@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
-import { IUser } from "@gsimulados/shared";
+import type { IUser } from "@gsimulados/shared";
 
 interface AuthContextData {
   signed: boolean;
