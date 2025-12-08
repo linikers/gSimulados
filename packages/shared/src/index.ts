@@ -21,3 +21,8 @@ export interface IAluno extends IUser {
   matricula?: string;
   turmaId?: string;
 }
+
+export interface ILoginCredentials {
+  email: string;
+  password: string;
+}

@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { User, IUser, Escola, Aluno } from "../../models/User";
+import { User, IUserDocument, Escola, Aluno } from "../../models/User";
 import { env } from "../../config/env";
 
 export class AuthService {
-  static async generateToken(user: IUser) {
+  static async generateToken(user: IUserDocument) {
     return jwt.sign(
       { id: user._id, role: user.role, email: user.email },
       env.JWT_SECRET,

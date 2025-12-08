@@ -1687,3 +1687,4 @@ Otimização de dificuldade
 ---
 
 efetuar testes om notebook lm e verificar valores de custo e uso de api para uso interno e autonomo
+projetar twa(android) e capacitor(ios) - verificar possibilidade de uso com proprio vite(publcando)

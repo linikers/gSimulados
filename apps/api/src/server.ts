@@ -15,9 +15,9 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello from API");
+  res.send("Hello para a API");
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server rodando na porta ${port}`);
 });

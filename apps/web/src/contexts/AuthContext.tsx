@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
-import type { IUser } from "@gsimulados/shared";
+import type { IUser, ILoginCredentials } from "@gsimulados/shared";
 
 interface AuthContextData {
   signed: boolean;
   user: IUser | null;
-  signIn: (data: any) => Promise<void>;
+  signIn: (data: ILoginCredentials) => Promise<void>;
   signOut: () => void;
   loading: boolean;
 }
@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(false);
   }, []);
 
-  async function signIn(data: any) {
+  async function signIn(data: ILoginCredentials) {
     const response = await api.post("/auth/login", data);
     const { token, user } = response.data;
 

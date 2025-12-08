@@ -1,37 +1,41 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { IUser, IEscola, IAluno, UserRole } from "@gsimulados/shared";
 
-export type UserRole = "admin" | "escola" | "aluno";
+// Extend Mongoose Document with Shared Interface
+export type { IUser };
+export interface IUserDocument extends Omit<IUser, "_id">, Document {}
 
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  password?: string;
-  role: UserRole;
-}
-
-const UserSchema = new Schema<IUser>(
+const UserSchema = new Schema<IUserDocument>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ["admin", "escola", "aluno"], required: true },
+    role: {
+      type: String,
+      enum: ["admin", "escola", "aluno"],
+      required: true,
+      default: "aluno",
+    },
   },
   { discriminatorKey: "role", timestamps: true }
 );
 
-export const User = mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUserDocument>("User", UserSchema);
 
-// Discriminators
+// --- Discriminators (Sub-perfis) ---
+
+// Schema da Escola
 const EscolaSchema = new Schema({
   cnpj: String,
   endereco: String,
   telefone: String,
 });
 
+// Schema do Aluno
 const AlunoSchema = new Schema({
   matricula: String,
   turmaId: { type: Schema.Types.ObjectId, ref: "Turma" },
-  escolaId: { type: Schema.Types.ObjectId, ref: "User" }, // Escola is a User
+  escolaId: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
 export const Escola = User.discriminator("escola", EscolaSchema);
