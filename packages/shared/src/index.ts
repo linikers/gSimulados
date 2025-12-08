@@ -1,7 +1,23 @@
-export const SHARED_CONSTANT = "Shared Value";
+export type UserRole = "admin" | "escola" | "aluno";
 
-export interface User {
-  id: string;
+export interface IUser {
+  _id?: string;
+  name: string;
   email: string;
-  role: "admin" | "escola" | "aluno";
+  role: UserRole;
+  password?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface IEscola extends IUser {
+  cnpj?: string;
+  endereco?: string;
+  telefone?: string;
+}
+
+export interface IAluno extends IUser {
+  escolaId?: string;
+  matricula?: string;
+  turmaId?: string;
 }

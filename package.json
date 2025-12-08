@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\"",
     "dev:web": "yarn workspace @gsimulados/web dev",
     "dev:api": "yarn workspace @gsimulados/api dev",
     "build": "yarn workspaces run build",
