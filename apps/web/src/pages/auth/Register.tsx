@@ -32,6 +32,7 @@ export function RegisterPage() {
       await api.post("/auth/register", formData);
       showToast("Cadastro realizado com sucesso!", "success");
       navigate("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const msg = error.response?.data?.error || "Erro ao cadastrar";
       showToast(msg, "error");

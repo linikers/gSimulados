@@ -7,6 +7,7 @@ import { CadastroEscola } from "./pages/admin/Escolas/CadastroEscola";
 import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
+import { AuthGuard } from "./routes/AuthGuard";
 
 const theme = createTheme({
   palette: {
@@ -33,11 +34,18 @@ function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="escolas/cadastro" element={<CadastroEscola />} />
-              <Route path="alunos/cadastro" element={<CadastroAluno />} />
+            {/* Rotas Protegidas */}
+            <Route element={<AuthGuard />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+
+              {/* Rotas de Admin */}
+              <Route element={<AuthGuard allowedRoles={["admin"]} />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="escolas/cadastro" element={<CadastroEscola />} />
+                  <Route path="alunos/cadastro" element={<CadastroAluno />} />
+                </Route>
+              </Route>
             </Route>
-            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
