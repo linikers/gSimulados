@@ -17,7 +17,7 @@ import { navigationConfig } from "../config/navigation";
 
 const drawerWidth = 240;
 
-export function AdminLayout() {
+export function AppLayout() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
 
