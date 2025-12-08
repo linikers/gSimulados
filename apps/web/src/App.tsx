@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LoginPage } from "./pages/auth/Login";
 import { RegisterPage } from "./pages/auth/Register";
+import { AdminLayout } from "./layouts/AdminLayout";
+import { CreateSchool } from "./pages/admin/schools/CreateSchool";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 const theme = createTheme({
@@ -26,6 +28,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="schools/create" element={<CreateSchool />} />
+            </Route>
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>

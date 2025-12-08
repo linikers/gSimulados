@@ -27,8 +27,10 @@ export const User = mongoose.model<IUserDocument>("User", UserSchema);
 // Schema da Escola
 const EscolaSchema = new Schema({
   cnpj: String,
+  nomeEscola: String,
   endereco: String,
   telefone: String,
+  logo: String,
 });
 
 // Schema do Aluno
