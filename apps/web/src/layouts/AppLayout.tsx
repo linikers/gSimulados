@@ -13,12 +13,13 @@ import {
 } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { navigationConfig } from "../config/navigation";
 
 const drawerWidth = 240;
 
-export function AdminLayout() {
+export function AppLayout() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const handleLogout = () => {
     signOut();
@@ -55,20 +56,17 @@ export function AdminLayout() {
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
           <List>
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => navigate("/admin/escolas/cadastro")}
-              >
-                <ListItemText primary="Cadastrar Escola" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => navigate("/admin/alunos/cadastro")}
-              >
-                <ListItemText primary="Cadastrar Aluno" />
-              </ListItemButton>
-            </ListItem>
+            {user?.role &&
+              navigationConfig[user.role as keyof typeof navigationConfig]?.map(
+                (item) => (
+                  <ListItem key={item.path} disablePadding>
+                    <ListItemButton onClick={() => navigate(item.path)}>
+                      <item.icon sx={{ mr: 2 }} />
+                      <ListItemText primary={item.title} />
+                    </ListItemButton>
+                  </ListItem>
+                )
+              )}
           </List>
           <Divider />
         </Box>

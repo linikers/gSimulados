@@ -15,33 +15,33 @@ Este projeto utiliza uma estrutura de **Monorepo**.
 Na raiz do projeto:
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Rodar Frontend (Desenvolvimento)
 
 ```bash
-npm run dev:web
+yarn workspace @gsimulados/web dev
 ```
 
 Ou entre na pasta e rode:
 
 ```bash
 cd apps/web
-npm run dev
+yarn dev
 ```
 
 ### Rodar Backend (Desenvolvimento)
 
 ```bash
-npm run dev:api
+yarn workspace @gsimulados/api dev
 ```
 
 Ou entre na pasta e rode:
 
 ```bash
 cd apps/api
-npm run dev
+yarn dev
 ```
 
 ## Dependências
