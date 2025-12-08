@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { IUser, IEscola, IAluno, UserRole } from "@gsimulados/shared";
+import { IUser } from "@gsimulados/shared";
 
 // Extend Mongoose Document with Shared Interface
 export type { IUser };

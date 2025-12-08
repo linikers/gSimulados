@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import api from "../../../services/api";
 
-export function CreateSchool() {
+export function CadastroEscola() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",

@@ -56,11 +56,19 @@ export function AdminLayout() {
         <Box sx={{ overflow: "auto" }}>
           <List>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/admin/schools/create")}>
+              <ListItemButton
+                onClick={() => navigate("/admin/escolas/cadastro")}
+              >
                 <ListItemText primary="Cadastrar Escola" />
               </ListItemButton>
             </ListItem>
-            {/* Add more admin links here */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => navigate("/admin/alunos/cadastro")}
+              >
+                <ListItemText primary="Cadastrar Aluno" />
+              </ListItemButton>
+            </ListItem>
           </List>
           <Divider />
         </Box>

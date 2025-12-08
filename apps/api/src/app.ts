@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes";
 import schoolRoutes from "./routes/schools.routes";
+import alunosRoutes from "./routes/alunos.routes";
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 app.use("/schools", schoolRoutes);
+app.use("/alunos", alunosRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello para a API");
