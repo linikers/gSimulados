@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../store/useToast";
 import {
   Box,
   Button,
@@ -12,6 +13,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 export function LoginPage() {
   const { signIn } = useAuth();
+  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -20,9 +22,10 @@ export function LoginPage() {
     e.preventDefault();
     try {
       await signIn({ email, password });
-      navigate("/dashboard"); // or redirect based on role
-    } catch (error) {
-      alert(`Erro ao fazer login: ${error}`);
+      navigate("/dashboard");
+    } catch (error: any) {
+      const msg = error.response?.data?.error || "Erro ao fazer login";
+      showToast(msg, "error");
     }
   };
 

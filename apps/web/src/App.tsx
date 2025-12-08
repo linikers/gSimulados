@@ -6,6 +6,7 @@ import { AdminLayout } from "./layouts/AdminLayout";
 import { CadastroEscola } from "./pages/admin/Escolas/CadastroEscola";
 import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 
 const theme = createTheme({
   palette: {
@@ -27,6 +28,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
+        <GlobalSnackbar />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LoginPage />} />

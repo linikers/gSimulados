@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { useToast } from "../../store/useToast";
 
 export function RegisterPage() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,10 +30,11 @@ export function RegisterPage() {
     e.preventDefault();
     try {
       await api.post("/auth/register", formData);
-      alert("Cadastro realizado com sucesso!");
+      showToast("Cadastro realizado com sucesso!", "success");
       navigate("/");
-    } catch (error) {
-      alert(`Erro ao cadastrar: ${error}`);
+    } catch (error: any) {
+      const msg = error.response?.data?.error || "Erro ao cadastrar";
+      showToast(msg, "error");
     }
   };
 
