@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Box,
   Button,
@@ -22,7 +22,7 @@ export function LoginPage() {
       await signIn({ email, password });
       navigate("/dashboard"); // or redirect based on role
     } catch (error) {
-      alert("Login falhou");
+      alert(`Erro ao fazer login: ${error}`);
     }
   };
 

@@ -1,3 +1,5 @@
+export * from "./types/aluno";
+
 export type UserRole = "admin" | "escola" | "aluno";
 
 export interface IUser {
@@ -12,8 +14,10 @@ export interface IUser {
 
 export interface IEscola extends IUser {
   cnpj?: string;
+  nomeEscola?: string;
   endereco?: string;
   telefone?: string;
+  logo?: string;
 }
 
 export interface IAluno extends IUser {

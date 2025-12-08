@@ -35,7 +35,10 @@ export class AuthService {
     await user.save();
     const token = await this.generateToken(user);
 
-    return { user, token };
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return { user: userResponse, token };
   }
 
   static async login(data: any) {
@@ -47,6 +50,10 @@ export class AuthService {
     }
 
     const token = await this.generateToken(user);
-    return { user, token };
+
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return { user: userResponse, token };
   }
 }

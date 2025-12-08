@@ -31,7 +31,7 @@ export function RegisterPage() {
       alert("Cadastro realizado com sucesso!");
       navigate("/");
     } catch (error) {
-      alert("Erro ao cadastrar");
+      alert(`Erro ao cadastrar: ${error}`);
     }
   };
 

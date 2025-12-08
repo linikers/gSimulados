@@ -1,33 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState } from "react";
 import api from "../services/api";
 import type { IUser, ILoginCredentials } from "@gsimulados/shared";
-
-interface AuthContextData {
-  signed: boolean;
-  user: IUser | null;
-  signIn: (data: ILoginCredentials) => Promise<void>;
-  signOut: () => void;
-  loading: boolean;
-}
-
-const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<IUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const [user, setUser] = useState<IUser | null>(() => {
     const storagedUser = localStorage.getItem("@gSimulados:user");
     const storagedToken = localStorage.getItem("@gSimulados:token");
 
     if (storagedToken && storagedUser) {
       api.defaults.headers.common["Authorization"] = `Bearer ${storagedToken}`;
-      setUser(JSON.parse(storagedUser));
+      return JSON.parse(storagedUser);
     }
-    setLoading(false);
-  }, []);
+    return null;
+  });
+
+  const [loading] = useState(false);
 
   async function signIn(data: ILoginCredentials) {
     const response = await api.post("/auth/login", data);
@@ -54,8 +44,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     </AuthContext.Provider>
   );
 };
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  return context;
-}

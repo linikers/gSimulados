@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { IUser, IEscola, IAluno, UserRole } from "@gsimulados/shared";
+import { IUser } from "@gsimulados/shared";
 
 // Extend Mongoose Document with Shared Interface
 export type { IUser };
@@ -27,8 +27,10 @@ export const User = mongoose.model<IUserDocument>("User", UserSchema);
 // Schema da Escola
 const EscolaSchema = new Schema({
   cnpj: String,
+  nomeEscola: String,
   endereco: String,
   telefone: String,
+  logo: String,
 });
 
 // Schema do Aluno

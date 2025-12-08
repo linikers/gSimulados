@@ -1,14 +1,19 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LoginPage } from "./pages/auth/Login";
 import { RegisterPage } from "./pages/auth/Register";
+import { AdminLayout } from "./layouts/AdminLayout";
+import { CadastroEscola } from "./pages/admin/Escolas/CadastroEscola";
+import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 const theme = createTheme({
   palette: {
-    mode: "light",
     primary: {
       main: "#1976d2",
+    },
+    secondary: {
+      main: "#dc004e",
     },
   },
 });
@@ -26,6 +31,10 @@ function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="escolas/cadastro" element={<CadastroEscola />} />
+              <Route path="alunos/cadastro" element={<CadastroAluno />} />
+            </Route>
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
