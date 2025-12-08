@@ -1,0 +1,17 @@
+{
+  "name": "gsimulados-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "yarn workspace @gsimulados/web dev",
+    "dev:api": "yarn workspace @gsimulados/api dev",
+    "build": "yarn workspaces run build",
+    "lint": "yarn workspaces run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
