@@ -1683,3 +1683,7 @@ Predição de desempenho
 Recomendação de questões
 Identificação de alunos em risco
 Otimização de dificuldade
+
+---
+
+efetuar testes om notebook lm e verificar valores de custo e uso de api para uso interno e autonomo
