@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IVestibular extends Document {
-  codigo: string; // 'uem', 'uel', 'enem', etc
+  codigo: string; // 'uem', 'uel', 'enem', etc(codigo numero, automatico?)
   nome: string;
   nomeCompleto: string;
   logoUrl?: string;
