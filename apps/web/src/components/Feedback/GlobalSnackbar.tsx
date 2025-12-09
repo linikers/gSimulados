@@ -5,7 +5,7 @@ export function GlobalSnackbar() {
   const { open, message, severity, hideToast } = useToast();
 
   const handleClose = (
-    event?: React.SyntheticEvent | Event,
+    _event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") {
