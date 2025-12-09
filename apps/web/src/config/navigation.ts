@@ -21,8 +21,18 @@ type NavigationConfig = {
 export const navigationConfig: NavigationConfig = {
   admin: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
-    { title: "Escolas", path: "/admin/escolas/cadastro", icon: SchoolIcon },
-    { title: "Alunos", path: "/admin/alunos/cadastro", icon: PersonIcon },
+    { title: "Escolas", path: "/admin/escolas", icon: SchoolIcon },
+    { title: "Alunos", path: "/admin/alunos", icon: PersonIcon },
+    {
+      title: "Cadastrar Escola",
+      path: "/admin/escolas/cadastro",
+      icon: SchoolIcon,
+    },
+    {
+      title: "Cadastrar Aluno",
+      path: "/admin/alunos/cadastro",
+      icon: PersonIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],

@@ -5,6 +5,7 @@ import { RegisterPage } from "./pages/auth/Register";
 import { AppLayout } from "./layouts/AppLayout";
 import { CadastroEscola } from "./pages/admin/Escolas/CadastroEscola";
 import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
+import { ListaEscolas } from "./pages/admin/Escolas/ListaEscolas";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -50,6 +51,7 @@ function App() {
 
                 {/* Rotas de Admin */}
                 <Route element={<AuthGuard allowedRoles={["admin"]} />}>
+                  <Route path="/admin/escolas" element={<ListaEscolas />} />
                   <Route
                     path="/admin/escolas/cadastro"
                     element={<CadastroEscola />}
