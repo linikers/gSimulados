@@ -15,7 +15,7 @@ export class SchoolsController {
       res.status(400).json({ error: error.message });
     }
   }
-  static async list(req: Request, res: Response) {
+  static async list(_req: Request, res: Response) {
     try {
       const { User } = require("../models/User");
       const schools = await User.find({ role: "escola" }).select("-password");

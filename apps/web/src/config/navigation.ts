@@ -33,6 +33,11 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/alunos/cadastro",
       icon: PersonIcon,
     },
+    {
+      title: "Cadastrar Questão",
+      path: "/admin/questoes/cadastro",
+      icon: QuizIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],

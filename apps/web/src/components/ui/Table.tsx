@@ -39,7 +39,7 @@ export function Table<T extends { _id?: string; id?: string }>({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
 
-  const handleChangePage = (unknown: unknown, newPage: number) => {
+  const handleChangePage = (_unknown: unknown, newPage: number) => {
     setPage(newPage);
   };
 
