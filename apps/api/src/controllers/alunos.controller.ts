@@ -29,4 +29,23 @@ export class AlunosController {
       res.status(400).json({ error: error.message });
     }
   }
+  static async list(req: Request, res: Response) {
+    try {
+      const { User } = require("../models/User");
+      const { userRole, userId } = req;
+      let query: any = { role: "aluno" };
+
+      if (userRole === "escola") {
+        query.escolaId = userId;
+      }
+
+      const alunos = await User.find(query)
+        .select("-password")
+        .populate("escolaId", "name email"); // Populate school details if needed
+
+      res.json(alunos);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

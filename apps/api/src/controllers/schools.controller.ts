@@ -15,4 +15,13 @@ export class SchoolsController {
       res.status(400).json({ error: error.message });
     }
   }
+  static async list(req: Request, res: Response) {
+    try {
+      const { User } = require("../models/User");
+      const schools = await User.find({ role: "escola" }).select("-password");
+      res.json(schools);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
