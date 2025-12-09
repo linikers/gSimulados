@@ -28,7 +28,7 @@ Democratizar o acesso a simulados de qualidade através de tecnologia de IA, per
 - ✅ Implementar gestão de usuários (3 níveis)
 - ✅ Criar interface administrativa funcional
 - ✅ Estabelecer conexão com MongoDB
-- ✅ Deploy inicial na Vercel
+- [ ] Deploy inicial na Vercel
 
 #### Médio Prazo (6 meses)
 
