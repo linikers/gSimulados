@@ -20,6 +20,7 @@ export const QuestionsService = {
     const response = await api.post("/questions", data);
     return response.data;
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list: async (filters?: any) => {
     const response = await api.get("/questions", { params: filters });
     return response.data;

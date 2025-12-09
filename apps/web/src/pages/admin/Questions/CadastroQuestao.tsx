@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   Box,
@@ -5,14 +6,14 @@ import {
   Button,
   Typography,
   Paper,
-  Grid,
   MenuItem,
   Divider,
+  Stack,
 } from "@mui/material";
 import { useToast } from "../../../store/useToast";
 import {
   QuestionsService,
-  IQuestionForm,
+  type IQuestionForm,
 } from "../../../services/questions.service";
 import SaveIcon from "@mui/icons-material/Save";
 
@@ -69,7 +70,7 @@ export function CadastroQuestao() {
         },
       });
     } catch (error) {
-      showToast("Erro ao cadastrar questão", "error");
+      showToast(`Erro ao cadastrar questão, ${error}`);
     } finally {
       setLoading(false);
     }
@@ -83,9 +84,9 @@ export function CadastroQuestao() {
       <Divider sx={{ mb: 3 }} />
 
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {/* Metadados */}
-          <Grid item xs={12} sm={6}>
+        <Stack spacing={3}>
+          {/* Metadados - Linha 1 */}
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
               fullWidth
               label="Matéria (ex: Matemática)"
@@ -93,8 +94,6 @@ export function CadastroQuestao() {
               onChange={(e) => handleChange("materia", e.target.value)}
               required
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Assunto (ex: Geometria)"
@@ -102,9 +101,10 @@ export function CadastroQuestao() {
               onChange={(e) => handleChange("assunto", e.target.value)}
               required
             />
-          </Grid>
+          </Stack>
 
-          <Grid item xs={12} sm={4}>
+          {/* Metadados - Linha 2 */}
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
               fullWidth
               select
@@ -116,8 +116,6 @@ export function CadastroQuestao() {
               <MenuItem value="medio">Médio</MenuItem>
               <MenuItem value="dificil">Difícil</MenuItem>
             </TextField>
-          </Grid>
-          <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
               label="Vestibular (ex: UEM)"
@@ -125,8 +123,6 @@ export function CadastroQuestao() {
               onChange={(e) => handleOrigemChange("vestibular", e.target.value)}
               required
             />
-          </Grid>
-          <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
               type="number"
@@ -137,80 +133,77 @@ export function CadastroQuestao() {
               }
               required
             />
-          </Grid>
+          </Stack>
 
           {/* Enunciado */}
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Enunciado da Questão"
-              value={formData.enunciado}
-              onChange={(e) => handleChange("enunciado", e.target.value)}
-              required
-              helperText="Você pode usar Markdown básico aqui."
-            />
-          </Grid>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Enunciado da Questão"
+            value={formData.enunciado}
+            onChange={(e) => handleChange("enunciado", e.target.value)}
+            required
+            helperText="Você pode usar Markdown básico aqui."
+          />
 
           {/* Alternativas */}
-          <Grid item xs={12}>
-            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
               Alternativas
             </Typography>
-            {formData.alternativas.map((alt, index) => (
-              <Box
-                key={index}
-                sx={{ display: "flex", mb: 2, alignItems: "center" }}
-              >
-                <Typography sx={{ width: 30, fontWeight: "bold" }}>
-                  {String.fromCharCode(65 + index)}
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={alt}
-                  onChange={(e) =>
-                    handleAlternativeChange(index, e.target.value)
-                  }
-                  placeholder={`Opção ${String.fromCharCode(65 + index)}`}
-                  required
-                />
-              </Box>
-            ))}
-          </Grid>
+            <Stack spacing={2}>
+              {formData.alternativas.map((alt, index) => (
+                <Box
+                  key={index}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <Typography sx={{ width: 30, fontWeight: "bold" }}>
+                    {String.fromCharCode(65 + index)}
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={alt}
+                    onChange={(e) =>
+                      handleAlternativeChange(index, e.target.value)
+                    }
+                    placeholder={`Opção ${String.fromCharCode(65 + index)}`}
+                    required
+                  />
+                </Box>
+              ))}
+            </Stack>
+          </Box>
 
           {/* Resposta Correta */}
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              select
-              label="Resposta Correta"
-              value={formData.respostaCorreta}
-              onChange={(e) => handleChange("respostaCorreta", e.target.value)}
-              required
-              sx={{ bgcolor: "#e8f5e9" }}
-            >
-              {["A", "B", "C", "D", "E"].map((opt) => (
-                <MenuItem key={opt} value={opt}>
-                  Alternativa {opt}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
+          <TextField
+            fullWidth
+            select
+            label="Resposta Correta"
+            value={formData.respostaCorreta}
+            onChange={(e) => handleChange("respostaCorreta", e.target.value)}
+            required
+            sx={{ bgcolor: "#e8f5e9", maxWidth: { sm: "50%" } }}
+          >
+            {["A", "B", "C", "D", "E"].map((opt) => (
+              <MenuItem key={opt} value={opt}>
+                Alternativa {opt}
+              </MenuItem>
+            ))}
+          </TextField>
 
-          <Grid item xs={12} sx={{ mt: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              startIcon={<SaveIcon />}
-              disabled={loading}
-              fullWidth
-            >
-              {loading ? "Salvando..." : "Salvar Questão"}
-            </Button>
-          </Grid>
-        </Grid>
+          {/* Botão Salvar */}
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            startIcon={<SaveIcon />}
+            disabled={loading}
+            fullWidth
+          >
+            {loading ? "Salvando..." : "Salvar Questão"}
+          </Button>
+        </Stack>
       </form>
     </Paper>
   );
