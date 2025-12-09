@@ -11,5 +11,6 @@ router.get("/:codigo", VestibularesController.getByCode);
 // Protected routes (Admin only)
 router.post("/", authMiddleware, VestibularesController.create);
 router.put("/:codigo", authMiddleware, VestibularesController.update);
+router.delete("/:codigo", authMiddleware, VestibularesController.delete);
 
 export default router;

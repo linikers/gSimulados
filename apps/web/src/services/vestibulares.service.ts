@@ -33,4 +33,19 @@ export const VestibularesService = {
     const response = await api.get<IVestibular>(`/vestibulares/${codigo}`);
     return response.data;
   },
+  create: async (data: Partial<IVestibular>) => {
+    const response = await api.post<IVestibular>("/vestibulares", data);
+    return response.data;
+  },
+  update: async (codigo: string, data: Partial<IVestibular>) => {
+    const response = await api.put<IVestibular>(
+      `/vestibulares/${codigo}`,
+      data
+    );
+    return response.data;
+  },
+  delete: async (codigo: string) => {
+    const response = await api.delete(`/vestibulares/${codigo}`);
+    return response.data;
+  },
 };

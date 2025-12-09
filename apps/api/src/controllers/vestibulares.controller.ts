@@ -52,4 +52,18 @@ export class VestibularesController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  static async delete(req: Request, res: Response) {
+    try {
+      const vestibular = await Vestibular.findOneAndDelete({
+        codigo: req.params.codigo,
+      });
+      if (!vestibular) {
+        return res.status(404).json({ error: "Vestibular não encontrado" });
+      }
+      res.json({ message: "Vestibular removido com sucesso" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
