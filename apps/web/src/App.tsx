@@ -8,6 +8,8 @@ import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
 import { ListaEscolas } from "./pages/admin/Escolas/ListaEscolas";
 import { ListaAlunos } from "./pages/admin/Alunos/ListaAlunos";
 import { CadastroQuestao } from "./pages/admin/Questions/CadastroQuestao";
+import { GerenciarVestibulares } from "./pages/admin/Vestibulares/GerenciarVestibulares";
+import { FormularioVestibular } from "./pages/admin/Vestibulares/FormularioVestibular";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -66,6 +68,18 @@ function App() {
                   <Route
                     path="/admin/questoes/cadastro"
                     element={<CadastroQuestao />}
+                  />
+                  <Route
+                    path="/admin/vestibulares"
+                    element={<GerenciarVestibulares />}
+                  />
+                  <Route
+                    path="/admin/vestibulares/cadastro"
+                    element={<FormularioVestibular />}
+                  />
+                  <Route
+                    path="/admin/vestibulares/editar/:codigo"
+                    element={<FormularioVestibular />}
                   />
                 </Route>
 

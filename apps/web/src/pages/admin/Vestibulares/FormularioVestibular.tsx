@@ -7,7 +7,7 @@ import {
   Typography,
   Paper,
   Stack,
-  MenuItem,
+  //   MenuItem,
   Divider,
   FormControlLabel,
   Switch,
@@ -15,7 +15,7 @@ import {
 import { useToast } from "../../../store/useToast";
 import {
   VestibularesService,
-  type IVestibular,
+  //   type IVestibular,
 } from "../../../services/vestibulares.service";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -63,7 +63,7 @@ export function FormularioVestibular() {
         ordem: data.ordem,
       });
     } catch (error) {
-      showToast("Erro ao carregar vestibular", "error");
+      showToast(`Erro ao carregar vestibular ${error}`);
       navigate("/admin/vestibulares");
     }
   };
@@ -87,8 +87,7 @@ export function FormularioVestibular() {
       navigate("/admin/vestibulares");
     } catch (error) {
       showToast(
-        `Erro ao ${isEdit ? "atualizar" : "cadastrar"} vestibular`,
-        "error"
+        `Erro ao ${isEdit ? "atualizar" : "cadastrar"} vestibular: ${error}`
       );
     } finally {
       setLoading(false);

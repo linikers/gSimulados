@@ -36,7 +36,7 @@ export function GerenciarVestibulares() {
       const data = await VestibularesService.list();
       setVestibulares(data);
     } catch (error) {
-      showToast("Erro ao carregar vestibulares", "error");
+      showToast(`Erro ao carregar vestibulares: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export function GerenciarVestibulares() {
       showToast("Vestibular removido com sucesso", "success");
       loadVestibulares();
     } catch (error) {
-      showToast("Erro ao remover vestibular", "error");
+      showToast(`Erro ao remover vestibular: ${error}`);
     }
   };
 
