@@ -1036,6 +1036,7 @@ cd ../..
 
 # .gitignore
 
+.
 cat > .gitignore << 'EOF'
 
 # Dependencies
