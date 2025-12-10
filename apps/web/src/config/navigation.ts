@@ -38,6 +38,12 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/questoes/cadastro",
       icon: QuizIcon,
     },
+    { title: "Vestibulares", path: "/admin/vestibulares", icon: SchoolIcon },
+    {
+      title: "Banco de Questões",
+      path: "/admin/banco-questoes/drive",
+      icon: QuizIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],

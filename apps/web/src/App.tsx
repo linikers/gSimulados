@@ -8,6 +8,10 @@ import { CadastroAluno } from "./pages/admin/Alunos/CadastroAluno";
 import { ListaEscolas } from "./pages/admin/Escolas/ListaEscolas";
 import { ListaAlunos } from "./pages/admin/Alunos/ListaAlunos";
 import { CadastroQuestao } from "./pages/admin/Questions/CadastroQuestao";
+import { GerenciarVestibulares } from "./pages/admin/Vestibulares/GerenciarVestibulares";
+import { FormularioVestibular } from "./pages/admin/Vestibulares/FormularioVestibular";
+import { ConfigurarDrive } from "./pages/admin/BancoQuestoes/ConfigurarDrive";
+import { ListaPdfs } from "./pages/admin/BancoQuestoes/ListaPdfs";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -66,6 +70,30 @@ function App() {
                   <Route
                     path="/admin/questoes/cadastro"
                     element={<CadastroQuestao />}
+                  />
+
+                  {/* Vestibulares */}
+                  <Route
+                    path="/admin/vestibulares"
+                    element={<GerenciarVestibulares />}
+                  />
+                  <Route
+                    path="/admin/vestibulares/cadastro"
+                    element={<FormularioVestibular />}
+                  />
+                  <Route
+                    path="/admin/vestibulares/editar/:codigo"
+                    element={<FormularioVestibular />}
+                  />
+
+                  {/* Banco de Questões */}
+                  <Route
+                    path="/admin/banco-questoes/drive"
+                    element={<ConfigurarDrive />}
+                  />
+                  <Route
+                    path="/admin/banco-questoes/pdfs"
+                    element={<ListaPdfs />}
                   />
                 </Route>
 
