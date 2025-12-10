@@ -10,6 +10,8 @@ import { ListaAlunos } from "./pages/admin/Alunos/ListaAlunos";
 import { CadastroQuestao } from "./pages/admin/Questions/CadastroQuestao";
 import { GerenciarVestibulares } from "./pages/admin/Vestibulares/GerenciarVestibulares";
 import { FormularioVestibular } from "./pages/admin/Vestibulares/FormularioVestibular";
+import { ConfigurarDrive } from "./pages/admin/BancoQuestoes/ConfigurarDrive";
+import { ListaPdfs } from "./pages/admin/BancoQuestoes/ListaPdfs";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -45,24 +47,6 @@ function App() {
         <GlobalSnackbar />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-
-            {/* Rotas Protegidas com Layout */}
-            <Route element={<AuthGuard />}>
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-
-                {/* Rotas de Admin */}
-                <Route element={<AuthGuard allowedRoles={["admin"]} />}>
-                  <Route path="/admin/escolas" element={<ListaEscolas />} />
-                  <Route
-                    path="/admin/escolas/cadastro"
-                    element={<CadastroEscola />}
-                  />
-                  <Route path="/admin/alunos" element={<ListaAlunos />} />
-                  <Route
-                    path="/admin/alunos/cadastro"
                     element={<CadastroAluno />}
                   />
                   <Route

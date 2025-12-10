@@ -15,26 +15,10 @@
 | :----------- | :------------------ | :----- |
 | `/dashboard` | Dashboard Principal | Todos  |
 
-### Rotas de Admin
-
-| Rota                       | Descrição                   | Acesso |
-| :------------------------- | :-------------------------- | :----- |
-| `/admin/escolas`           | Lista de Escolas            | Admin  |
-| `/admin/escolas/cadastro`  | Cadastro de Escola          | Admin  |
-| `/admin/alunos`            | Lista de Alunos             | Admin  |
-| `/admin/alunos/cadastro`   | Cadastro de Aluno           | Admin  |
-| `/admin/questoes/cadastro` | Cadastro de Questão         | Admin  |
-| `/admin/config`            | Configurações (placeholder) | Admin  |
-| `/admin/analytics`         | Analytics (placeholder)     | Admin  |
-
-### Rotas de Escola
-
-| Rota                 | Descrição                 | Acesso |
-| :------------------- | :------------------------ | :----- |
-| `/escola/alunos`     | Lista de Alunos da Escola | Escola |
-| `/escola/turmas`     | Turmas (placeholder)      | Escola |
-| `/escola/simulados`  | Simulados (placeholder)   | Escola |
-| `/escola/relatorios` | Relatórios (placeholder)  | Escola |
+| `/escola/alunos` | Lista de Alunos da Escola | Escola |
+| `/escola/turmas` | Turmas (placeholder) | Escola |
+| `/escola/simulados` | Simulados (placeholder) | Escola |
+| `/escola/relatorios` | Relatórios (placeholder) | Escola |
 
 ### Rotas de Aluno
 
@@ -68,21 +52,6 @@
 | :----- | :-------- | :------------ | :----------- |
 | `POST` | `/alunos` | Criar aluno   | Admin/Escola |
 | `GET`  | `/alunos` | Listar alunos | Admin/Escola |
-
-### Questões
-
-| Método   | Endpoint         | Descrição       | Proteção    |
-| :------- | :--------------- | :-------------- | :---------- |
-| `POST`   | `/questions`     | Criar questão   | Autenticado |
-| `GET`    | `/questions`     | Listar questões | Autenticado |
-| `GET`    | `/questions/:id` | Obter questão   | Autenticado |
-| `DELETE` | `/questions/:id` | Deletar questão | Autenticado |
-
-#### Filtros Disponíveis (GET /questions)
-
-- `?materia=Matemática`
-- `?dificuldade=facil|medio|dificil`
-- `?vestibular=UEM`
 
 ---
 
