@@ -47,12 +47,32 @@ function App() {
         <GlobalSnackbar />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Rotas Protegidas com Layout */}
+            <Route element={<AuthGuard />}>
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+
+                {/* Rotas de Admin */}
+                <Route element={<AuthGuard allowedRoles={["admin"]} />}>
+                  <Route path="/admin/escolas" element={<ListaEscolas />} />
+                  <Route
+                    path="/admin/escolas/cadastro"
+                    element={<CadastroEscola />}
+                  />
+                  <Route path="/admin/alunos" element={<ListaAlunos />} />
+                  <Route
+                    path="/admin/alunos/cadastro"
                     element={<CadastroAluno />}
                   />
                   <Route
                     path="/admin/questoes/cadastro"
                     element={<CadastroQuestao />}
                   />
+
+                  {/* Vestibulares */}
                   <Route
                     path="/admin/vestibulares"
                     element={<GerenciarVestibulares />}
@@ -64,6 +84,16 @@ function App() {
                   <Route
                     path="/admin/vestibulares/editar/:codigo"
                     element={<FormularioVestibular />}
+                  />
+
+                  {/* Banco de Questões */}
+                  <Route
+                    path="/admin/banco-questoes/drive"
+                    element={<ConfigurarDrive />}
+                  />
+                  <Route
+                    path="/admin/banco-questoes/pdfs"
+                    element={<ListaPdfs />}
                   />
                 </Route>
 

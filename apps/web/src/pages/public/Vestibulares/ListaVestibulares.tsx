@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   CardActions,
@@ -15,13 +13,14 @@ import {
   VestibularesService,
   type IVestibular,
 } from "../../../services/vestibulares.service";
-import SchoolIcon from "@mui/icons-material/School";
+import { useToast } from "../../../store/useToast";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import SchoolIcon from "@mui/icons-material/School";
 
 export function ListaVestibulares() {
   const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadVestibulares();
@@ -30,29 +29,20 @@ export function ListaVestibulares() {
   const loadVestibulares = async () => {
     try {
       const data = await VestibularesService.list();
-      setVestibulares(data);
+      setVestibulares(data.filter((v) => v.ativo));
     } catch (error) {
-      console.error("Erro ao carregar vestibulares:", error);
+      showToast(`Erro ao carregar vestibulares: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "aberto":
-        return "success";
-      case "encerrado":
-        return "error";
-      case "em_breve":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
   if (loading) {
-    return <Typography>Carregando...</Typography>;
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   return (
@@ -60,79 +50,95 @@ export function ListaVestibulares() {
       <Typography variant="h4" gutterBottom>
         Vestibulares Disponíveis
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Explore informações sobre os principais vestibulares e processos
-        seletivos
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        Confira os principais vestibulares e processos seletivos
       </Typography>
 
-      <Grid container spacing={3}>
+      {/* CSS Grid - Mais estável que MUI Grid */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+          },
+          gap: 3,
+        }}
+      >
         {vestibulares.map((vestibular) => (
-          <Grid item xs={12} sm={6} md={4} key={vestibular._id}>
-            <Card
-              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-            >
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                  sx={{ mb: 2 }}
-                >
+          <Card
+            key={vestibular._id}
+            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1} alignItems="center">
                   <SchoolIcon color="primary" />
                   <Typography variant="h6">{vestibular.nome}</Typography>
                 </Stack>
 
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
+                <Typography variant="body2" color="text.secondary">
                   {vestibular.nomeCompleto}
                 </Typography>
 
-                {vestibular.proximaProva && (
-                  <Box sx={{ mt: 2 }}>
+                <Typography variant="body2">{vestibular.descricao}</Typography>
+
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {vestibular.cidade && vestibular.estado && (
                     <Chip
-                      label={vestibular.proximaProva.inscricoes.status.toUpperCase()}
-                      color={getStatusColor(
-                        vestibular.proximaProva.inscricoes.status
-                      )}
+                      label={`${vestibular.cidade}/${vestibular.estado}`}
                       size="small"
-                      sx={{ mb: 1 }}
+                      variant="outlined"
                     />
-                    <Typography variant="caption" display="block">
-                      Prova:{" "}
+                  )}
+
+                  {vestibular.regiao && (
+                    <Chip
+                      label={vestibular.regiao}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  )}
+                </Stack>
+
+                {vestibular.proximaProva?.data && (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Próxima Prova:
+                    </Typography>
+                    <Typography variant="body2">
                       {new Date(
                         vestibular.proximaProva.data
                       ).toLocaleDateString()}
                     </Typography>
-                    <Typography variant="caption" display="block">
-                      Taxa: R$ {vestibular.proximaProva.taxa.toFixed(2)}
-                    </Typography>
                   </Box>
                 )}
-              </CardContent>
+              </Stack>
+            </CardContent>
 
-              <CardActions>
-                <Button
-                  size="small"
-                  onClick={() => navigate(`/vestibulares/${vestibular.codigo}`)}
-                >
-                  Ver Detalhes
-                </Button>
-                <Button
-                  size="small"
-                  href={vestibular.siteOficial}
-                  target="_blank"
-                  endIcon={<OpenInNewIcon />}
-                >
-                  Site Oficial
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
+            <CardActions>
+              <Button
+                size="small"
+                href={vestibular.siteOficial}
+                target="_blank"
+                startIcon={<OpenInNewIcon />}
+              >
+                Site Oficial
+              </Button>
+            </CardActions>
+          </Card>
         ))}
-      </Grid>
+      </Box>
+
+      {vestibulares.length === 0 && (
+        <Box sx={{ textAlign: "center", py: 8 }}>
+          <Typography color="text.secondary">
+            Nenhum vestibular disponível no momento
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

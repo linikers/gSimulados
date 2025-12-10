@@ -20,6 +20,7 @@ export interface IVestibular {
     taxa: number;
     siteInscricao: string;
   };
+  regiao: string;
   ativo: boolean;
   ordem: number;
 }
