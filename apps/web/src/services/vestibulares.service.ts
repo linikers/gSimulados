@@ -48,4 +48,8 @@ export const VestibularesService = {
     const response = await api.delete(`/vestibulares/${codigo}`);
     return response.data;
   },
+  sync: async () => {
+    const response = await api.post("/vestibulares/sync");
+    return response.data;
+  },
 };

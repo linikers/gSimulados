@@ -12,5 +12,6 @@ router.get("/:codigo", VestibularesController.getByCode);
 router.post("/", authMiddleware, VestibularesController.create);
 router.put("/:codigo", authMiddleware, VestibularesController.update);
 router.delete("/:codigo", authMiddleware, VestibularesController.delete);
+router.post("/sync", authMiddleware, VestibularesController.sync);
 
 export default router;

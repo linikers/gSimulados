@@ -66,4 +66,17 @@ export class VestibularesController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async sync(_req: Request, res: Response) {
+    try {
+      const { syncVestibulares } = require("../services/scraping.service");
+      const result = await syncVestibulares();
+      res.json({
+        message: "Sincronização concluída",
+        ...result,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

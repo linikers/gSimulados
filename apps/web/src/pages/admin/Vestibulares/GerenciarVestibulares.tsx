@@ -24,6 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import SyncIcon from "@mui/icons-material/Sync";
 
 export function GerenciarVestibulares() {
   const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
@@ -58,6 +59,29 @@ export function GerenciarVestibulares() {
     }
   };
 
+  const handleSync = async () => {
+    if (
+      !window.confirm(
+        "Deseja sincronizar vestibulares? Isso pode levar alguns segundos."
+      )
+    )
+      return;
+
+    try {
+      setLoading(true);
+      const result = await VestibularesService.sync();
+      showToast(
+        `Sincronização concluída! Criados: ${result.created}, Atualizados: ${result.updated}, Ignorados: ${result.skipped}`,
+        "success"
+      );
+      loadVestibulares();
+    } catch (error) {
+      showToast(`Erro ao sincronizar: ${error}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <Typography>Carregando...</Typography>;
   }
@@ -71,13 +95,23 @@ export function GerenciarVestibulares() {
         sx={{ mb: 3 }}
       >
         <Typography variant="h4">Gerenciar Vestibulares</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate("/admin/vestibulares/cadastro")}
-        >
-          Novo Vestibular
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="outlined"
+            startIcon={<SyncIcon />}
+            onClick={handleSync}
+            disabled={loading}
+          >
+            Sincronizar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate("/admin/vestibulares/cadastro")}
+          >
+            Novo Vestibular
+          </Button>
+        </Stack>
       </Stack>
 
       <TableContainer component={Paper}>

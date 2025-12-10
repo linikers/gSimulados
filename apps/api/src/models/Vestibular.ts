@@ -11,6 +11,16 @@ export interface IVestibular extends Document {
   // Localização
   cidade?: string;
   estado?: string;
+  regiao?:
+    | "Sul"
+    | "Sudeste"
+    | "Centro-Oeste"
+    | "Norte"
+    | "Nordeste"
+    | "Nacional";
+
+  // Controle de sincronização
+  fonte?: "manual" | "scraping"; // Identifica origem do registro
 
   // Próxima prova
   proximaProva?: {
@@ -47,6 +57,15 @@ const VestibularSchema: Schema = new Schema(
     siteOficial: { type: String, required: true },
     cidade: { type: String },
     estado: { type: String },
+    regiao: {
+      type: String,
+      enum: ["Sul", "Sudeste", "Centro-Oeste", "Norte", "Nordeste", "Nacional"],
+    },
+    fonte: {
+      type: String,
+      enum: ["manual", "scraping"],
+      default: "manual",
+    },
     proximaProva: {
       data: Date,
       inscricoes: {
