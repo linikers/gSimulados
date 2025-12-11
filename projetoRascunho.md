@@ -1888,6 +1888,7 @@ Próxima Revisão: Final da Fase 1</parameter>
 
 efetuar testes om notebook lm e verificar valores de custo e uso de api para uso interno e autonomo
 projetar twa(android) e capacitor(ios) - verificar possibilidade de uso com proprio vite(publcando)
+possivel projeto para incluir docker
 
 1. Autenticação + RBAC + Gestão de usuários (3 níveis)
    Tarefa Horas
