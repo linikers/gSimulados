@@ -2024,3 +2024,116 @@ Realista (mercado) 900–1100h
 Complexo (retrabalho / ajustes / júnior) 1200h+
 
 $1,5 google vision acima de 1001
+
+---
+
+💰 Estimativa de custo mensal (após MVP)
+Component AWS Estimado
+Backend (EC2) R$ 80–R$ 200
+MongoDB Atlas R$ 0–R$ 150
+S3 + CloudFront R$ 5–R$ 50
+API Gateway/Lambda R$ 10–R$ 50
+Logs/monitoramento R$ 10–R$ 30
+
+---
+
+Seu projeto — o que importa
+
+Você tem:
+
+✅ Frontend React/Vite
+✅ Backend Node/Express
+✅ MongoDB
+✅ IA OpenAI
+✅ Scraping
+✅ Users + RBAC
+✅ Simulados, dashboards, analytics
+✅ Potencial grande escala (escolas, alunos)
+
+Isso muda bastante o que faz sentido.
+
+🧠 HOSTINGER — Quando faz sentido
+
+👉 Se você quer algo barato e simples, por exemplo:
+
+✔ Projeto ainda em MVP
+✔ Testes de plataforma
+✔ Beta com poucos usuários
+✔ Não precisa escalar hoje
+✔ Quer apenas um backend Node e frontend simples
+
+💰 Custo estimado (Brasil):
+
+Plano VPS básico: ~R$ 60 – R$ 150/mês
+
+Hospedar Node + Mongo Atlas (separado)
+
+👍 Vantagens
+
+Fácil de configurar
+
+Preço baixo
+
+Painel intuitivo (cPanel)
+
+👎 Desvantagens
+
+Não escalável
+
+Não tem deploy automático sem CI/CD personalizado
+
+Pode precisar de configurações específicas de Node/Express
+
+VR: sem funções serverless
+
+📌 Bom para: MVP, beta, testes internos, aprendizado.
+
+🧠 AWS — Quando é a melhor escolha
+
+👉 Se você pretende:
+
+✔ Escalar para muitas escolas/alunos
+✔ Alta disponibilidade
+✔ Integrar vários serviços (S3, CloudFront, Lambda, API Gateway)
+✔ Arquitetura profissional
+✔ Automatizar deploy, logs, monitoramento
+✔ Integrar scraping, jobs, filas
+
+🏆 Serviços que você pode usar:
+
+AWS Service Uso
+EC2 / ECS / EKS Hospedar backend escalável
+S3 Armazenar uploads, imagens, PDFs
+CloudFront CDN para frontend
+Lambda Funções serverless (OCR, pequenos jobs)
+API Gateway Serverless API + autenticação
+DocumentDB / Mongo Atlas Mongo gerenciado
+RDS Banco relacional (se precisar)
+CloudWatch Logs + métricas
+ALB Load balancing
+Route53 DNS avançado
+WAF Segurança
+
+📈 Prós
+
+Escalabilidade real (horizontal/vertical)
+
+Alta performance e redundância
+
+Pagamento por uso
+
+Integra com sistemas de IA, filas, jobs, OCR, etc
+
+Infra global (regiões)
+
+📉 Contras
+
+Mais complexo
+
+Administração mais técnica
+
+Curva de aprendizado
+
+Pode ter custo inicial maior
+
+📌 Excelente para: produção real, escala, clientes pagantes, SaaS profissional.
