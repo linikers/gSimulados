@@ -1,4 +1,5 @@
 import pdf from "pdf-parse";
+// import { pdf } from "pdf-parse";
 import { PDFDocument } from "pdf-lib";
 
 export async function convertPdfToImages(
