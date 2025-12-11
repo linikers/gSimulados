@@ -1888,3 +1888,138 @@ Próxima Revisão: Final da Fase 1</parameter>
 
 efetuar testes om notebook lm e verificar valores de custo e uso de api para uso interno e autonomo
 projetar twa(android) e capacitor(ios) - verificar possibilidade de uso com proprio vite(publcando)
+
+1. Autenticação + RBAC + Gestão de usuários (3 níveis)
+   Tarefa Horas
+   Cadastro / Login / Logout 10–16h
+   JWT + refresh tokens 8–12h
+   Recuperar senha 6–8h
+   RBAC (roles + permissões) 12–20h
+   Tela de login, registro e UI base 10–16h
+   Subtotal: 50–70h
+
+2. Painel Administrativo (Web App MUI completo)
+   Estrutura base (layout, navbar, sidebar, rotas privadas)
+
+20–30h
+
+Gestão de escolas
+
+CRUD completo, formulários, listagem, paginação
+20–35h
+
+Gestão de alunos
+
+25–40h
+
+Gestão de turmas
+
+20–35h
+
+Gestão de simulados
+
+Listar / criar / editar / configurar
+50–80h
+
+Gestão de questões
+
+Editor de questão, alternativas, categorias
+35–60h
+
+Analytics inicial (gráficos, estatísticas básicas)
+
+25–40h
+
+UI refinada com MUI + design system
+
+20–30h
+
+Subtotal frontend admin: 215–350h
+
+3. Backend Node.js + MongoDB completo
+   Estrutura da API (Express, middlewares, logs, erros)
+
+20–30h
+
+Models + validações avançadas
+
+25–40h
+
+Controllers (usuários, escolas, alunos, simulados, questões, resultados)
+
+70–110h
+
+Serviços internos (business logic)
+
+60–100h
+
+Upload de arquivos + PDF parsing
+
+15–25h
+
+Scraping (cheerio) + integração com APIs externas
+
+30–50h
+
+Dashboard de métricas (contadores, agregações)
+
+20–35h
+
+Testes automatizados (10–20%)
+
+30–60h
+
+Subtotal backend: 270–450h
+
+4. IA – geração de questões + fluxos de simulado adaptativo
+
+Esse é o módulo que mais varia entre devs júnior / pleno / sênior.
+
+Orquestração com OpenAI + LangChain
+
+25–50h
+
+Prompt engineering avançado
+
+15–25h
+
+Sistema de geração automática de questões
+
+35–60h
+
+Sistema de simulado adaptativo (nível progressivo do aluno)
+
+40–80h
+
+Biblioteca de 1000 questões (importação + categorização)
+
+20–40h
+
+Subtotal IA: 135–255h
+
+5. Infraestrutura, DevOps e Deploy
+   Deploy na Vercel + variáveis de ambiente
+
+6–10h
+
+CI/CD básico
+
+10–20h
+
+Logs, monitoramento, alertas
+
+10–15h
+
+Preparação para AWS (arquitetura + documentação)
+
+10–20h
+
+Subtotal DevOps: 36–65h
+
+📌 TOTAL ESTIMADO
+Cenário Horas
+Mínimo (sênior muito experiente) ~750h
+Realista (mercado) 900–1100h
+Complexo (retrabalho / ajustes / júnior) 1200h+
+
+$1,5 google vision acima de 1001
