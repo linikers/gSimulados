@@ -23,7 +23,7 @@ export function Footer() {
       sx={{
         backgroundColor: "primary.main",
         color: "white",
-        py: 6,
+        py: { xs: 4, md: 6 },
         mt: "auto",
       }}
     >
@@ -36,7 +36,7 @@ export function Footer() {
               sm: "repeat(2, 1fr)",
               md: "repeat(4, 1fr)",
             },
-            gap: 4,
+            gap: { xs: 3, md: 4 },
           }}
         >
           {/* Sobre */}
@@ -113,16 +113,36 @@ export function Footer() {
               Contato
             </Typography>
             <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-              <IconButton color="inherit" size="small" aria-label="Facebook">
+              <IconButton
+                color="inherit"
+                size="small"
+                aria-label="Facebook"
+                sx={{ minWidth: 44, minHeight: 44 }}
+              >
                 <FacebookIcon />
               </IconButton>
-              <IconButton color="inherit" size="small" aria-label="Instagram">
+              <IconButton
+                color="inherit"
+                size="small"
+                aria-label="Instagram"
+                sx={{ minWidth: 44, minHeight: 44 }}
+              >
                 <InstagramIcon />
               </IconButton>
-              <IconButton color="inherit" size="small" aria-label="YouTube">
+              <IconButton
+                color="inherit"
+                size="small"
+                aria-label="YouTube"
+                sx={{ minWidth: 44, minHeight: 44 }}
+              >
                 <YouTubeIcon />
               </IconButton>
-              <IconButton color="inherit" size="small" aria-label="Email">
+              <IconButton
+                color="inherit"
+                size="small"
+                aria-label="Email"
+                sx={{ minWidth: 44, minHeight: 44 }}
+              >
                 <EmailIcon />
               </IconButton>
             </Box>

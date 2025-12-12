@@ -14,8 +14,11 @@ import {
   useTheme,
   Menu,
   MenuItem,
+  Collapse,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,6 +32,8 @@ export function Navbar() {
   const [seriadosAnchor, setSeriadosAnchor] = useState<null | HTMLElement>(
     null
   );
+  const [vestibularesOpenMobile, setVestibularesOpenMobile] = useState(false);
+  const [seriadosOpenMobile, setSeriadosOpenMobile] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -69,20 +74,92 @@ export function Navbar() {
   ];
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+    <Box sx={{ textAlign: "center" }}>
       <Typography variant="h6" sx={{ my: 2 }}>
         Prof. Jean Ribeiro
       </Typography>
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.label} disablePadding>
-            <ListItemButton onClick={() => handleNavigate(item.path)}>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
+          <div key={item.label}>
+            {item.hasSubmenu ? (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (item.label === "Vestibulares") {
+                        setVestibularesOpenMobile(!vestibularesOpenMobile);
+                      } else if (item.label === "Seriados") {
+                        setSeriadosOpenMobile(!seriadosOpenMobile);
+                      }
+                    }}
+                    sx={{ minHeight: 48 }}
+                  >
+                    <ListItemText primary={item.label} />
+                    {item.label === "Vestibulares" ? (
+                      vestibularesOpenMobile ? (
+                        <ExpandLess />
+                      ) : (
+                        <ExpandMore />
+                      )
+                    ) : seriadosOpenMobile ? (
+                      <ExpandLess />
+                    ) : (
+                      <ExpandMore />
+                    )}
+                  </ListItemButton>
+                </ListItem>
+                <Collapse
+                  in={
+                    item.label === "Vestibulares"
+                      ? vestibularesOpenMobile
+                      : seriadosOpenMobile
+                  }
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        sx={{ pl: 4, minHeight: 48 }}
+                        onClick={() => handleNavigate(item.path)}
+                      >
+                        <ListItemText primary="Ver Todos" />
+                      </ListItemButton>
+                    </ListItem>
+                    {(item.label === "Vestibulares"
+                      ? vestibularesSubmenu
+                      : seriadosSubmenu
+                    ).map((subItem) => (
+                      <ListItem key={subItem.path} disablePadding>
+                        <ListItemButton
+                          sx={{ pl: 4, minHeight: 48 }}
+                          onClick={() => handleNavigate(subItem.path)}
+                        >
+                          <ListItemText primary={subItem.label} />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </>
+            ) : (
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => handleNavigate(item.path)}
+                  sx={{ minHeight: 48 }}
+                >
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              </ListItem>
+            )}
+          </div>
         ))}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigate("/login")}>
+          <ListItemButton
+            onClick={() => handleNavigate("/login")}
+            sx={{ minHeight: 48 }}
+          >
             <ListItemText primary="Login" />
           </ListItemButton>
         </ListItem>
@@ -106,9 +183,11 @@ export function Navbar() {
           {isMobile ? (
             <IconButton
               color="inherit"
-              aria-label="open drawer"
+              aria-label="Abrir menu de navegação"
+              aria-expanded={mobileOpen}
               edge="start"
               onClick={handleDrawerToggle}
+              sx={{ minWidth: 44, minHeight: 44 }}
             >
               <MenuIcon />
             </IconButton>
@@ -127,6 +206,12 @@ export function Navbar() {
                             setSeriadosAnchor(e.currentTarget);
                           }
                         }}
+                        aria-expanded={
+                          item.label === "Vestibulares"
+                            ? Boolean(vestibularesAnchor)
+                            : Boolean(seriadosAnchor)
+                        }
+                        aria-haspopup="true"
                       >
                         {item.label}
                       </Button>
