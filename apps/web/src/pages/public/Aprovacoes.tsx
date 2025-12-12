@@ -6,8 +6,8 @@ import {
   CardContent,
   Avatar,
 } from "@mui/material";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Hero } from "src/components/public/Hero";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 export function Aprovacoes() {
   // Dados de exemplo - depois virão do backend
