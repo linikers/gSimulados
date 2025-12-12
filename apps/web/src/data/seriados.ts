@@ -1,4 +1,6 @@
-import { ProcessoSeriado } from "../types/vestibular";
+// import { ProcessoSeriado } from "../types/vestibular";
+
+import type { ProcessoSeriado } from "src/types/vestibular";
 
 export const processosSeriados: ProcessoSeriado[] = [
   {

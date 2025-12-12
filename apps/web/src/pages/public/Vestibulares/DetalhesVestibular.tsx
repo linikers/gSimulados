@@ -1,6 +1,5 @@
 import {
   Container,
-  Grid,
   Typography,
   Box,
   Card,
@@ -48,133 +47,148 @@ export function DetalhesVestibular() {
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Informações Gerais */}
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          <Grid item xs={12} md={8}>
-            <Card>
-              <CardContent>
-                <Typography variant="h5" fontWeight="bold" gutterBottom>
-                  Informações Gerais
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "2fr 1fr",
+            },
+            gap: 4,
+            mb: 6,
+          }}
+        >
+          <Card>
+            <CardContent>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Informações Gerais
+              </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <LocationOnIcon sx={{ mr: 1, color: "primary.main" }} />
+                <Typography>
+                  {vestibular.cidade} - {vestibular.estado}
                 </Typography>
+              </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <LocationOnIcon sx={{ mr: 1, color: "primary.main" }} />
-                  <Typography>
-                    {vestibular.cidade} - {vestibular.estado}
-                  </Typography>
-                </Box>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                {vestibular.descricao}
+              </Typography>
 
-                <Typography variant="body1" color="text.secondary" paragraph>
-                  {vestibular.descricao}
-                </Typography>
-
-                <Button
-                  variant="outlined"
-                  href={vestibular.siteOficial}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  endIcon={<OpenInNewIcon />}
-                >
-                  Site Oficial
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
+              <Button
+                variant="outlined"
+                href={vestibular.siteOficial}
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewIcon />}
+              >
+                Site Oficial
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Próxima Prova */}
-          <Grid item xs={12} md={4}>
-            {vestibular.proximaProva && (
-              <Card sx={{ backgroundColor: "primary.main", color: "white" }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Próximo Vestibular
-                  </Typography>
+          {vestibular.proximaProva && (
+            <Card sx={{ backgroundColor: "primary.main", color: "white" }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Próximo Vestibular
+                </Typography>
 
-                  {vestibular.proximaProva.data && (
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                      <CalendarTodayIcon sx={{ mr: 1, fontSize: 20 }} />
-                      <Typography variant="body2">
-                        Prova:{" "}
-                        {new Date(
-                          vestibular.proximaProva.data
-                        ).toLocaleDateString("pt-BR")}
-                      </Typography>
-                    </Box>
-                  )}
+                {vestibular.proximaProva.data && (
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <CalendarTodayIcon sx={{ mr: 1, fontSize: 20 }} />
+                    <Typography variant="body2">
+                      Prova:{" "}
+                      {new Date(
+                        vestibular.proximaProva.data
+                      ).toLocaleDateString("pt-BR")}
+                    </Typography>
+                  </Box>
+                )}
 
-                  {vestibular.proximaProva.inscricoes && (
-                    <>
-                      <Typography variant="body2" sx={{ mb: 0.5 }}>
-                        Inscrições:{" "}
-                        {new Date(
-                          vestibular.proximaProva.inscricoes.inicio
-                        ).toLocaleDateString("pt-BR")}{" "}
-                        a{" "}
-                        {new Date(
-                          vestibular.proximaProva.inscricoes.fim
-                        ).toLocaleDateString("pt-BR")}
-                      </Typography>
-                      <Chip
-                        label={vestibular.proximaProva.inscricoes.status
-                          .replace("_", " ")
-                          .toUpperCase()}
-                        size="small"
-                        sx={{
-                          backgroundColor: "white",
-                          color: "primary.main",
-                          mb: 2,
-                        }}
-                      />
-                    </>
-                  )}
-
-                  {vestibular.proximaProva.taxa && (
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <AttachMoneyIcon sx={{ mr: 1, fontSize: 20 }} />
-                      <Typography variant="body2">
-                        Taxa: R$ {vestibular.proximaProva.taxa.toFixed(2)}
-                      </Typography>
-                    </Box>
-                  )}
-
-                  {vestibular.proximaProva.siteInscricao && (
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      href={vestibular.proximaProva.siteInscricao}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                {vestibular.proximaProva.inscricoes && (
+                  <>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      Inscrições:{" "}
+                      {new Date(
+                        vestibular.proximaProva.inscricoes.inicio
+                      ).toLocaleDateString("pt-BR")}{" "}
+                      a{" "}
+                      {new Date(
+                        vestibular.proximaProva.inscricoes.fim
+                      ).toLocaleDateString("pt-BR")}
+                    </Typography>
+                    <Chip
+                      label={vestibular.proximaProva.inscricoes.status
+                        .replace("_", " ")
+                        .toUpperCase()}
+                      size="small"
                       sx={{
                         backgroundColor: "white",
                         color: "primary.main",
-                        "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                        mb: 2,
                       }}
-                    >
-                      Inscreva-se
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </Grid>
-        </Grid>
+                    />
+                  </>
+                )}
+
+                {vestibular.proximaProva.taxa && (
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <AttachMoneyIcon sx={{ mr: 1, fontSize: 20 }} />
+                    <Typography variant="body2">
+                      Taxa: R$ {vestibular.proximaProva.taxa.toFixed(2)}
+                    </Typography>
+                  </Box>
+                )}
+
+                {vestibular.proximaProva.siteInscricao && (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    href={vestibular.proximaProva.siteInscricao}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "primary.main",
+                      "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                    }}
+                  >
+                    Inscreva-se
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </Box>
 
         {/* Recursos Disponíveis */}
         <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
           Recursos Disponíveis
         </Typography>
 
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
           {vestibular.recursos.map((recurso, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <RecursoCard
-                tipo={recurso.tipo}
-                titulo={recurso.titulo}
-                descricao={recurso.descricao}
-                googleDriveUrl={recurso.googleDriveUrl}
-              />
-            </Grid>
+            <RecursoCard
+              key={index}
+              tipo={recurso.tipo}
+              titulo={recurso.titulo}
+              descricao={recurso.descricao}
+              googleDriveUrl={recurso.googleDriveUrl}
+            />
           ))}
-        </Grid>
+        </Box>
 
         {/* Mapa (se tiver coordenadas) */}
         {vestibular.coordenadas && (

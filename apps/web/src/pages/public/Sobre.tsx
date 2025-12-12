@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Grid, Avatar } from "@mui/material";
+import { Container, Typography, Box, Avatar } from "@mui/material";
 
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SchoolIcon from "@mui/icons-material/School";
@@ -16,33 +16,40 @@ export function Sobre() {
       />
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Grid container spacing={6}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "4fr 8fr",
+            },
+            gap: 6,
+          }}
+        >
           {/* Foto e Apresentação */}
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: "center" }}>
-              <Avatar
-                sx={{
-                  width: 200,
-                  height: 200,
-                  margin: "0 auto",
-                  mb: 2,
-                  fontSize: 80,
-                  backgroundColor: "primary.main",
-                }}
-              >
-                JR
-              </Avatar>
-              <Typography variant="h5" fontWeight="bold">
-                Prof. Jean Ribeiro
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Especialista em Vestibulares
-              </Typography>
-            </Box>
-          </Grid>
+          <Box sx={{ textAlign: "center" }}>
+            <Avatar
+              sx={{
+                width: 200,
+                height: 200,
+                margin: "0 auto",
+                mb: 2,
+                fontSize: 80,
+                backgroundColor: "primary.main",
+              }}
+            >
+              JR
+            </Avatar>
+            <Typography variant="h5" fontWeight="bold">
+              Prof. Jean Ribeiro
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Especialista em Vestibulares
+            </Typography>
+          </Box>
 
           {/* Biografia */}
-          <Grid item xs={12} md={8}>
+          <Box>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Quem sou eu
             </Typography>
@@ -62,8 +69,8 @@ export function Sobre() {
               críticos, preparados para os desafios acadêmicos e profissionais
               que virão.
             </Typography>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Valores */}
         <Box sx={{ mt: 8 }}>
@@ -84,32 +91,35 @@ export function Sobre() {
             O que guia meu trabalho
           </Typography>
 
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <InfoCard
-                titulo="Excelência"
-                descricao="Compromisso com a qualidade em cada aula, material e orientação fornecida"
-                icone={<EmojiEventsIcon sx={{ fontSize: 60 }} />}
-                cor="primary.main"
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <InfoCard
-                titulo="Dedicação"
-                descricao="Acompanhamento próximo e personalizado para cada estudante"
-                icone={<SchoolIcon sx={{ fontSize: 60 }} />}
-                cor="secondary.main"
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <InfoCard
-                titulo="Paixão"
-                descricao="Amor genuíno pela educação e pelo sucesso dos meus alunos"
-                icone={<FavoriteIcon sx={{ fontSize: 60 }} />}
-                cor="error.main"
-              />
-            </Grid>
-          </Grid>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 4,
+            }}
+          >
+            <InfoCard
+              titulo="Excelência"
+              descricao="Compromisso com a qualidade em cada aula, material e orientação fornecida"
+              icone={<EmojiEventsIcon sx={{ fontSize: 60 }} />}
+              cor="primary.main"
+            />
+            <InfoCard
+              titulo="Dedicação"
+              descricao="Acompanhamento próximo e personalizado para cada estudante"
+              icone={<SchoolIcon sx={{ fontSize: 60 }} />}
+              cor="secondary.main"
+            />
+            <InfoCard
+              titulo="Paixão"
+              descricao="Amor genuíno pela educação e pelo sucesso dos meus alunos"
+              icone={<FavoriteIcon sx={{ fontSize: 60 }} />}
+              cor="error.main"
+            />
+          </Box>
         </Box>
 
         {/* Resultados */}
@@ -117,32 +127,42 @@ export function Sobre() {
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             Resultados Comprovados
           </Typography>
-          <Grid container spacing={4} sx={{ mt: 2 }}>
-            <Grid item xs={12} sm={4}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(3, 1fr)",
+              },
+              gap: 4,
+              mt: 2,
+            }}
+          >
+            <Box>
               <Typography variant="h2" color="primary" fontWeight="bold">
                 500+
               </Typography>
               <Typography variant="h6" color="text.secondary">
                 Alunos Aprovados
               </Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            </Box>
+            <Box>
               <Typography variant="h2" color="primary" fontWeight="bold">
                 10+
               </Typography>
               <Typography variant="h6" color="text.secondary">
                 Anos de Experiência
               </Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            </Box>
+            <Box>
               <Typography variant="h2" color="primary" fontWeight="bold">
                 7
               </Typography>
               <Typography variant="h6" color="text.secondary">
                 Universidades Cobertas
               </Typography>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
       </Container>
     </>

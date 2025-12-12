@@ -1,9 +1,9 @@
-import { Container, Grid, Box, Typography, Button } from "@mui/material";
+import { Container, Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Hero } from "../../components/public/Hero";
-import { VestibularCard } from "../../components/public/VestibularCard";
-import { InfoCard } from "../../components/public/InfoCard";
-import { vestibulares } from "../../data/vestibulares";
+import { Hero } from "src/components/public/Hero";
+import { VestibularCard } from "src/components/public/VestibularCard";
+import { InfoCard } from "src/components/public/InfoCard";
+import { vestibulares } from "src/data/vestibulares";
 import SchoolIcon from "@mui/icons-material/School";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -46,32 +46,35 @@ export function Home() {
           Metodologia comprovada e materiais exclusivos
         </Typography>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <InfoCard
-              titulo="Material Completo"
-              descricao="Acesso a provas anteriores, listas de exercícios e materiais de todas as universidades"
-              icone={<MenuBookIcon sx={{ fontSize: 60 }} />}
-              cor="primary.main"
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <InfoCard
-              titulo="Acompanhamento Personalizado"
-              descricao="Mentoria individual focada nas suas necessidades e objetivos"
-              icone={<SchoolIcon sx={{ fontSize: 60 }} />}
-              cor="secondary.main"
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <InfoCard
-              titulo="Resultados Comprovados"
-              descricao="Centenas de aprovações nas principais universidades do Paraná"
-              icone={<EmojiEventsIcon sx={{ fontSize: 60 }} />}
-              cor="success.main"
-            />
-          </Grid>
-        </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 4,
+          }}
+        >
+          <InfoCard
+            titulo="Material Completo"
+            descricao="Acesso a provas anteriores, listas de exercícios e materiais de todas as universidades"
+            icone={<MenuBookIcon sx={{ fontSize: 60 }} />}
+            cor="primary.main"
+          />
+          <InfoCard
+            titulo="Acompanhamento Personalizado"
+            descricao="Mentoria individual focada nas suas necessidades e objetivos"
+            icone={<SchoolIcon sx={{ fontSize: 60 }} />}
+            cor="secondary.main"
+          />
+          <InfoCard
+            titulo="Resultados Comprovados"
+            descricao="Centenas de aprovações nas principais universidades do Paraná"
+            icone={<EmojiEventsIcon sx={{ fontSize: 60 }} />}
+            cor="success.main"
+          />
+        </Box>
       </Container>
 
       {/* Vestibulares em Destaque */}
@@ -95,21 +98,30 @@ export function Home() {
             Preparação focada nos principais processos seletivos
           </Typography>
 
-          <Grid container spacing={3}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 3,
+            }}
+          >
             {vestibularesDestaque.map((vestibular) => (
-              <Grid item xs={12} sm={6} md={4} key={vestibular.codigo}>
-                <VestibularCard
-                  codigo={vestibular.codigo}
-                  nome={vestibular.nome}
-                  nomeCompleto={vestibular.nomeCompleto}
-                  cidade={vestibular.cidade}
-                  estado={vestibular.estado}
-                  proximaData={vestibular.proximaProva?.data}
-                  logoUrl={vestibular.logoUrl}
-                />
-              </Grid>
+              <VestibularCard
+                key={vestibular.codigo}
+                codigo={vestibular.codigo}
+                nome={vestibular.nome}
+                nomeCompleto={vestibular.nomeCompleto}
+                cidade={vestibular.cidade}
+                estado={vestibular.estado}
+                proximaData={vestibular.proximaProva?.data}
+                logoUrl={vestibular.logoUrl}
+              />
             ))}
-          </Grid>
+          </Box>
 
           <Box sx={{ textAlign: "center", mt: 4 }}>
             <Button
