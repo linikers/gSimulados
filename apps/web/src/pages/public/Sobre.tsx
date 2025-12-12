@@ -1,9 +1,11 @@
 import { Container, Typography, Box, Grid, Avatar } from "@mui/material";
-import { Hero } from "../components/public/Hero";
-import { InfoCard } from "../components/public/InfoCard";
+// import { Hero } from "../components/public/Hero";
+// import { InfoCard } from "../components/public/InfoCard";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SchoolIcon from "@mui/icons-material/School";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { Hero } from "src/components/public/Hero";
+import { InfoCard } from "src/components/public/InfoCard";
 
 export function Sobre() {
   return (

@@ -1,8 +1,6 @@
-import { Container, Typography, Grid, Box } from "@mui/material";
+import { Container, Typography, Box } from "@mui/material";
 import { Hero } from "src/components/public/Hero";
 import { RecursoCard } from "src/components/public/RecursoCard";
-// import { Hero } from "../components/public/Hero";
-// import { RecursoCard } from "../components/public/RecursoCard";
 
 export function Materiais() {
   const materiais = [
@@ -61,18 +59,28 @@ export function Materiais() {
           para fácil acesso. Clique em cada categoria para acessar os arquivos.
         </Typography>
 
-        <Grid container spacing={3} sx={{ mt: 4 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+            mt: 4,
+          }}
+        >
           {materiais.map((material, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <RecursoCard
-                tipo={material.tipo}
-                titulo={material.titulo}
-                descricao={material.descricao}
-                googleDriveUrl={material.googleDriveUrl}
-              />
-            </Grid>
+            <RecursoCard
+              key={index}
+              tipo={material.tipo}
+              titulo={material.titulo}
+              descricao={material.descricao}
+              googleDriveUrl={material.googleDriveUrl}
+            />
           ))}
-        </Grid>
+        </Box>
 
         <Box sx={{ mt: 8, p: 4, backgroundColor: "grey.100", borderRadius: 2 }}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>

@@ -1,13 +1,11 @@
 import {
   Container,
   Typography,
-  Grid,
   Box,
   Card,
   CardContent,
   Avatar,
 } from "@mui/material";
-// import { Hero } from "../components/public/Hero";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Hero } from "src/components/public/Hero";
 
@@ -92,44 +90,48 @@ export function Aprovacoes() {
           principais universidades.
         </Typography>
 
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
           {aprovados.map((aprovado, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
-                <CardContent sx={{ textAlign: "center" }}>
-                  <Avatar
-                    sx={{
-                      width: 100,
-                      height: 100,
-                      margin: "0 auto",
-                      mb: 2,
-                      backgroundColor: "primary.main",
-                      fontSize: 40,
-                    }}
-                  >
-                    {aprovado.nome
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </Avatar>
-                  <Typography variant="h6" fontWeight="bold">
-                    {aprovado.nome}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    fontWeight="medium"
-                  >
-                    {aprovado.curso}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {aprovado.universidade} - {aprovado.ano}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card key={index}>
+              <CardContent sx={{ textAlign: "center" }}>
+                <Avatar
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    margin: "0 auto",
+                    mb: 2,
+                    backgroundColor: "primary.main",
+                    fontSize: 40,
+                  }}
+                >
+                  {aprovado.nome
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </Avatar>
+                <Typography variant="h6" fontWeight="bold">
+                  {aprovado.nome}
+                </Typography>
+                <Typography variant="body2" color="primary" fontWeight="medium">
+                  {aprovado.curso}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {aprovado.universidade} - {aprovado.ano}
+                </Typography>
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
         <Box
           sx={{

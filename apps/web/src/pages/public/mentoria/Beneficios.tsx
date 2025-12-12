@@ -1,12 +1,14 @@
 import { Container, Typography, Grid, Box } from "@mui/material";
-import { Hero } from "../../components/public/Hero";
-import { InfoCard } from "../../components/public/InfoCard";
+// import { Hero } from "../../components/public/Hero";
+// import { InfoCard } from "../../components/public/InfoCard";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import GroupIcon from "@mui/icons-material/Group";
+import { Hero } from "src/components/public/Hero";
+import { InfoCard } from "src/components/public/InfoCard";
 
 export function Beneficios() {
   return (

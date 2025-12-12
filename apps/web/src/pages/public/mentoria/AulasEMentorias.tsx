@@ -8,12 +8,14 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { Hero } from "../../components/public/Hero";
-import { InfoCard } from "../../components/public/InfoCard";
+// import { Hero } from "../../components/public/Hero";
+// import { InfoCard } from "../../components/public/InfoCard";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import GroupsIcon from "@mui/icons-material/Groups";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import { Hero } from "src/components/public/Hero";
+import { InfoCard } from "src/components/public/InfoCard";
+// import AssignmentIcon from "@mui/icons-material/Assignment";
 
 export function AulasEMentorias() {
   return (
