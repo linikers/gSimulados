@@ -8,8 +8,6 @@ import {
   Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import { Hero } from "../../components/public/Hero";
-// import { processosSeriados } from "../../data/seriados";
 import SchoolIcon from "@mui/icons-material/School";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Hero } from "src/components/public/Hero";

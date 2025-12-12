@@ -9,13 +9,16 @@ import {
   Chip,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { Hero } from "../../components/public/Hero";
-import { RecursoCard } from "../../components/public/RecursoCard";
-import { getVestibularByCodigo } from "../../data/vestibulares";
+// import { Hero } from "../../components/public/Hero";
+// import { RecursoCard } from "../../components/public/RecursoCard";
+// import { getVestibularByCodigo } from "../../data/vestibulares";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { getVestibularByCodigo } from "src/data/vestibulares";
+import { Hero } from "src/components/public/Hero";
+import { RecursoCard } from "src/components/public/RecursoCard";
 
 export function DetalhesVestibular() {
   const { codigo } = useParams<{ codigo: string }>();
