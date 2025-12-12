@@ -1,6 +1,6 @@
 html,
 body {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -27,7 +27,14 @@ html {
 }
 
 /* Melhora a renderização de fontes */
+/* Melhora a renderização de fontes */
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Garante que o conteúdo principal tenha contexto de empilhamento correto */
+main {
+  position: relative;
+  z-index: 1;
 }
