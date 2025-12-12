@@ -169,7 +169,7 @@ export function Navbar() {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar position="fixed">
         <Toolbar>
           <Typography
             variant="h6"
@@ -238,7 +238,7 @@ export function Navbar() {
           )}
         </Toolbar>
       </AppBar>
-
+      <Toolbar /> {/* Espaçador para compensar o AppBar fixed */}
       {/* Vestibulares Menu */}
       <Menu
         anchorEl={vestibularesAnchor}
@@ -254,7 +254,6 @@ export function Navbar() {
           </MenuItem>
         ))}
       </Menu>
-
       {/* Seriados Menu */}
       <Menu
         anchorEl={seriadosAnchor}
@@ -270,7 +269,6 @@ export function Navbar() {
           </MenuItem>
         ))}
       </Menu>
-
       {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
