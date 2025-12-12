@@ -1,6 +1,5 @@
 import {
   Container,
-  Grid,
   Typography,
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Hero } from "src/components/public/Hero";
+import { processosSeriados } from "src/data/seriados";
 
 export function ListaSeriados() {
   const navigate = useNavigate();
@@ -38,72 +38,79 @@ export function ListaSeriados() {
           <Typography variant="h5" fontWeight="bold" gutterBottom>
             Processos Disponíveis
           </Typography>
-          <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 3,
+              mt: 2,
+            }}
+          >
             {processosSeriados.map((seriado) => (
-              <Grid item xs={12} md={4} key={seriado.codigo}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <SchoolIcon
-                        sx={{ fontSize: 40, mr: 2, color: "primary.main" }}
-                      />
-                      <Box>
-                        <Typography variant="h6" fontWeight="bold">
-                          {seriado.nome}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {seriado.universidade}
-                        </Typography>
-                      </Box>
+              <Card
+                key={seriado.codigo}
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <SchoolIcon
+                      sx={{ fontSize: 40, mr: 2, color: "primary.main" }}
+                    />
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        {seriado.nome}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {seriado.universidade}
+                      </Typography>
                     </Box>
-
-                    <Typography variant="body2" paragraph>
-                      {seriado.descricao}
-                    </Typography>
-
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Fases:</strong> {seriado.fases}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Duração:</strong> {seriado.duracaoAnos} anos
-                    </Typography>
-
-                    {seriado.proximaProva?.data && (
-                      <Box
-                        sx={{ mt: 2, display: "flex", alignItems: "center" }}
-                      >
-                        <CalendarTodayIcon
-                          sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
-                        />
-                        <Typography variant="body2" color="primary">
-                          Próxima prova:{" "}
-                          {new Date(
-                            seriado.proximaProva.data
-                          ).toLocaleDateString("pt-BR")}
-                        </Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-
-                  <Box sx={{ p: 2 }}>
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      onClick={() => navigate(`/seriados/${seriado.codigo}`)}
-                    >
-                      Ver Detalhes
-                    </Button>
                   </Box>
-                </Card>
-              </Grid>
+
+                  <Typography variant="body2" paragraph>
+                    {seriado.descricao}
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>Fases:</strong> {seriado.fases}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>Duração:</strong> {seriado.duracaoAnos} anos
+                  </Typography>
+
+                  {seriado.proximaProva?.data && (
+                    <Box sx={{ mt: 2, display: "flex", alignItems: "center" }}>
+                      <CalendarTodayIcon
+                        sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
+                      />
+                      <Typography variant="body2" color="primary">
+                        Próxima prova:{" "}
+                        {new Date(seriado.proximaProva.data).toLocaleDateString(
+                          "pt-BR"
+                        )}
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+
+                <Box sx={{ p: 2 }}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => navigate(`/seriados/${seriado.codigo}`)}
+                  >
+                    Ver Detalhes
+                  </Button>
+                </Box>
+              </Card>
             ))}
-          </Grid>
+          </Box>
         </Box>
 
         <Box

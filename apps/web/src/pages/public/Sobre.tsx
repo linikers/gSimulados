@@ -1,6 +1,5 @@
 import { Container, Typography, Box, Grid, Avatar } from "@mui/material";
-// import { Hero } from "../components/public/Hero";
-// import { InfoCard } from "../components/public/InfoCard";
+
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SchoolIcon from "@mui/icons-material/School";
 import FavoriteIcon from "@mui/icons-material/Favorite";

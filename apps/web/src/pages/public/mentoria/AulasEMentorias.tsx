@@ -1,7 +1,6 @@
 import {
   Container,
   Typography,
-  Grid,
   Box,
   List,
   ListItem,
@@ -34,93 +33,105 @@ export function AulasEMentorias() {
           deseja prestar.
         </Typography>
 
-        <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={6}>
-            <InfoCard
-              titulo="Aulas Individuais"
-              descricao="Sessões personalizadas focadas nas suas dificuldades e objetivos"
-              icone={<VideoLibraryIcon sx={{ fontSize: 60 }} />}
-              cor="primary.main"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <InfoCard
-              titulo="Aulas em Grupo"
-              descricao="Turmas reduzidas para melhor aproveitamento e interação"
-              icone={<GroupsIcon sx={{ fontSize: 60 }} />}
-              cor="secondary.main"
-            />
-          </Grid>
-        </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(2, 1fr)",
+            },
+            gap: 4,
+            mt: 4,
+          }}
+        >
+          <InfoCard
+            titulo="Aulas Individuais"
+            descricao="Sessões personalizadas focadas nas suas dificuldades e objetivos"
+            icone={<VideoLibraryIcon sx={{ fontSize: 60 }} />}
+            cor="primary.main"
+          />
+          <InfoCard
+            titulo="Aulas em Grupo"
+            descricao="Turmas reduzidas para melhor aproveitamento e interação"
+            icone={<GroupsIcon sx={{ fontSize: 60 }} />}
+            cor="secondary.main"
+          />
+        </Box>
 
         <Box sx={{ mt: 8 }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             O que está incluído
           </Typography>
-          <Grid container spacing={4} sx={{ mt: 2 }}>
-            <Grid item xs={12} md={6}>
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Acesso a todo material didático"
-                    secondary="Provas anteriores, listas de exercícios e resumos"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Acompanhamento personalizado"
-                    secondary="Plano de estudos adaptado ao seu perfil"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Correção de redações"
-                    secondary="Feedback detalhado e orientações"
-                  />
-                </ListItem>
-              </List>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Simulados periódicos"
-                    secondary="Avaliações no formato dos vestibulares"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Suporte contínuo"
-                    secondary="Tire dúvidas a qualquer momento"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <CheckCircleIcon color="primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Orientação vocacional"
-                    secondary="Ajuda na escolha do curso e universidade"
-                  />
-                </ListItem>
-              </List>
-            </Grid>
-          </Grid>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, 1fr)",
+              },
+              gap: 4,
+              mt: 2,
+            }}
+          >
+            <List>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Acesso a todo material didático"
+                  secondary="Provas anteriores, listas de exercícios e resumos"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Acompanhamento personalizado"
+                  secondary="Plano de estudos adaptado ao seu perfil"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Correção de redações"
+                  secondary="Feedback detalhado e orientações"
+                />
+              </ListItem>
+            </List>
+            <List>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Simulados periódicos"
+                  secondary="Avaliações no formato dos vestibulares"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Suporte contínuo"
+                  secondary="Tire dúvidas a qualquer momento"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <CheckCircleIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Orientação vocacional"
+                  secondary="Ajuda na escolha do curso e universidade"
+                />
+              </ListItem>
+            </List>
+          </Box>
         </Box>
 
         <Box
