@@ -1,6 +1,8 @@
 import { Container, Typography, Grid, Box } from "@mui/material";
-import { Hero } from "../components/public/Hero";
-import { RecursoCard } from "../components/public/RecursoCard";
+import { Hero } from "src/components/public/Hero";
+import { RecursoCard } from "src/components/public/RecursoCard";
+// import { Hero } from "../components/public/Hero";
+// import { RecursoCard } from "../components/public/RecursoCard";
 
 export function Materiais() {
   const materiais = [

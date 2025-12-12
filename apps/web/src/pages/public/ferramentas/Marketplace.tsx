@@ -1,5 +1,6 @@
 import { Container, Typography, Box } from "@mui/material";
-import { Hero } from "../../components/public/Hero";
+import { Hero } from "src/components/public/Hero";
+// import { Hero } from "../../components/public/Hero";
 
 export function Marketplace() {
   return (

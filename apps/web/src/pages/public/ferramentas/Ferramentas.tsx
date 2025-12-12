@@ -1,10 +1,12 @@
 import { Container, Typography, Grid, Box } from "@mui/material";
-import { Hero } from "../../components/public/Hero";
-import { InfoCard } from "../../components/public/InfoCard";
+// import { Hero } from "../../components/public/Hero";
+// import { InfoCard } from "../../components/public/InfoCard";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import TimerIcon from "@mui/icons-material/Timer";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useNavigate } from "react-router-dom";
+import { Hero } from "src/components/public/Hero";
+import { InfoCard } from "src/components/public/InfoCard";
 
 export function Ferramentas() {
   const navigate = useNavigate();
