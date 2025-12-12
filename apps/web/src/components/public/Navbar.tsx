@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 export function Navbar() {
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [vestibularesAnchor, setVestibularesAnchor] =
     useState<null | HTMLElement>(null);
@@ -56,6 +56,9 @@ export function Navbar() {
     { label: "Ferramentas", path: "/ferramentas" },
     { label: "Aprovações", path: "/aprovacoes" },
   ];
+
+  // ... (rest of the file remains same, targeting the lines around 27 and title)
+  // Wait, I need to execute replace chunks carefully.
 
   const vestibularesSubmenu = [
     { label: "ENEM", path: "/vestibulares/enem" },
@@ -169,12 +172,20 @@ export function Navbar() {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Toolbar>
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1, cursor: "pointer", fontWeight: "bold" }}
+            sx={{
+              flexGrow: 1,
+              cursor: "pointer",
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+            }}
             onClick={() => handleNavigate("/")}
           >
             Prof. Jean Ribeiro
@@ -238,7 +249,6 @@ export function Navbar() {
           )}
         </Toolbar>
       </AppBar>
-
       {/* Vestibulares Menu */}
       <Menu
         anchorEl={vestibularesAnchor}
@@ -254,7 +264,6 @@ export function Navbar() {
           </MenuItem>
         ))}
       </Menu>
-
       {/* Seriados Menu */}
       <Menu
         anchorEl={seriadosAnchor}
@@ -270,7 +279,6 @@ export function Navbar() {
           </MenuItem>
         ))}
       </Menu>
-
       {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
@@ -280,7 +288,7 @@ export function Navbar() {
           keepMounted: true,
         }}
         sx={{
-          display: { xs: "block", md: "none" },
+          display: { xs: "block", lg: "none" },
           "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
         }}
       >
