@@ -1,11 +1,4 @@
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  Link,
-  IconButton,
-} from "@mui/material";
+import { Box, Container, Typography, Link, IconButton } from "@mui/material";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
@@ -35,9 +28,19 @@ export function Footer() {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(4, 1fr)",
+            },
+            gap: 4,
+          }}
+        >
           {/* Sobre */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Prof. Jean Ribeiro
             </Typography>
@@ -45,10 +48,10 @@ export function Footer() {
               Mentoria educacional especializada em vestibulares do Paraná e
               ENEM.
             </Typography>
-          </Grid>
+          </Box>
 
           {/* Links Rápidos */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Links Rápidos
             </Typography>
@@ -69,10 +72,10 @@ export function Footer() {
                 Aprovações
               </Link>
             </Box>
-          </Grid>
+          </Box>
 
           {/* Vestibulares */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Vestibulares
             </Typography>
@@ -102,10 +105,10 @@ export function Footer() {
                 UFPR
               </Link>
             </Box>
-          </Grid>
+          </Box>
 
           {/* Contato */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Contato
             </Typography>
@@ -126,8 +129,8 @@ export function Footer() {
             <Typography variant="body2">
               contato@profjeanribeiro.com.br
             </Typography>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         <Box
           sx={{
