@@ -2137,3 +2137,85 @@ Curva de aprendizado
 Pode ter custo inicial maior
 
 📌 Excelente para: produção real, escala, clientes pagantes, SaaS profissional.
+
+---
+
+Preço AWS EC2 (São Paulo)
+
+As instâncias mais comuns para seu SaaS:
+
+✅ t3.small — 2 vCPU / 2GB RAM
+
+Bom para MVP, poucos acessos.
+
+💵 Preço on-demand:
+
+~ US$ 0.035 / hora
+= US$ 25 / mês
+≈ R$ 140 / mês
+
+✅ t3.medium — 2 vCPU / 4GB RAM (mais recomendado para seu SaaS)
+💵 Preço on-demand:
+
+~ US$ 0.070 / hora
+= US$ 50 / mês
+≈ R$ 280 / mês
+
+Esse é o ponto ideal:
+✔ roda API
+✔ roda workers
+✔ roda upload
+✔ consegue PDF, imagens, IA leve
+✔ melhor custo/benefício
+
+📦 2. Preço do S3 (separado da EC2)
+
+Sim, S3 é independente e você paga só pelo que usa.
+
+📌 Valores:
+
+US$ 0.025 por GB/mês (armazenamento padrão)
+
+US$ 0.0004 por 1.000 requisições GET
+
+US$ 0.005 por 1.000 requisições PUT
+
+💵 Exemplo real:
+
+10 GB de arquivos (PDFs, imagens, provas):
+→ US$ 0.25 / mês
+≈ R$ 1.40
+
+100.000 requisições no mês:
+→ ~ US$ 1.50
+≈ R$ 8,00
+
+➡️ S3 é MUITO barato.
+
+🧮 3. Total estimado EC2 + S3
+🚀 Cenário ideal para seu SaaS (t3.medium + 10GB S3):
+EC2: R$ 280/mês
+S3: R$ 10/mês (com folga)
+TOTAL: ~ R$ 290/mês
+
+🚗 Cenário mais barato (t3.small + 5GB S3):
+EC2: R$ 140/mês
+S3: R$ 5/mês
+TOTAL: ~ R$ 145/mês
+
+💡 Conclusão Rápida
+
+✔ S3 é separado da EC2
+
+✔ t3.medium (4GB) é o ideal para seu SaaS
+
+✔ Custo total: R$ 280–300/mês
+
+✔ Escala fácil depois (AutoScaling, RDS, etc.)
+
+Se quiser, posso montar:
+
+✅ Arquitetura completa com EC2 + S3 + CloudFront
+✅ Docker ou PM2 + Nginx
+✅ Deploy automático via GitHub Actions
+✅ Arquivo docker-compose para sua API
