@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     await user.save();
-    const token = await this.generateToken(user);
+    const token = await this.generateToken(user as IUserDocument);
 
     const userResponse = user.toObject();
     delete userResponse.password;

@@ -13,6 +13,10 @@ COPY apps/web/package.json ./apps/web/package.json
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
+# Build shared package
+WORKDIR /app/packages/shared
+RUN yarn build
+
 # Build API
 WORKDIR /app/apps/api
 RUN yarn build
