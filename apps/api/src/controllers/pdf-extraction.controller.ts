@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { PdfSource } from "../models/PdfSource";
 import { ExtractedQuestion } from "../models/ExtractedQuestion";
+import { convertPdfToImages } from "../services/pdf-processing.service";
+import { uploadImage } from "../services/cloudinary.service";
+import { extractQuestionsFromImage } from "../services/gemini-vision.service";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -27,53 +30,78 @@ export class PdfExtractionController {
     try {
       const { id } = req.params;
 
-      const pdf = await PdfSource.findById(id);
-      if (!pdf) {
+      const pdfSource = await PdfSource.findById(id);
+      if (!pdfSource) {
         return res.status(404).json({ error: "PDF não encontrado" });
       }
 
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
-      // TODO: Implementar extração real com GPT-4 Vision
-      // Por enquanto, cria questões mock
+      // 1. Obter Buffer do PDF
+      // TODO: Implementar download real do Google Drive
+      // Por enquanto, checa se é mock
+      if (pdfSource.driveFileId.startsWith("mock-")) {
+        throw new Error(
+          "Não é possível processar arquivos Mock. Por favor, configure a integração real com o Google Drive."
+        );
+      }
 
-      const mockQuestions = [
-        {
-          pdfSourceId: pdf._id,
-          vestibularCodigo: pdf.vestibularCodigo,
-          pageNumber: 1,
-          rawText: "Texto bruto da questão...",
-          enunciado: "Qual é a capital do Brasil?",
-          alternativas: [
-            "A) São Paulo",
-            "B) Rio de Janeiro",
-            "C) Brasília",
-            "D) Salvador",
-            "E) Belo Horizonte",
-          ],
-          respostaCorreta: "C",
-          materia: "Geografia",
-          assunto: "Capitais",
-          dificuldade: "facil",
-          confidence: 95,
-          temImagem: false,
-          temFormula: false,
-        },
-      ];
+      // Simulação de obtenção do buffer (Substituir por chamada ao DriveService)
+      // const pdfBuffer = await DriveService.download(pdfSource.driveFileId);
+      const pdfBuffer = Buffer.from(""); // Placeholder para evitar erro de compilação se DriveService não existe
 
-      const extracted = await ExtractedQuestion.insertMany(mockQuestions);
+      if (pdfBuffer.length === 0) {
+        throw new Error("Buffer do PDF vazio ou não implementado.");
+      }
+
+      // 2. Converter PDF para Imagens
+      const images = await convertPdfToImages(pdfBuffer);
+      const totalQuestions: any[] = [];
+
+      // 3. Processar cada página
+      for (const { pageNumber, imageBuffer } of images) {
+        // Upload para Cloudinary (para obter URL pública para o frontend)
+        const publicId = `questions/${pdfSource.vestibularCodigo}/${pdfSource._id}_page_${pageNumber}`;
+        const imageUrl = await uploadImage(imageBuffer, "questions", publicId);
+
+        // Extrair com Gemini
+        const extractionResult = await extractQuestionsFromImage(
+          imageBuffer,
+          pdfSource.vestibularCodigo
+        );
+
+        // Salvar questões
+        for (const q of extractionResult.questoes) {
+          const extractedQ = await ExtractedQuestion.create({
+            pdfSourceId: pdfSource._id,
+            vestibularCodigo: pdfSource.vestibularCodigo,
+            pageNumber,
+            enunciado: q.enunciado,
+            alternativas: q.alternativas,
+            respostaCorreta: q.respostaCorreta,
+            materia: q.materia,
+            assunto: q.assunto,
+            temImagem: q.temImagem,
+            imagemUrl: q.temImagem ? imageUrl : undefined, // Se a questão tem imagem, usamos a da página por enquanto (ou fazer crop futuro)
+            imagemPublicId: q.temImagem ? publicId : undefined,
+            confidence: extractionResult.confidence,
+            status: "pending",
+          });
+          totalQuestions.push(extractedQ);
+        }
+      }
 
       // Atualizar PDF
       await PdfSource.findByIdAndUpdate(id, {
         status: "completed",
-        questoesExtraidas: extracted.length,
+        questoesExtraidas: totalQuestions.length,
         processedAt: new Date(),
       });
 
       res.json({
-        message: `${extracted.length} questões extraídas`,
-        questions: extracted,
+        message: `${totalQuestions.length} questões extraídas com sucesso`,
+        questions: totalQuestions,
       });
     } catch (error: any) {
       // Atualizar status de erro

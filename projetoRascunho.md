@@ -2219,3 +2219,5 @@ Se quiser, posso montar:
 ✅ Docker ou PM2 + Nginx
 ✅ Deploy automático via GitHub Actions
 ✅ Arquivo docker-compose para sua API
+
+implementar um FAQ
