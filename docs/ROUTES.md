@@ -4,10 +4,22 @@
 
 ### Rotas Públicas
 
-| Rota        | Descrição          |
-| :---------- | :----------------- |
-| `/`         | Página de Login    |
-| `/register` | Página de Registro |
+| Rota                       | Descrição                    |
+| :------------------------- | :--------------------------- |
+| `/`                        | Página Inicial               |
+| `/sobre`                   | Sobre o Projeto/Professor    |
+| `/aulas-e-mentorias`       | Informações de Mentorias     |
+| `/beneficios`              | Benefícios da Plataforma     |
+| `/vestibulares`            | Lista de Vestibulares        |
+| `/vestibulares/:codigo`    | Detalhes do Vestibular       |
+| `/seriados`                | Processos Seriados (PAS/PSS) |
+| `/materiais`               | Materiais de Estudo          |
+| `/ferramentas`             | Ferramentas de Estudo        |
+| `/ferramentas/marketplace` | Marketplace                  |
+| `/aprovacoes`              | Hall de Aprovações           |
+| `/faq`                     | Perguntas Frequentes (FAQ)   |
+| `/login`                   | Página de Login              |
+| `/register`                | Página de Registro           |
 
 ### Rotas Protegidas (Requer Autenticação)
 
@@ -15,18 +27,25 @@
 | :----------- | :------------------ | :----- |
 | `/dashboard` | Dashboard Principal | Todos  |
 
-| `/escola/alunos` | Lista de Alunos da Escola | Escola |
-| `/escola/turmas` | Turmas (placeholder) | Escola |
-| `/escola/simulados` | Simulados (placeholder) | Escola |
-| `/escola/relatorios` | Relatórios (placeholder) | Escola |
+#### Admin Routes
 
-### Rotas de Aluno
+| Rota                           | Descrição                     |
+| :----------------------------- | :---------------------------- |
+| `/admin/escolas`               | Listar Escolas                |
+| `/admin/escolas/cadastro`      | Cadastrar Escola              |
+| `/admin/alunos`                | Listar Alunos                 |
+| `/admin/alunos/cadastro`       | Cadastrar Aluno               |
+| `/admin/questoes/cadastro`     | Cadastrar Questão Manualmente |
+| `/admin/vestibulares`          | Gerenciar Vestibulares        |
+| `/admin/vestibulares/cadastro` | Criar Novo Vestibular         |
+| `/admin/banco-questoes/drive`  | Configurar Google Drive       |
+| `/admin/banco-questoes/pdfs`   | Listar/Processar PDFs         |
 
-| Rota                | Descrição                     | Acesso |
-| :------------------ | :---------------------------- | :----- |
-| `/aluno/simulados`  | Meus Simulados (placeholder)  | Aluno  |
-| `/aluno/resultados` | Meus Resultados (placeholder) | Aluno  |
-| `/aluno/desempenho` | Meu Desempenho (placeholder)  | Aluno  |
+#### Escola Routes
+
+| Rota             | Descrição               |
+| :--------------- | :---------------------- |
+| `/escola/alunos` | Listar Alunos da Escola |
 
 ---
 
@@ -52,6 +71,23 @@
 | :----- | :-------- | :------------ | :----------- |
 | `POST` | `/alunos` | Criar aluno   | Admin/Escola |
 | `GET`  | `/alunos` | Listar alunos | Admin/Escola |
+
+### Questões & Vestibulares
+
+| Método | Endpoint        | Descrição           | Proteção    |
+| :----- | :-------------- | :------------------ | :---------- |
+| `POST` | `/questions`    | Criar questão       | Admin       |
+| `GET`  | `/questions`    | Listar questões     | Auth        |
+| `GET`  | `/vestibulares` | Listar vestibulares | Public/Auth |
+
+### Banco de Questões (Extração)
+
+| Método | Endpoint                       | Descrição           | Proteção |
+| :----- | :----------------------------- | :------------------ | :------- |
+| `GET`  | `/drive-config`                | Listar config drive | Admin    |
+| `POST` | `/drive-config/sync`           | Sincronizar PDFs    | Admin    |
+| `GET`  | `/extraction/pdfs`             | Listar Status PDFs  | Admin    |
+| `POST` | `/extraction/pdfs/:id/extract` | Iniciar Extração IA | Admin    |
 
 ---
 
