@@ -19,6 +19,8 @@ export interface IExtractedQuestion extends Document {
   // Qualidade da extração
   confidence: number; // 0-100
   temImagem: boolean;
+  imagemUrl?: string;
+  imagemPublicId?: string;
   temFormula: boolean;
 
   // Controle de revisão
@@ -55,6 +57,8 @@ const ExtractedQuestionSchema: Schema = new Schema(
 
     confidence: { type: Number, required: true, min: 0, max: 100 },
     temImagem: { type: Boolean, default: false },
+    imagemUrl: { type: String },
+    imagemPublicId: { type: String },
     temFormula: { type: Boolean, default: false },
 
     status: {
