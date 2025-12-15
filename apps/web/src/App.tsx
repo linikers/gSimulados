@@ -30,6 +30,7 @@ import { Materiais } from "./pages/public/Materiais";
 import { Ferramentas } from "./pages/public/ferramentas/Ferramentas";
 import { Marketplace } from "./pages/public/ferramentas/Marketplace";
 import { Aprovacoes } from "./pages/public/Aprovacoes";
+import { FAQ } from "./pages/public/FAQ";
 
 const theme = createTheme({
   palette: {
@@ -80,6 +81,7 @@ function App() {
                 element={<Marketplace />}
               />
               <Route path="/aprovacoes" element={<Aprovacoes />} />
+              <Route path="/faq" element={<FAQ />} />
             </Route>
 
             {/* Auth Routes (no layout) */}
