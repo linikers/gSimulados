@@ -62,8 +62,12 @@ export function ListaPdfs() {
       const result = await PdfExtractionService.extractFromPdf(id);
       showToast(`${result.message}`, "success");
       loadData();
-    } catch (error) {
-      showToast(`Erro ao extrair: ${error}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const msg =
+        error.response?.data?.error || error.message || "Erro desconhecido";
+      showToast(`Erro ao extrair: ${msg}`, "error");
+      loadData(); // Recarrega para mostrar status 'error' atualizado
     } finally {
       setLoading(false);
     }
