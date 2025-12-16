@@ -13,6 +13,7 @@ import { GerenciarVestibulares } from "./pages/admin/Vestibulares/GerenciarVesti
 import { FormularioVestibular } from "./pages/admin/Vestibulares/FormularioVestibular";
 import { ConfigurarDrive } from "./pages/admin/BancoQuestoes/ConfigurarDrive";
 import { ListaPdfs } from "./pages/admin/BancoQuestoes/ListaPdfs";
+import { RevisarQuestoes } from "./pages/admin/BancoQuestoes/RevisarQuestoes";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -132,6 +133,10 @@ function App() {
                   <Route
                     path="/admin/banco-questoes/pdfs"
                     element={<ListaPdfs />}
+                  />
+                  <Route
+                    path="/admin/banco-questoes/revisar"
+                    element={<RevisarQuestoes />}
                   />
                 </Route>
 
