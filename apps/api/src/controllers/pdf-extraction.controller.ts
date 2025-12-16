@@ -4,6 +4,7 @@ import { ExtractedQuestion } from "../models/ExtractedQuestion";
 import { convertPdfToImages } from "../services/pdf-processing.service";
 import { uploadImage } from "../services/cloudinary.service";
 import { extractQuestionsFromImage } from "../services/gemini-vision.service";
+import { DriveService } from "../services/drive.service";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -38,38 +39,40 @@ export class PdfExtractionController {
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
+      console.log(
+        `[Extração] Iniciando download do PDF ${pdfSource.driveFileId}...`
+      );
       // 1. Obter Buffer do PDF
-      // TODO: Implementar download real do Google Drive
-      // Por enquanto, checa se é mock
-      if (pdfSource.driveFileId.startsWith("mock-")) {
-        throw new Error(
-          "Não é possível processar arquivos Mock. Por favor, configure a integração real com o Google Drive."
-        );
-      }
-
-      // Simulação de obtenção do buffer (Substituir por chamada ao DriveService)
-      // const pdfBuffer = await DriveService.download(pdfSource.driveFileId);
-      const pdfBuffer = Buffer.from(""); // Placeholder para evitar erro de compilação se DriveService não existe
+      const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
+      console.log(
+        `[Extração] Download concluído. Tamanho: ${pdfBuffer.length} bytes`
+      );
 
       if (pdfBuffer.length === 0) {
         throw new Error("Buffer do PDF vazio ou não implementado.");
       }
 
       // 2. Converter PDF para Imagens
+      console.log(`[Extração] Convertendo PDF para imagens...`);
       const images = await convertPdfToImages(pdfBuffer);
+      console.log(`[Extraction] Conversão concluída: ${images.length} páginas`);
       const totalQuestions: any[] = [];
 
       // 3. Processar cada página
       for (const { pageNumber, imageBuffer } of images) {
         // Upload para Cloudinary (para obter URL pública para o frontend)
         const publicId = `questions/${pdfSource.vestibularCodigo}/${pdfSource._id}_page_${pageNumber}`;
+        console.log(`[Extração] Uploading page ${pageNumber} to Cloudinary...`);
         const imageUrl = await uploadImage(imageBuffer, "questions", publicId);
+        console.log(`[Extraction] Upload OK: ${imageUrl}`);
 
         // Extrair com Gemini
+        console.log(`[Extração] Sending to Gemini...`);
         const extractionResult = await extractQuestionsFromImage(
           imageBuffer,
           pdfSource.vestibularCodigo
         );
+        console.log(`[Extração] Gemini response recebida.`);
 
         // Salvar questões
         for (const q of extractionResult.questoes) {

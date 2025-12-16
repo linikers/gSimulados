@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   QuestionReviewService,
   type IQuestionReview,
@@ -17,6 +17,20 @@ export function RevisarQuestoes() {
   const [questoes, setQuestoes] = useState<IQuestionReview[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const questao = questoes[currentIndex];
+
+  const loadQuestoes = async () => {
+    try {
+      const data = await QuestionReviewService.listPending();
+      setQuestoes(data);
+    } catch (error) {
+      console.error("Erro ao carregar questões:", error);
+    }
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadQuestoes();
+  }, []);
 
   const loadNext = () => {
     setCurrentIndex((prev) => {

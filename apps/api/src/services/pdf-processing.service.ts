@@ -1,7 +1,5 @@
 import pdf from "pdf-parse";
 import pdfImgConvert from "pdf-img-convert";
-// import { pdf } from "pdf-parse";
-// import { PDFDocument } from "pdf-lib";
 
 export async function convertPdfToImages(
   pdfBuffer: Buffer

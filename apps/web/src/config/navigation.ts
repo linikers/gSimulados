@@ -40,9 +40,19 @@ export const navigationConfig: NavigationConfig = {
     },
     { title: "Vestibulares", path: "/admin/vestibulares", icon: SchoolIcon },
     {
-      title: "Banco de Questões",
+      title: "Configurar Drive",
       path: "/admin/banco-questoes/drive",
+      icon: SettingsIcon,
+    },
+    {
+      title: "Extrair PDFs",
+      path: "/admin/banco-questoes/pdfs",
       icon: QuizIcon,
+    },
+    {
+      title: "Revisar Questões",
+      path: "/admin/banco-questoes/revisar",
+      icon: AssignmentIcon,
     },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
