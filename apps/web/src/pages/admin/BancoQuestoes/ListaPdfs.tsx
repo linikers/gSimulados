@@ -203,7 +203,7 @@ export function ListaPdfs() {
                   >
                     <OpenInNewIcon fontSize="small" />
                   </IconButton>
-                  {pdf.status === "pending" && (
+                  {(pdf.status === "pending" || pdf.status === "error") && (
                     <IconButton
                       size="small"
                       color="primary"
