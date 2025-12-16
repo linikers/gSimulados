@@ -7,12 +7,14 @@ module.exports = {
   setupFilesAfterEnv: ["./src/tests/setup.ts"],
   testMatch: ["**/*.test.ts"],
   moduleNameMapper: {
-    "^@gsimulados/shared$": "<rootDir>/../../packages/shared/src/index.ts"
+    "^@gsimulados/shared$": "<rootDir>/../../packages/shared/src/index.ts",
+    "^pdf-img-convert$": "<rootDir>/src/tests/mocks/pdf-img-convert.js"
   },
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", { isolatedModules: true }]
+    "^.+\\.(t|j)sx?$": ["ts-jest", { isolatedModules: true }],
+    "^.+\\.mjs$": ["ts-jest", { isolatedModules: true }]
   },
   transformIgnorePatterns: [
-    "node_modules/(?!pdf-img-convert|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)"
+    "node_modules/(?!(pdf-img-convert|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pdfjs-dist)/)"
   ]
 };

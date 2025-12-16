@@ -4,6 +4,7 @@ import { ExtractedQuestion } from "../models/ExtractedQuestion";
 import { convertPdfToImages } from "../services/pdf-processing.service";
 import { uploadImage } from "../services/cloudinary.service";
 import { extractQuestionsFromImage } from "../services/gemini-vision.service";
+import { DriveService } from "../services/drive.service";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -39,17 +40,7 @@ export class PdfExtractionController {
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
       // 1. Obter Buffer do PDF
-      // TODO: Implementar download real do Google Drive
-      // Por enquanto, checa se é mock
-      if (pdfSource.driveFileId.startsWith("mock-")) {
-        throw new Error(
-          "Não é possível processar arquivos Mock. Por favor, configure a integração real com o Google Drive."
-        );
-      }
-
-      // Simulação de obtenção do buffer (Substituir por chamada ao DriveService)
-      // const pdfBuffer = await DriveService.download(pdfSource.driveFileId);
-      const pdfBuffer = Buffer.from(""); // Placeholder para evitar erro de compilação se DriveService não existe
+      const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
 
       if (pdfBuffer.length === 0) {
         throw new Error("Buffer do PDF vazio ou não implementado.");
