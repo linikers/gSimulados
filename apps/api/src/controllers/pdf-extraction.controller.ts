@@ -39,28 +39,42 @@ export class PdfExtractionController {
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
+      console.log(
+        `[Extraction] Iniciando download do PDF ${pdfSource.driveFileId}...`
+      );
       // 1. Obter Buffer do PDF
       const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
+      console.log(
+        `[Extraction] Download concluído. Tamanho: ${pdfBuffer.length} bytes`
+      );
 
       if (pdfBuffer.length === 0) {
         throw new Error("Buffer do PDF vazio ou não implementado.");
       }
 
       // 2. Converter PDF para Imagens
+      console.log(`[Extraction] Convertendo PDF para imagens...`);
       const images = await convertPdfToImages(pdfBuffer);
+      console.log(`[Extraction] Conversão concluída: ${images.length} páginas`);
       const totalQuestions: any[] = [];
 
       // 3. Processar cada página
       for (const { pageNumber, imageBuffer } of images) {
         // Upload para Cloudinary (para obter URL pública para o frontend)
         const publicId = `questions/${pdfSource.vestibularCodigo}/${pdfSource._id}_page_${pageNumber}`;
+        console.log(
+          `[Extraction] Uploading page ${pageNumber} to Cloudinary...`
+        );
         const imageUrl = await uploadImage(imageBuffer, "questions", publicId);
+        console.log(`[Extraction] Upload OK: ${imageUrl}`);
 
         // Extrair com Gemini
+        console.log(`[Extraction] Sending to Gemini...`);
         const extractionResult = await extractQuestionsFromImage(
           imageBuffer,
           pdfSource.vestibularCodigo
         );
+        console.log(`[Extraction] Gemini response received.`);
 
         // Salvar questões
         for (const q of extractionResult.questoes) {
