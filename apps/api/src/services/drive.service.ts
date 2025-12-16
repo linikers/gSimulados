@@ -32,12 +32,10 @@ export class DriveService {
       );
     }
 
-    this.auth = new google.auth.GoogleAuth({
+    return new google.auth.GoogleAuth({
       keyFile: keyFilePath,
       scopes: ["https://www.googleapis.com/auth/drive.readonly"],
     });
-
-    return this.auth;
   }
 
   static async listFiles(folderId: string) {
@@ -54,14 +52,38 @@ export class DriveService {
   }
 
   static async downloadFile(fileId: string): Promise<Buffer> {
-    const auth = await this.getAuthClient();
-    const drive = google.drive({ version: "v3", auth });
+    try {
+      console.log(`[DriveService] Preparando download do arquivo: ${fileId}`);
+      const auth = await this.getAuthClient();
+      const drive = google.drive({ version: "v3", auth });
 
-    const response = await drive.files.get(
-      { fileId, alt: "media" },
-      { responseType: "arraybuffer" }
-    );
+      console.log(`[DriveService] Solicitando stream do arquivo...`);
 
-    return Buffer.from(response.data as ArrayBuffer);
+      // Teste: Buscar metadados primeiro para confirmar token
+      await drive.files.get({ fileId, fields: "id,name" });
+      console.log(
+        `[DriveService] Token validado com sucesso (metadata check). Baixando conteúdo...`
+      );
+
+      const response = await drive.files.get(
+        { fileId, alt: "media" },
+        { responseType: "arraybuffer" }
+      );
+      console.log(
+        `[DriveService] Resposta recebida. Status: ${response.status}`
+      );
+
+      return Buffer.from(response.data as ArrayBuffer);
+    } catch (error: any) {
+      console.error(
+        `[DriveService] Erro ao baixar arquivo ${fileId}:`,
+        error.message
+      );
+      // Log do erro completo se possível
+      if (error.response) {
+        console.error(`[DriveService] Detalhes do erro:`, error.response.data);
+      }
+      throw error;
+    }
   }
 }
