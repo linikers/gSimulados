@@ -11,5 +11,8 @@ module.exports = {
   },
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { isolatedModules: true }]
-  }
+  },
+  transformIgnorePatterns: [
+    "node_modules/(?!pdf-img-convert|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)"
+  ]
 };
