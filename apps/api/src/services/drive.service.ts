@@ -12,14 +12,16 @@ export class DriveService {
     // Pode ser service-account.json ou service-acount.json (typo comum)
     const possiblePaths = [
       path.join(process.cwd(), "service-account.json"),
-      //   path.join(process.cwd(), "service-acount.json"), // Typo fallback
+      path.join(process.cwd(), "apps/api/service-account.json"),
       path.join(__dirname, "../../service-account.json"),
+      path.join(__dirname, "../../../service-account.json"), // Case dist/src/services
     ];
 
     let keyFilePath = "";
     for (const p of possiblePaths) {
       if (fs.existsSync(p)) {
         keyFilePath = p;
+        console.log(`[DriveService] Usando credenciais de: ${keyFilePath}`);
         break;
       }
     }
