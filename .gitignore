@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Secrets
+service-account.json
+service-acount.json
+apps/api/service-account.json
+apps/api/service-acount.json
