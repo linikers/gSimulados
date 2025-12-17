@@ -32,10 +32,16 @@ export class DriveService {
       );
     }
 
-    return new google.auth.GoogleAuth({
-      keyFile: keyFilePath,
+    const content = fs.readFileSync(keyFilePath, "utf8");
+    const credentials = JSON.parse(content);
+
+    this.auth = new google.auth.JWT({
+      email: credentials.client_email,
+      key: credentials.private_key.replace(/\\n/g, "\n"),
       scopes: ["https://www.googleapis.com/auth/drive.readonly"],
     });
+
+    return this.auth;
   }
 
   static async listFiles(folderId: string) {
