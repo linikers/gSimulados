@@ -52,10 +52,10 @@ describe("AuthService Unit Tests", () => {
       // Precisamos garantir que os Mocks funcionem para instâncias.
       // Simplificação: vamos testar se o registro passa sem erro.
 
-      const saveMock = jest.fn().mockResolvedValue(true);
-      const toObjectMock = jest
-        .fn()
-        .mockReturnValue({ _id: "123", email: "new@test.com", role: "aluno" });
+      // const saveMock = jest.fn().mockResolvedValue(true);
+      // const toObjectMock = jest
+      //   .fn()
+      //   .mockReturnValue({ _id: "123", email: "new@test.com", role: "aluno" });
 
       // Mock da Factory de User (User, Aluno, Escola são models do Mongoose)
       // Isso é complexo de mockar 100% unitário no estilo "new Model()".
