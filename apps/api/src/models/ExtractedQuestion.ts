@@ -11,7 +11,7 @@ export interface IExtractedQuestion extends Document {
   alternativas: string[]; // Array de 5 alternativas
   respostaCorreta?: string; // A, B, C, D, E
 
-  // Metadados sugeridos pela IA
+  // Metadados sugeridos
   materia?: string;
   assunto?: string;
   dificuldade?: "facil" | "medio" | "dificil";
