@@ -37,7 +37,7 @@ const req = https.request(
 );
 
 req.on("error", (e: any) => {
-  console.error(`❌ Erro de conexão: ${e.message}`);
+  console.error(`Erro de conexão: ${e.message}`);
 });
 
 req.end();
