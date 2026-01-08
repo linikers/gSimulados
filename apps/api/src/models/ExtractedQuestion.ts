@@ -46,10 +46,10 @@ const ExtractedQuestionSchema: Schema = new Schema(
     vestibularCodigo: { type: String, required: true },
     pageNumber: { type: Number, required: true },
 
-    rawText: { type: String, required: true },
+    rawText: { type: String, required: false },
     enunciado: { type: String, required: true },
     alternativas: [{ type: String }],
-    respostaCorreta: { type: String, enum: ["A", "B", "C", "D", "E"] },
+    respostaCorreta: { type: String }, // Removido enum estrito para evitar quebras na extração
 
     materia: { type: String },
     assunto: { type: String },

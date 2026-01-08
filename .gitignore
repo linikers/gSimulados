@@ -26,7 +26,10 @@ dist-ssr
 .vercel
 
 # Secrets
+.env
+*.env
 service-account.json
-service-acount.json
 apps/api/service-account.json
-apps/api/service-acount.json
+names_new.json
+full_models.txt
+models_output.txt

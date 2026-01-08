@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { PdfSource } from "../models/PdfSource";
 import { ExtractedQuestion } from "../models/ExtractedQuestion";
-import { convertPdfToImages } from "../services/pdf-processing.service";
-import { uploadImage } from "../services/cloudinary.service";
-import { extractQuestionsFromImage } from "../services/gemini-vision.service";
+import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
 import { DriveService } from "../services/drive.service";
+import { Question } from "../models/Question";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -40,59 +39,46 @@ export class PdfExtractionController {
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
       console.log(
-        `[Extração] Iniciando download do PDF ${pdfSource.driveFileId}...`
+        `[Extração] Iniciando extração direta do PDF ${pdfSource.driveFileId}...`
       );
+
       // 1. Obter Buffer do PDF
       const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
       console.log(
         `[Extração] Download concluído. Tamanho: ${pdfBuffer.length} bytes`
       );
 
-      if (pdfBuffer.length === 0) {
-        throw new Error("Buffer do PDF vazio ou não implementado.");
-      }
+      // 2. Extrair com Gemini (Passando o PDF diretamente)
+      console.log(`[Extração] Enviando PDF diretamente para o Gemini...`);
+      const extractionResult = await extractQuestionsFromPdf(
+        pdfBuffer,
+        pdfSource.vestibularCodigo
+      );
+      console.log(`[Extração] Resposta do Gemini recebida.`);
 
-      // 2. Converter PDF para Imagens
-      console.log(`[Extração] Convertendo PDF para imagens...`);
-      const images = await convertPdfToImages(pdfBuffer);
-      console.log(`[Extraction] Conversão concluída: ${images.length} páginas`);
+      // 3. Salvar questões
       const totalQuestions: any[] = [];
-
-      // 3. Processar cada página
-      for (const { pageNumber, imageBuffer } of images) {
-        // Upload para Cloudinary (para obter URL pública para o frontend)
-        const publicId = `questions/${pdfSource.vestibularCodigo}/${pdfSource._id}_page_${pageNumber}`;
-        console.log(`[Extração] Uploading page ${pageNumber} to Cloudinary...`);
-        const imageUrl = await uploadImage(imageBuffer, "questions", publicId);
-        console.log(`[Extraction] Upload OK: ${imageUrl}`);
-
-        // Extrair com Gemini
-        console.log(`[Extração] Sending to Gemini...`);
-        const extractionResult = await extractQuestionsFromImage(
-          imageBuffer,
-          pdfSource.vestibularCodigo
-        );
-        console.log(`[Extração] Gemini response recebida.`);
-
-        // Salvar questões
-        for (const q of extractionResult.questoes) {
-          const extractedQ = await ExtractedQuestion.create({
-            pdfSourceId: pdfSource._id,
-            vestibularCodigo: pdfSource.vestibularCodigo,
-            pageNumber,
-            enunciado: q.enunciado,
-            alternativas: q.alternativas,
-            respostaCorreta: q.respostaCorreta,
-            materia: q.materia,
-            assunto: q.assunto,
-            temImagem: q.temImagem,
-            imagemUrl: q.temImagem ? imageUrl : undefined, // Se a questão tem imagem, usamos a da página por enquanto (ou fazer crop futuro)
-            imagemPublicId: q.temImagem ? publicId : undefined,
-            confidence: extractionResult.confidence,
-            status: "pending",
-          });
-          totalQuestions.push(extractedQ);
+      for (const q of extractionResult.questoes) {
+        // Sanitizar a resposta correta para garantir que seja A, B, C, D ou E
+        let sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
+        if (!["A", "B", "C", "D", "E"].includes(sanitizedResposta || "")) {
+          sanitizedResposta = undefined;
         }
+
+        const extractedQ = await ExtractedQuestion.create({
+          pdfSourceId: pdfSource._id,
+          vestibularCodigo: pdfSource.vestibularCodigo,
+          pageNumber: q.pageNumber || 1,
+          enunciado: q.enunciado,
+          alternativas: q.alternativas,
+          respostaCorreta: sanitizedResposta,
+          materia: q.materia,
+          assunto: q.assunto,
+          temImagem: q.temImagem,
+          confidence: extractionResult.confidence,
+          status: "pending",
+        });
+        totalQuestions.push(extractedQ);
       }
 
       // Atualizar PDF
@@ -102,17 +88,110 @@ export class PdfExtractionController {
         processedAt: new Date(),
       });
 
+      console.log(`[Extração] Concluído: ${totalQuestions.length} questões.`);
+
       res.json({
         message: `${totalQuestions.length} questões extraídas com sucesso`,
         questions: totalQuestions,
       });
     } catch (error: any) {
+      console.error(`[Extração] ERRO FATAL:`, error);
+
       // Atualizar status de erro
       await PdfSource.findByIdAndUpdate(req.params.id, {
         status: "error",
         errorMessage: error.message,
       });
 
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Listar questões pendentes para revisão
+  static async listPendingQuestions(req: Request, res: Response) {
+    try {
+      const { vestibularCodigo } = req.query;
+      const filter: any = { status: "pending" };
+      if (vestibularCodigo) filter.vestibularCodigo = vestibularCodigo;
+
+      const questions = await ExtractedQuestion.find(filter).sort({
+        createdAt: 1,
+      });
+      res.json(questions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Aprovar questão
+  static async approveQuestion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const editedData = req.body;
+
+      const extracted = await ExtractedQuestion.findById(id).populate(
+        "pdfSourceId"
+      );
+      if (!extracted) {
+        return res.status(404).json({ error: "Questão não encontrada" });
+      }
+
+      // 1. Criar a questão real
+      const pdfSource = extracted.pdfSourceId as any;
+
+      // Tentar extrair ano do nome do arquivo (ex: "ENEM 2023.pdf")
+      const yearMatch = pdfSource.fileName.match(/\d{4}/);
+      const ano = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+
+      const newQuestion = await Question.create({
+        enunciado: editedData.enunciado || extracted.enunciado,
+        alternativas: editedData.alternativas || extracted.alternativas,
+        respostaCorreta:
+          editedData.respostaCorreta || extracted.respostaCorreta,
+        materia: editedData.materia || extracted.materia || "Desconhecida",
+        assunto: editedData.assunto || extracted.assunto || "Geral",
+        dificuldade: editedData.dificuldade || extracted.dificuldade || "medio",
+        origem: {
+          vestibular: pdfSource.vestibularCodigo,
+          ano: ano,
+          prova: pdfSource.fileName.replace(".pdf", ""),
+        },
+        tags: editedData.tags || [],
+      });
+
+      // 2. Atualizar status da extração
+      extracted.status = "approved";
+      extracted.questionId = newQuestion._id as any;
+      extracted.reviewedAt = new Date();
+      extracted.reviewedBy = (req as any).userId;
+      await extracted.save();
+
+      res.json({ message: "Questão aprovada e criada", question: newQuestion });
+    } catch (error: any) {
+      console.error("Erro ao aprovar questão:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Rejeitar questão
+  static async rejectQuestion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { notes } = req.body;
+
+      const extracted = await ExtractedQuestion.findById(id);
+      if (!extracted) {
+        return res.status(404).json({ error: "Questão não encontrada" });
+      }
+
+      extracted.status = "rejected";
+      extracted.reviewNotes = notes;
+      extracted.reviewedAt = new Date();
+      extracted.reviewedBy = (req as any).userId;
+      await extracted.save();
+
+      res.json({ message: "Questão rejeitada" });
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   }

@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import path from "path";
 import fs from "fs";
+import { env } from "../config/env";
 
 export class DriveService {
   private static auth: any;
@@ -8,32 +9,47 @@ export class DriveService {
   private static async getAuthClient() {
     if (this.auth) return this.auth;
 
-    // Tenta encontrar o arquivo de credenciais
-    // Pode ser service-account.json ou service-acount.json (typo comum)
-    const possiblePaths = [
-      path.join(process.cwd(), "service-account.json"),
-      path.join(process.cwd(), "apps/api/service-account.json"),
-      path.join(__dirname, "../../service-account.json"),
-      path.join(__dirname, "../../../service-account.json"), // Case dist/src/services
-    ];
-
+    let credentials;
     let keyFilePath = "";
-    for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        keyFilePath = p;
-        console.log(`[DriveService] Usando credenciais de: ${keyFilePath}`);
-        break;
-      }
-    }
 
-    if (!keyFilePath) {
-      throw new Error(
-        "Arquivo de credenciais do Google (service-account.json) não encontrado na raiz da API."
+    // 1. Prioriza variável de ambiente (recomendado para Fly.io/Produção)
+    if (env.GOOGLE_SERVICE_ACCOUNT) {
+      console.log(
+        "[DriveService] Usando credenciais da variável de ambiente GOOGLE_SERVICE_ACCOUNT"
       );
-    }
+      try {
+        credentials = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
+      } catch (error: any) {
+        throw new Error(
+          `Erro ao parsear GOOGLE_SERVICE_ACCOUNT: ${error.message}`
+        );
+      }
+    } else {
+      // 2. Fallback para arquivo local (Desenvolvimento)
+      const possiblePaths = [
+        path.join(process.cwd(), "service-account.json"),
+        path.join(process.cwd(), "apps/api/service-account.json"),
+        path.join(__dirname, "../../service-account.json"),
+        path.join(__dirname, "../../../service-account.json"),
+      ];
 
-    const content = fs.readFileSync(keyFilePath, "utf8");
-    const credentials = JSON.parse(content);
+      for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+          keyFilePath = p;
+          console.log(`[DriveService] Usando credenciais de: ${keyFilePath}`);
+          break;
+        }
+      }
+
+      if (!keyFilePath) {
+        throw new Error(
+          "Credenciais do Google não encontradas (variável GOOGLE_SERVICE_ACCOUNT ou arquivo service-account.json)."
+        );
+      }
+
+      const content = fs.readFileSync(keyFilePath, "utf8");
+      credentials = JSON.parse(content);
+    }
 
     this.auth = new google.auth.JWT({
       email: credentials.client_email,
