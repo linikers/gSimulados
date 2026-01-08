@@ -9,17 +9,17 @@ async function run() {
   try {
     console.log(`\n1. Testando Listagem (listFiles) na pasta: ${FOLDER_ID}`);
     const files = await DriveService.listFiles(FOLDER_ID);
-    console.log(`✅ Sucesso! Encontrados ${files.length} arquivos.`);
+    console.log(`Sucesso! Encontrados ${files.length} arquivos.`);
   } catch (error: any) {
-    console.error("❌ Erro no listFiles:", error.message);
+    console.error("Erro no listFiles:", error.message);
   }
 
   try {
     console.log(`\n2. Testando Download (downloadFile) do arquivo: ${FILE_ID}`);
     const buffer = await DriveService.downloadFile(FILE_ID);
-    console.log(`✅ Sucesso! Download concluído. Bytes: ${buffer.length}`);
+    console.log(`Sucesso! Download concluído. Bytes: ${buffer.length}`);
   } catch (error: any) {
-    console.error("❌ Erro no downloadFile:", error.message);
+    console.error("Erro no downloadFile:", error.message);
     if (error.response) {
       console.error("Detalhes:", JSON.stringify(error.response.data, null, 2));
     }
