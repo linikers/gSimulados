@@ -71,6 +71,9 @@ export function Footer() {
               <Link sx={linkStyle} onClick={() => navigate("/aprovacoes")}>
                 Aprovações
               </Link>
+              <Link sx={linkStyle} onClick={() => navigate("/faq")}>
+                FAQ
+              </Link>
             </Box>
           </Box>
 

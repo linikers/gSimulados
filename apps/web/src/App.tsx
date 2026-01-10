@@ -13,6 +13,7 @@ import { GerenciarVestibulares } from "./pages/admin/Vestibulares/GerenciarVesti
 import { FormularioVestibular } from "./pages/admin/Vestibulares/FormularioVestibular";
 import { ConfigurarDrive } from "./pages/admin/BancoQuestoes/ConfigurarDrive";
 import { ListaPdfs } from "./pages/admin/BancoQuestoes/ListaPdfs";
+import { RevisarQuestoes } from "./pages/admin/BancoQuestoes/RevisarQuestoes";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AuthGuard } from "./routes/AuthGuard";
@@ -30,6 +31,7 @@ import { Materiais } from "./pages/public/Materiais";
 import { Ferramentas } from "./pages/public/ferramentas/Ferramentas";
 import { Marketplace } from "./pages/public/ferramentas/Marketplace";
 import { Aprovacoes } from "./pages/public/Aprovacoes";
+import { FAQ } from "./pages/public/FAQ";
 
 const theme = createTheme({
   palette: {
@@ -80,6 +82,7 @@ function App() {
                 element={<Marketplace />}
               />
               <Route path="/aprovacoes" element={<Aprovacoes />} />
+              <Route path="/faq" element={<FAQ />} />
             </Route>
 
             {/* Auth Routes (no layout) */}
@@ -130,6 +133,10 @@ function App() {
                   <Route
                     path="/admin/banco-questoes/pdfs"
                     element={<ListaPdfs />}
+                  />
+                  <Route
+                    path="/admin/banco-questoes/revisar"
+                    element={<RevisarQuestoes />}
                   />
                 </Route>
 

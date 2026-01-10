@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -22,7 +22,20 @@ export function RegisterPage() {
     email: "",
     password: "",
     role: "aluno",
+    escolaId: "",
   });
+  const [schools, setSchools] = useState<{ _id: string; nomeEscola: string }[]>(
+    []
+  );
+
+  useEffect(() => {
+    if (formData.role === "aluno") {
+      api
+        .get("/schools")
+        .then((res) => setSchools(res.data))
+        .catch((err) => console.error("Erro ao carregar escolas", err));
+    }
+  }, [formData.role]);
 
   const navigate = useNavigate();
 
@@ -99,6 +112,25 @@ export function RegisterPage() {
               <MenuItem value="admin">Administrador</MenuItem>
             </Select>
           </FormControl>
+
+          {formData.role === "aluno" && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Selecione sua Escola</InputLabel>
+              <Select
+                value={formData.escolaId}
+                label="Selecione sua Escola"
+                onChange={(e) =>
+                  setFormData({ ...formData, escolaId: e.target.value })
+                }
+              >
+                {schools.map((school) => (
+                  <MenuItem key={school._id} value={school._id}>
+                    {school.nomeEscola || "Escola sem nome"}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           <Button
             type="submit"

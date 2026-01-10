@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { PdfSource } from "../models/PdfSource";
 import { ExtractedQuestion } from "../models/ExtractedQuestion";
+import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
+import { DriveService } from "../services/drive.service";
+import { Question } from "../models/Question";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -27,61 +30,168 @@ export class PdfExtractionController {
     try {
       const { id } = req.params;
 
-      const pdf = await PdfSource.findById(id);
-      if (!pdf) {
+      const pdfSource = await PdfSource.findById(id);
+      if (!pdfSource) {
         return res.status(404).json({ error: "PDF não encontrado" });
       }
 
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
-      // TODO: Implementar extração real com GPT-4 Vision
-      // Por enquanto, cria questões mock
+      console.log(
+        `[Extração] Iniciando extração direta do PDF ${pdfSource.driveFileId}...`
+      );
 
-      const mockQuestions = [
-        {
-          pdfSourceId: pdf._id,
-          vestibularCodigo: pdf.vestibularCodigo,
-          pageNumber: 1,
-          rawText: "Texto bruto da questão...",
-          enunciado: "Qual é a capital do Brasil?",
-          alternativas: [
-            "A) São Paulo",
-            "B) Rio de Janeiro",
-            "C) Brasília",
-            "D) Salvador",
-            "E) Belo Horizonte",
-          ],
-          respostaCorreta: "C",
-          materia: "Geografia",
-          assunto: "Capitais",
-          dificuldade: "facil",
-          confidence: 95,
-          temImagem: false,
-          temFormula: false,
-        },
-      ];
+      // 1. Obter Buffer do PDF
+      const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
+      console.log(
+        `[Extração] Download concluído. Tamanho: ${pdfBuffer.length} bytes`
+      );
 
-      const extracted = await ExtractedQuestion.insertMany(mockQuestions);
+      // 2. Extrair com Gemini (Passando o PDF diretamente)
+      console.log(`[Extração] Enviando PDF diretamente para o Gemini...`);
+      const extractionResult = await extractQuestionsFromPdf(
+        pdfBuffer,
+        pdfSource.vestibularCodigo
+      );
+      console.log(`[Extração] Resposta do Gemini recebida.`);
+
+      // 3. Salvar questões
+      const totalQuestions: any[] = [];
+      for (const q of extractionResult.questoes) {
+        // Sanitizar a resposta correta para garantir que seja A, B, C, D ou E
+        let sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
+        if (!["A", "B", "C", "D", "E"].includes(sanitizedResposta || "")) {
+          sanitizedResposta = undefined;
+        }
+
+        const extractedQ = await ExtractedQuestion.create({
+          pdfSourceId: pdfSource._id,
+          vestibularCodigo: pdfSource.vestibularCodigo,
+          pageNumber: q.pageNumber || 1,
+          enunciado: q.enunciado,
+          alternativas: q.alternativas,
+          respostaCorreta: sanitizedResposta,
+          materia: q.materia,
+          assunto: q.assunto,
+          temImagem: q.temImagem,
+          confidence: extractionResult.confidence,
+          status: "pending",
+        });
+        totalQuestions.push(extractedQ);
+      }
 
       // Atualizar PDF
       await PdfSource.findByIdAndUpdate(id, {
         status: "completed",
-        questoesExtraidas: extracted.length,
+        questoesExtraidas: totalQuestions.length,
         processedAt: new Date(),
       });
 
+      console.log(`[Extração] Concluído: ${totalQuestions.length} questões.`);
+
       res.json({
-        message: `${extracted.length} questões extraídas`,
-        questions: extracted,
+        message: `${totalQuestions.length} questões extraídas com sucesso`,
+        questions: totalQuestions,
       });
     } catch (error: any) {
+      console.error(`[Extração] ERRO FATAL:`, error);
+
       // Atualizar status de erro
       await PdfSource.findByIdAndUpdate(req.params.id, {
         status: "error",
         errorMessage: error.message,
       });
 
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Listar questões pendentes para revisão
+  static async listPendingQuestions(req: Request, res: Response) {
+    try {
+      const { vestibularCodigo } = req.query;
+      const filter: any = { status: "pending" };
+      if (vestibularCodigo) filter.vestibularCodigo = vestibularCodigo;
+
+      const questions = await ExtractedQuestion.find(filter).sort({
+        createdAt: 1,
+      });
+      res.json(questions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Aprovar questão
+  static async approveQuestion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const editedData = req.body;
+
+      const extracted = await ExtractedQuestion.findById(id).populate(
+        "pdfSourceId"
+      );
+      if (!extracted) {
+        return res.status(404).json({ error: "Questão não encontrada" });
+      }
+
+      // 1. Criar a questão real
+      const pdfSource = extracted.pdfSourceId as any;
+
+      // Tentar extrair ano do nome do arquivo (ex: "ENEM 2023.pdf")
+      const yearMatch = pdfSource.fileName.match(/\d{4}/);
+      const ano = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+
+      const newQuestion = await Question.create({
+        enunciado: editedData.enunciado || extracted.enunciado,
+        alternativas: editedData.alternativas || extracted.alternativas,
+        respostaCorreta:
+          editedData.respostaCorreta || extracted.respostaCorreta,
+        materia: editedData.materia || extracted.materia || "Desconhecida",
+        assunto: editedData.assunto || extracted.assunto || "Geral",
+        dificuldade: editedData.dificuldade || extracted.dificuldade || "medio",
+        origem: {
+          vestibular: pdfSource.vestibularCodigo,
+          ano: ano,
+          prova: pdfSource.fileName.replace(".pdf", ""),
+        },
+        tags: editedData.tags || [],
+      });
+
+      // 2. Atualizar status da extração
+      extracted.status = "approved";
+      extracted.questionId = newQuestion._id as any;
+      extracted.reviewedAt = new Date();
+      extracted.reviewedBy = (req as any).userId;
+      await extracted.save();
+
+      res.json({ message: "Questão aprovada e criada", question: newQuestion });
+    } catch (error: any) {
+      console.error("Erro ao aprovar questão:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Rejeitar questão
+  static async rejectQuestion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { notes } = req.body;
+
+      const extracted = await ExtractedQuestion.findById(id);
+      if (!extracted) {
+        return res.status(404).json({ error: "Questão não encontrada" });
+      }
+
+      extracted.status = "rejected";
+      extracted.reviewNotes = notes;
+      extracted.reviewedAt = new Date();
+      extracted.reviewedBy = (req as any).userId;
+      await extracted.save();
+
+      res.json({ message: "Questão rejeitada" });
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   }

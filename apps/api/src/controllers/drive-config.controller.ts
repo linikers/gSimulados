@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { DriveConfig } from "../models/DriveConfig";
 import { PdfSource } from "../models/PdfSource";
+import { DriveService } from "../services/drive.service";
 
 export class DriveConfigController {
   // Listar configurações de Drive
@@ -56,32 +57,26 @@ export class DriveConfigController {
     try {
       const { codigo } = req.params;
 
-      // TODO: Implementar integração real com Google Drive API
-      // Por enquanto, retorna mock
-
       const config = await DriveConfig.findOne({ vestibularCodigo: codigo });
       if (!config) {
         return res.status(404).json({ error: "Configuração não encontrada" });
       }
 
-      // Mock: simula encontrar 3 PDFs
-      const mockPdfs = [
-        {
-          driveFileId: "mock-id-1",
-          fileName: `${codigo}_2024.pdf`,
-          fileSize: 1024000,
-          webViewLink: "https://drive.google.com/file/mock-1",
-        },
-        {
-          driveFileId: "mock-id-2",
-          fileName: `${codigo}_2023.pdf`,
-          fileSize: 2048000,
-          webViewLink: "https://drive.google.com/file/mock-2",
-        },
-      ];
+      // Buscar arquivos reais do Google Drive
+      const driveFiles = await DriveService.listFiles(
+        config.googleDriveFolderId
+      );
+
+      // Mapear para o formato interno
+      const drivePdfs = driveFiles.map((f: any) => ({
+        driveFileId: f.id,
+        fileName: f.name,
+        fileSize: f.size ? parseInt(f.size) : 0,
+        webViewLink: f.webViewLink,
+      }));
 
       let created = 0;
-      for (const pdf of mockPdfs) {
+      for (const pdf of drivePdfs) {
         const existing = await PdfSource.findOne({
           driveFileId: pdf.driveFileId,
         });

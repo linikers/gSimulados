@@ -17,7 +17,7 @@ export class AuthService {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new Error("Usuário já cadastrado");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,7 +46,7 @@ export class AuthService {
     const user = await User.findOne({ email });
 
     if (!user || !(await bcrypt.compare(password, user.password!))) {
-      throw new Error("Invalid credentials");
+      throw new Error("Acesso não permitido");
     }
 
     const token = await this.generateToken(user);

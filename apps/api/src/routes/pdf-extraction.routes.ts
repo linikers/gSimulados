@@ -11,4 +11,9 @@ router.get("/pdfs", PdfExtractionController.listPdfs);
 router.post("/pdfs/:id/extract", PdfExtractionController.extractFromPdf);
 router.get("/stats", PdfExtractionController.getStats);
 
+// Rotas de revisão de questões extraídas
+router.get("/questions/pending", PdfExtractionController.listPendingQuestions);
+router.post("/questions/:id/approve", PdfExtractionController.approveQuestion);
+router.post("/questions/:id/reject", PdfExtractionController.rejectQuestion);
+
 export default router;

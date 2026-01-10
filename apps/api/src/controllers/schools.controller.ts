@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth/auth.service";
+import { User } from "../models/User";
 
 export class SchoolsController {
   static async create(req: Request, res: Response) {
@@ -17,7 +18,6 @@ export class SchoolsController {
   }
   static async list(_req: Request, res: Response) {
     try {
-      const { User } = require("../models/User");
       const schools = await User.find({ role: "escola" }).select("-password");
       res.json(schools);
     } catch (error: any) {

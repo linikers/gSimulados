@@ -10,7 +10,11 @@ import {
 } from "@mui/material";
 import api from "../../../services/api";
 
+// import { useAuth } from "../../../contexts/useAuth";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+
 import type { ICadastroAlunoDTO } from "@gsimulados/shared";
+import { useAuth } from "src/hooks/useAuth";
 
 export function CadastroAluno() {
   const [formData, setFormData] = useState<ICadastroAlunoDTO>({
@@ -20,10 +24,25 @@ export function CadastroAluno() {
     matricula: "",
     escolaId: "", // Optional, for admin use
   });
+  const { user } = useAuth();
+  const [schools, setSchools] = useState<{ _id: string; nomeEscola: string }[]>(
+    []
+  );
+
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // Carregar escolas se for admin
+  useState(() => {
+    if (user?.role === "admin") {
+      api
+        .get("/schools")
+        .then((res) => setSchools(res.data))
+        .catch((err) => console.error(err));
+    }
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +123,24 @@ export function CadastroAluno() {
             onChange={handleChange}
           />
 
-          {/* TODO: Add Select for Escola if Admin */}
+          {user?.role === "admin" && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Selecione a Escola</InputLabel>
+              <Select
+                value={formData.escolaId}
+                label="Selecione a Escola"
+                onChange={(e) =>
+                  setFormData({ ...formData, escolaId: e.target.value })
+                }
+              >
+                {schools.map((school) => (
+                  <MenuItem key={school._id} value={school._id}>
+                    {school.nomeEscola || "Escola sem nome"}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2 }}>
             Cadastrar Aluno
