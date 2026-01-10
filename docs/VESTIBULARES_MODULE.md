@@ -94,7 +94,6 @@ import { ListaVestibulares } from "./pages/public/Vestibulares/ListaVestibulares
 // Adicionar rota pública
 <Route path="/vestibulares" element={<ListaVestibulares />} />;
 ```
-
 ### 2. Criar Página de Detalhes
 
 Criar `apps/web/src/pages/public/Vestibulares/DetalhesVestibular.tsx`:
