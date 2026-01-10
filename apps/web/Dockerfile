@@ -11,6 +11,7 @@ COPY apps/web ./apps/web
 COPY apps/api/package.json ./apps/api/package.json
 
 # Install dependencies
+RUN apk add --no-cache python3 make g++ cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev
 RUN yarn install --frozen-lockfile
 
 # Build shared package
