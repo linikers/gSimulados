@@ -6,6 +6,8 @@ import {
   CardContent,
   TextField,
   Typography,
+  Chip,
+  Stack,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -55,10 +57,32 @@ export function RevisarQuestoes() {
   return (
     <Box>
       <Typography variant="h4">Revisar Questões</Typography>
-      <Typography>Pendentes: {questoes.length}</Typography>
+      <Typography sx={{ mb: 2 }}>Pendentes: {questoes.length}</Typography>
       {questao && (
         <Card>
           <CardContent>
+            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+              {questao.temGabarito ? (
+                <Chip
+                  label="Possui Gabarito"
+                  color="success"
+                  variant="filled"
+                />
+              ) : (
+                <Chip label="Sem Gabarito" color="warning" variant="outlined" />
+              )}
+              <Chip
+                label={
+                  questao.tipoQuestao === "somatoria"
+                    ? "Somatória"
+                    : questao.tipoQuestao === "alternativa"
+                    ? "Alternativas"
+                    : "Múltipla Escolha"
+                }
+                color="info"
+                variant="outlined"
+              />
+            </Stack>
             {/* Exibir imagem se existir */}
             {questao.imagemUrl && (
               <Box sx={{ mb: 2 }}>
@@ -114,31 +138,50 @@ export function RevisarQuestoes() {
             ))}
 
             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <TextField
-                select
-                label="Resposta Correta"
-                value={questao.respostaCorreta}
-                onChange={(e) =>
-                  setQuestoes((prev) => {
-                    const copy = [...prev];
-                    copy[currentIndex] = {
-                      ...copy[currentIndex],
-                      respostaCorreta: e.target.value,
-                    };
-                    return copy;
-                  })
-                }
-                SelectProps={{
-                  native: true,
-                }}
-                sx={{ width: 150 }}
-              >
-                {["A", "B", "C", "D", "E"].map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </TextField>
+              {questao.tipoQuestao === "somatoria" ? (
+                <TextField
+                  label="Resposta Correta (Soma)"
+                  value={questao.respostaCorreta || ""}
+                  onChange={(e) =>
+                    setQuestoes((prev) => {
+                      const copy = [...prev];
+                      copy[currentIndex] = {
+                        ...copy[currentIndex],
+                        respostaCorreta: e.target.value,
+                      };
+                      return copy;
+                    })
+                  }
+                  placeholder="Ex: 09, 15, 31"
+                  sx={{ width: 200 }}
+                />
+              ) : (
+                <TextField
+                  select
+                  label="Resposta Correta"
+                  value={questao.respostaCorreta}
+                  onChange={(e) =>
+                    setQuestoes((prev) => {
+                      const copy = [...prev];
+                      copy[currentIndex] = {
+                        ...copy[currentIndex],
+                        respostaCorreta: e.target.value,
+                      };
+                      return copy;
+                    })
+                  }
+                  SelectProps={{
+                    native: true,
+                  }}
+                  sx={{ width: 150 }}
+                >
+                  {["A", "B", "C", "D", "E"].map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </TextField>
+              )}
 
               <TextField
                 label="Matéria"

@@ -8,9 +8,12 @@ export async function extractQuestionsFromPdf(
   vestibularCodigo: string
 ): Promise<{
   questoes: Array<{
+    numeroQuestao?: number;
     enunciado: string;
     alternativas: string[];
     respostaCorreta?: string;
+    tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
+    temGabarito: boolean;
     materia?: string;
     assunto?: string;
     temImagem: boolean;
@@ -18,46 +21,45 @@ export async function extractQuestionsFromPdf(
   }>;
   confidence: number;
 }> {
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-flash-latest",
+    generationConfig: {
+      responseMimeType: "application/json",
+    },
+  });
 
   const prompt = `
-Você é um professor especialista em extrair questões de provas de vestibular ${vestibularCodigo.toUpperCase()}.
+Você é um professor especialista em vestibulares do exame ${vestibularCodigo.toUpperCase()}.
+Sua tarefa é converter o PDF anexo em uma estrutura JSON organizada.
 
-TAREFA: Analise o documento PDF em anexo e extraia TODAS as questões, incluindo  as respectivar imagens e fórmulas contidas em cada questão.
+CARACTERÍSTICAS DA PROVA:
+- As questões podem ser SOMATÓRIAS (01, 02, 04...) ou MÚLTIPLA ESCOLHA (A, B, C, D, E).
+- Se for somatória, a "respostaCorreta" é a soma dos números verdadeiros.
 
-REGRAS:
-1. Identifique o enunciado completo de cada questão.
-2. Liste TODAS as 5 alternativas (A, B, C, D, E).
-3. Se houver gabarito visível no documento, identifique a resposta correta. Use APENAS a letra (A, B, C, D ou E). Se não tiver certeza, deixe null.
-4. Classifique a matéria (Matemática, Física, Química, etc).
-5. Identifique o assunto específico (ex: Derivadas, Cinemática).
-6. Se a questão contém imagem/gráfico/tabela, marque "temImagem": true.
-7. Identifique EXATAMENTE em qual página do PDF a questão começa (pageNumber).
+REGRAS DE EXTRAÇÃO:
+1. "numeroQuestao": Identifique o número (ex: 21, 22...).
+2. "enunciado": Texto base antes das alternativas.
+3. "alternativas": Capture o número/letra e o texto (ex: "01) Texto..." ou "A) Texto...").
+4. "tipoQuestao": 
+   - Use "somatoria" para questões com itens numéricos (01, 02...).
+   - Use "multipla_escolha" para itens com letras (A, B...).
+5. "respostaCorreta": Procure na folha de gabarito se houver.
+6. "materia": Identifique pelo cabeçalho da prova ou contexto.
 
-IMPORTANTE:
-- O campo "respostaCorreta" deve ser EXATAMENTE uma das letras: "A", "B", "C", "D", "E" ou null. NÃO coloque números ou textos longos.
-- Se houver imagem na questão, descreva-a brevemente no enunciado.
-- Mantenha formatação matemática (use LaTeX se necessário).
-- Preserve símbolos e fórmulas.
-- Retorne APENAS o JSON, sem markdown blocks.
-
-RETORNE JSON ARRAY no formato:
+FORMATO DE RETORNO (JSON APENAS):
 {
   "questoes": [
     {
-      "enunciado": "Texto completo da questão...",
-      "alternativas": [
-        "A) ...",
-        "B) ...",
-        "C) ...",
-        "D) ...",
-        "E) ..."
-      ],
-      "respostaCorreta": "A",
-      "materia": "Matemática",
-      "assunto": "Geometria Analítica",
-      "temImagem": true,
-      "pageNumber": 1
+      "numeroQuestao": number,
+      "enunciado": "string",
+      "alternativas": ["string"],
+      "respostaCorreta": "string",
+      "tipoQuestao": "somatoria" | "multipla_escolha",
+      "temGabarito": boolean,
+      "materia": "string",
+      "assunto": "string",
+      "temImagem": boolean,
+      "pageNumber": number
     }
   ]
 }
@@ -70,26 +72,39 @@ RETORNE JSON ARRAY no formato:
     },
   };
 
-  const result = await model.generateContent([prompt, pdfPart]);
-  const response = await result.response;
-  const text = response.text();
+  try {
+    console.log(
+      `[Gemini] Enviando prompt para o modelo gemini-flash-latest...`
+    );
+    const result = await model.generateContent([prompt, pdfPart]);
+    console.log(`[Gemini] Resposta recebida. Processando texto...`);
+    const response = await result.response;
+    const text = response.text();
 
-  // Limpar markdown blocks se houver
-  const cleanText = text
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
+    // Limpar markdown blocks se houver
+    const cleanText = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-  // Parse JSON
-  const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("IA não retornou JSON válido");
+    // Parse JSON
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("IA não retornou JSON válido");
+    }
+
+    const data = JSON.parse(jsonMatch[0]);
+
+    return {
+      questoes: data.questoes || [],
+      confidence: 85,
+    };
+  } catch (error: any) {
+    console.error(`[Gemini] Erro ao chamar API: ${error.message}`);
+    if (error.status)
+      console.error(
+        `[Gemini] Status HTTP: ${error.status} ${error.statusText}`
+      );
+    throw error;
   }
-
-  const data = JSON.parse(jsonMatch[0]);
-
-  return {
-    questoes: data.questoes || [],
-    confidence: 85,
-  };
 }
