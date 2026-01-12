@@ -32,11 +32,8 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 export function ListaPdfs() {
   const { showToast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [pdfs, setPdfs] = useState<IPdfSource[]>([]);
-  const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
-  const [filterVestibular, setFilterVestibular] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  // Estado para controlar quais PDFs estão sendo extraídos individualmente
+  const [extractingIds, setExtractingIds] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
@@ -59,18 +56,20 @@ export function ListaPdfs() {
     if (!window.confirm(`Extrair questões de ${fileName}?`)) return;
 
     try {
-      setLoading(true);
+      // Adiciona ID ao array de extração
+      setExtractingIds((prev) => [...prev, id]);
+
       const result = await PdfExtractionService.extractFromPdf(id);
       showToast(`${result.message}`, "success");
-      loadData();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await loadData();
     } catch (error: any) {
       const msg =
         error.response?.data?.error || error.message || "Erro desconhecido";
       showToast(`Erro ao extrair: ${msg}`, "error");
-      loadData(); // Recarrega para mostrar status 'error' atualizado
+      await loadData();
     } finally {
-      setLoading(false);
+      // Remove ID do array de extração
+      setExtractingIds((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -162,73 +161,98 @@ export function ListaPdfs() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {pdfs.map((pdf) => (
-              <TableRow key={pdf._id}>
-                <TableCell>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <DescriptionIcon color="action" />
-                    <Typography variant="body2">{pdf.fileName}</Typography>
-                  </Stack>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={pdf.vestibularCodigo.toUpperCase()}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{formatFileSize(pdf.fileSize)}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={getStatusLabel(pdf.status)}
-                    color={getStatusColor(pdf.status)}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  {pdf.questoesExtraidas > 0 ? (
+            {pdfs.map((pdf) => {
+              const isExtracting = extractingIds.includes(pdf._id);
+
+              return (
+                <TableRow key={pdf._id}>
+                  <TableCell>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <DescriptionIcon color="action" />
+                      <Typography variant="body2">{pdf.fileName}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
                     <Chip
-                      label={pdf.questoesExtraidas}
-                      color="primary"
+                      label={pdf.vestibularCodigo.toUpperCase()}
                       size="small"
                     />
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    href={pdf.webViewLink}
-                    target="_blank"
-                    title="Abrir no Drive"
-                  >
-                    <OpenInNewIcon fontSize="small" />
-                  </IconButton>
-                  {(pdf.status === "pending" || pdf.status === "error") && (
+                  </TableCell>
+                  <TableCell>{formatFileSize(pdf.fileSize)}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={
+                        isExtracting
+                          ? "Extraindo..."
+                          : getStatusLabel(pdf.status)
+                      }
+                      color={
+                        isExtracting ? "warning" : getStatusColor(pdf.status)
+                      }
+                      size="small"
+                    />
+                    {isExtracting && (
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        sx={{ mt: 0.5, color: "text.secondary" }}
+                      >
+                        Aguarde...
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {pdf.questoesExtraidas > 0 ? (
+                      <Chip
+                        label={pdf.questoesExtraidas}
+                        color="primary"
+                        size="small"
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
                     <IconButton
                       size="small"
-                      color="primary"
-                      onClick={() => handleExtract(pdf._id, pdf.fileName)}
-                      disabled={loading}
-                      title="Extrair Questões"
+                      href={pdf.webViewLink}
+                      target="_blank"
+                      title="Abrir no Drive"
                     >
-                      <PlayArrowIcon fontSize="small" />
+                      <OpenInNewIcon fontSize="small" />
                     </IconButton>
-                  )}
-                  {pdf.status === "completed" && (
-                    <IconButton
-                      size="small"
-                      color="secondary"
-                      onClick={() => handleExtract(pdf._id, pdf.fileName)}
-                      disabled={loading}
-                      title="Refazer Extração"
-                    >
-                      <RefreshIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+
+                    {isExtracting ? (
+                      <CircularProgress size={24} sx={{ ml: 1 }} />
+                    ) : (
+                      <>
+                        {(pdf.status === "pending" ||
+                          pdf.status === "error") && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleExtract(pdf._id, pdf.fileName)}
+                            title="Extrair Questões"
+                          >
+                            <PlayArrowIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {pdf.status === "completed" && (
+                          <IconButton
+                            size="small"
+                            color="secondary"
+                            onClick={() => handleExtract(pdf._id, pdf.fileName)}
+                            title="Refazer Extração"
+                          >
+                            <RefreshIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
