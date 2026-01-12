@@ -6,6 +6,8 @@ import {
   CardContent,
   TextField,
   Typography,
+  Chip,
+  Stack,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -55,10 +57,30 @@ export function RevisarQuestoes() {
   return (
     <Box>
       <Typography variant="h4">Revisar Questões</Typography>
-      <Typography>Pendentes: {questoes.length}</Typography>
+      <Typography sx={{ mb: 2 }}>Pendentes: {questoes.length}</Typography>
       {questao && (
         <Card>
           <CardContent>
+            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+              {questao.temGabarito ? (
+                <Chip
+                  label="Possui Gabarito"
+                  color="success"
+                  variant="filled"
+                />
+              ) : (
+                <Chip label="Sem Gabarito" color="warning" variant="outlined" />
+              )}
+              <Chip
+                label={
+                  questao.tipoQuestao === "alternativa"
+                    ? "Alternativas"
+                    : "Múltipla Escolha"
+                }
+                color="info"
+                variant="outlined"
+              />
+            </Stack>
             {/* Exibir imagem se existir */}
             {questao.imagemUrl && (
               <Box sx={{ mb: 2 }}>

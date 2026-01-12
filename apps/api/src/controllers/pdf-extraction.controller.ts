@@ -38,6 +38,12 @@ export class PdfExtractionController {
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
+      // Limpar questões pendentes anteriores para este PDF (Redo/Retry)
+      await ExtractedQuestion.deleteMany({
+        pdfSourceId: id,
+        status: "pending",
+      });
+
       console.log(
         `[Extração] Iniciando extração direta do PDF ${pdfSource.driveFileId}...`
       );
@@ -72,6 +78,8 @@ export class PdfExtractionController {
           enunciado: q.enunciado,
           alternativas: q.alternativas,
           respostaCorreta: sanitizedResposta,
+          tipoQuestao: q.tipoQuestao || "multipla_escolha",
+          temGabarito: q.temGabarito || false,
           materia: q.materia,
           assunto: q.assunto,
           temImagem: q.temImagem,

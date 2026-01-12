@@ -5,6 +5,8 @@ export interface IQuestionReview {
   enunciado: string;
   alternativas: string[];
   respostaCorreta: string;
+  tipoQuestao: "multipla_escolha" | "alternativa";
+  temGabarito: boolean;
   materia: string;
   assunto: string;
   imagemUrl?: string;

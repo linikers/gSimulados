@@ -28,6 +28,7 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import DescriptionIcon from "@mui/icons-material/Description";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 export function ListaPdfs() {
   const { showToast } = useToast();
@@ -212,6 +213,17 @@ export function ListaPdfs() {
                       title="Extrair Questões"
                     >
                       <PlayArrowIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  {pdf.status === "completed" && (
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      onClick={() => handleExtract(pdf._id, pdf.fileName)}
+                      disabled={loading}
+                      title="Refazer Extração"
+                    >
+                      <RefreshIcon fontSize="small" />
                     </IconButton>
                   )}
                 </TableCell>

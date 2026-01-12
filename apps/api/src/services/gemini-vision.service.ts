@@ -11,6 +11,8 @@ export async function extractQuestionsFromPdf(
     enunciado: string;
     alternativas: string[];
     respostaCorreta?: string;
+    tipoQuestao: "multipla_escolha" | "alternativa";
+    temGabarito: boolean;
     materia?: string;
     assunto?: string;
     temImagem: boolean;
@@ -28,17 +30,19 @@ TAREFA: Analise o documento PDF em anexo e extraia TODAS as questões, incluindo
 REGRAS:
 1. Identifique o enunciado completo de cada questão.
 2. Liste TODAS as 5 alternativas (A, B, C, D, E).
-3. Se houver gabarito visível no documento, identifique a resposta correta. Use APENAS a letra (A, B, C, D ou E). Se não tiver certeza, deixe null.
-4. Classifique a matéria (Matemática, Física, Química, etc).
-5. Identifique o assunto específico (ex: Derivadas, Cinemática).
-6. Se a questão contém imagem/gráfico/tabela, marque "temImagem": true.
-7. Identifique EXATAMENTE em qual página do PDF a questão começa (pageNumber).
+3. Determine o "tipoQuestao": 
+   - "alternativa": se a questão for do tipo que pede para assinalar a sequência correta de afirmações (ex: I, II, III são verdadeiras) ou se no PDF as opções forem apenas as letras (ex: A, B, C, D, E sem texto ao lado).
+   - "multipla_escolha": para questões tradicionais com texto em cada alternativa.
+4. Se houver gabarito visível no documento para a questão, identifique a resposta correta e marque "temGabarito": true. Se não houver gabarito explícito para aquela questão, deixe null ou "temGabarito": false.
+5. Use APENAS a letra (A, B, C, D ou E) para "respostaCorreta".
+6. Classifique a matéria (Matemática, Física, Química, etc).
+7. Identifique o assunto específico (ex: Derivadas, Cinemática).
+8. Se a questão contém imagem/gráfico/tabela, marque "temImagem": true.
+9. Identifique EXATAMENTE em qual página do PDF a questão começa (pageNumber).
 
 IMPORTANTE:
-- O campo "respostaCorreta" deve ser EXATAMENTE uma das letras: "A", "B", "C", "D", "E" ou null. NÃO coloque números ou textos longos.
-- Se houver imagem na questão, descreva-a brevemente no enunciado.
+- O campo "respostaCorreta" deve ser EXATAMENTE uma das letras: "A", "B", "C", "D", "E" ou null.
 - Mantenha formatação matemática (use LaTeX se necessário).
-- Preserve símbolos e fórmulas.
 - Retorne APENAS o JSON, sem markdown blocks.
 
 RETORNE JSON ARRAY no formato:
@@ -46,14 +50,10 @@ RETORNE JSON ARRAY no formato:
   "questoes": [
     {
       "enunciado": "Texto completo da questão...",
-      "alternativas": [
-        "A) ...",
-        "B) ...",
-        "C) ...",
-        "D) ...",
-        "E) ..."
-      ],
+      "alternativas": ["A) ...", "B) ...", "C) ...", "D) ...", "E) ..."],
       "respostaCorreta": "A",
+      "tipoQuestao": "multipla_escolha",
+      "temGabarito": true,
       "materia": "Matemática",
       "assunto": "Geometria Analítica",
       "temImagem": true,

@@ -57,6 +57,22 @@ export class DriveService {
       scopes: ["https://www.googleapis.com/auth/drive.readonly"],
     });
 
+    // Diagnóstico básico (sem expor a chave completa)
+    const key = credentials.private_key || "";
+    console.log("[DriveService] Diagnóstico da Chave Privada:");
+    console.log(`- Comprimento: ${key.length}`);
+    console.log(
+      `- Começa com BEGIN: ${key.startsWith("-----BEGIN PRIVATE KEY-----")}`
+    );
+    console.log(
+      `- Termina com END: ${key.trim().endsWith("-----END PRIVATE KEY-----")}`
+    );
+    console.log(`- Contém \\n literal: ${key.includes("\\n")}`);
+    console.log(`- Contém quebra de linha real: ${key.includes("\n")}`);
+    console.log(
+      `- Início da chave (primeiros 30 chars): "${key.substring(0, 30)}..."`
+    );
+
     return this.auth;
   }
 
