@@ -22,6 +22,7 @@ RUN apk add --no-cache \
     librsvg-dev
 
 # Install dependencies
+RUN apk add --no-cache python3 make g++ cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev
 RUN yarn install --frozen-lockfile
 
 # Build shared package
