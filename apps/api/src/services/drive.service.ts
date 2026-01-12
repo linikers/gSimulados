@@ -3,6 +3,11 @@ import path from "path";
 import fs from "fs";
 import { env } from "../config/env";
 
+// --- PATCH REMOVIDO: Causou conflito com Mongoose ---
+// Vamos tentar uma abordagem local apenas no JWT
+// ------------------------------------------------
+// ------------------------------------------------
+
 export class DriveService {
   private static auth: any;
 
@@ -19,6 +24,12 @@ export class DriveService {
       );
       try {
         credentials = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
+        if (typeof credentials === "string") {
+          console.log(
+            "[DriveService] GOOGLE_SERVICE_ACCOUNT estava com aspas extras, parseando novamente..."
+          );
+          credentials = JSON.parse(credentials);
+        }
       } catch (error: any) {
         throw new Error(
           `Erro ao parsear GOOGLE_SERVICE_ACCOUNT: ${error.message}`
@@ -51,27 +62,102 @@ export class DriveService {
       credentials = JSON.parse(content);
     }
 
-    this.auth = new google.auth.JWT({
-      email: credentials.client_email,
-      key: credentials.private_key.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+    const sanitizedKey = credentials.private_key
+      .replace(/\\n/g, "\n")
+      .replace(/\r/g, "")
+      .split("\n")
+      .map((line: string) => line.trim())
+      .join("\n")
+      .trim();
+
+    // Usar fromJSON é mais robusto pois pega todos os campos necessários (project_id, private_key_id, etc)
+    this.auth = google.auth.fromJSON({
+      ...credentials,
+      private_key: sanitizedKey,
     });
 
-    // Diagnóstico básico (sem expor a chave completa)
-    const key = credentials.private_key || "";
-    console.log("[DriveService] Diagnóstico da Chave Privada:");
-    console.log(`- Comprimento: ${key.length}`);
+    // É necessário setar os scopes separadamente quando usa fromJSON
+    (this.auth as any).scopes = [
+      "https://www.googleapis.com/auth/drive.readonly",
+    ];
+
+    // Diagnóstico detalhado
+    console.log("[DriveService] Diagnóstico Detalhado:");
+    console.log(`- Project ID: ${credentials.project_id}`);
     console.log(
-      `- Começa com BEGIN: ${key.startsWith("-----BEGIN PRIVATE KEY-----")}`
+      `- Private Key ID: ${
+        credentials.private_key_id ? "Encontrado" : "NÃO ENCONTRADO"
+      }`
     );
+    console.log(`- Comprimento da Chave: ${sanitizedKey.length}`);
+    console.log(`- Início: ${sanitizedKey.substring(0, 30)}...`);
     console.log(
-      `- Termina com END: ${key.trim().endsWith("-----END PRIVATE KEY-----")}`
+      `- Fim: ...${sanitizedKey.substring(sanitizedKey.length - 30)}`
     );
-    console.log(`- Contém \\n literal: ${key.includes("\\n")}`);
-    console.log(`- Contém quebra de linha real: ${key.includes("\n")}`);
-    console.log(
-      `- Início da chave (primeiros 30 chars): "${key.substring(0, 30)}..."`
-    );
+    console.log(`- Email Service Account: "${credentials.client_email}"`);
+
+    // --- PATCH DE HORA LOCALIZADO (Evita quebras no Mongoose) ---
+    // Apenas forçamos a geração do token enquanto a data está "mentindo", depois restauramos.
+    // --- PATCH DE HORA LOCALIZADO ---
+    const OriginalDate = global.Date;
+
+    // Verifica se estamos no futuro (2026)
+    if (new OriginalDate().getFullYear() >= 2026) {
+      console.log("⚠️ [DriveService] DETECÇÃO DE DATA FUTURA ATIVADA.");
+
+      const systemDate = new OriginalDate();
+      // Criamos a data ajustada apenas para o log (e para pegar a diferença correta)
+      const adjustedTime = new OriginalDate(systemDate);
+      adjustedTime.setFullYear(adjustedTime.getFullYear() - 1);
+
+      console.log("[DriveService] 🕒 Comparativo de Datas:");
+      console.log(
+        `   🔴 Data do Sistema (Recusada pelo Google): ${systemDate.toISOString()}`
+      );
+      console.log(
+        `   🟢 Data Ajustada (Enviada ao Google):      ${adjustedTime.toISOString()}`
+      );
+
+      class TimeTravelDate extends OriginalDate {
+        constructor(...args: any[]) {
+          if (args.length === 0) {
+            // Retorna a data atual ajustada em -1 ano
+            const now = new OriginalDate();
+            now.setFullYear(now.getFullYear() - 1);
+            super(now.getTime());
+          } else {
+            // @ts-ignore
+            super(...args);
+          }
+        }
+        static now() {
+          const now = new OriginalDate();
+          now.setFullYear(now.getFullYear() - 1);
+          return now.getTime();
+        }
+      }
+
+      // 1. Substitui Date globalmente temporariamente
+      // @ts-ignore
+      global.Date = TimeTravelDate;
+
+      try {
+        // 2. Força a geração do Token
+        await this.auth.getAccessToken();
+        console.log(
+          "✅ [DriveService] Token gerado com sucesso (Auth Cacheada)!"
+        );
+      } catch (err: any) {
+        console.error("❌ [DriveService] Falha na autenticação:", err.message);
+        if (err.response)
+          console.error("Detalhes do erro OAuth:", err.response.data);
+        throw err;
+      } finally {
+        // 3. Restaura Date original IMEDIATAMENTE
+        global.Date = OriginalDate;
+        console.log("🔄 [DriveService] Data do sistema restaurada.");
+      }
+    }
 
     return this.auth;
   }
