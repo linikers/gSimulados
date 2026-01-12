@@ -11,7 +11,7 @@ export class DriveService {
 
     // Log da data atual para o usuário
     console.log(
-      `[DriveService] 🕒 Data do Sistema: ${new Date().toISOString()}`
+      `[GoogleDriveService] Data do Sistema: ${new Date().toISOString()}`
     );
 
     let credentials;
@@ -19,7 +19,9 @@ export class DriveService {
 
     // 1. Prioriza variável de ambiente
     if (env.GOOGLE_SERVICE_ACCOUNT) {
-      console.log("[DriveService] Inicializando via Variável de Ambiente");
+      console.log(
+        "[GoogleDriveService] Inicializando via Variável de Ambiente"
+      );
       try {
         credentials = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
         if (typeof credentials === "string") {
@@ -27,7 +29,7 @@ export class DriveService {
         }
       } catch (error: any) {
         throw new Error(
-          `Erro ao parsing GOOGLE_SERVICE_ACCOUNT: ${error.message}`
+          `Erro no parsing GOOGLE_SERVICE_ACCOUNT: ${error.message}`
         );
       }
     } else {
@@ -50,7 +52,7 @@ export class DriveService {
         throw new Error("Service Account não encontrada.");
       }
 
-      console.log(`[DriveService] Lendo credenciais de: ${keyFilePath}`);
+      console.log(`[GoogleDriveService] Lendo credenciais de: ${keyFilePath}`);
       const content = fs.readFileSync(keyFilePath, "utf8");
       credentials = JSON.parse(content);
     }
@@ -60,7 +62,7 @@ export class DriveService {
     const rawKey = credentials.private_key || "";
     const sanitizedKey = rawKey.replace(/\\n/g, "\n").replace(/\r/g, "").trim();
 
-    console.log("[DriveService] 🔑 Chave sanitizada.");
+    console.log("[GoogleDriveService] 🔑 Chave sanitizada.");
 
     // --- CORREÇÃO DE DECASAMENTO DE RELÓGIO (CLOCK SKEW) ---
     // Se o relógio local estiver adiantado em relação ao Google (mesmo que milissegundos),
@@ -85,7 +87,7 @@ export class DriveService {
 
     // Log para confirmar que a hora "baixou" 5 minutos
     console.log(
-      `[DriveService] 🕒 Hora Ajustada para Token (Skew -5min): ${new Date().toISOString()}`
+      `[GoogleDriveService] 🕒 Hora Ajustada para Token (Skew -5min): ${new Date().toISOString()}`
     );
 
     // Usamos JWT Client diretamente para controle total
@@ -99,10 +101,12 @@ export class DriveService {
     try {
       // Força a verificação da autorização agora (fail-fast)
       await jwtClient.authorize();
-      console.log("✅ [DriveService] Autorização JWT realizada com sucesso.");
+      console.log(
+        "[GoogleDriveService] Autorização JWT realizada com sucesso."
+      );
     } catch (err: any) {
       console.error(
-        "❌ [DriveService] Erro crítico ao autorizar JWT:",
+        "[GoogleDriveService] Erro crítico ao autorizar JWT:",
         err.message
       );
       throw err;
@@ -130,16 +134,18 @@ export class DriveService {
 
   static async downloadFile(fileId: string): Promise<Buffer> {
     try {
-      console.log(`[DriveService] Preparando download do arquivo: ${fileId}`);
+      console.log(
+        `[GoogleDriveService] Preparando download do arquivo: ${fileId}`
+      );
       const auth = await this.getAuthClient();
       const drive = google.drive({ version: "v3", auth });
 
-      console.log(`[DriveService] Solicitando stream do arquivo...`);
+      console.log(`[GoogleDriveService] Solicitando stream do arquivo...`);
 
       // Teste: Buscar metadados primeiro para confirmar token
       await drive.files.get({ fileId, fields: "id,name" });
       console.log(
-        `[DriveService] Token validado com sucesso (metadata check). Baixando conteúdo...`
+        `[GoogleDriveService] Token validado com sucesso (metadata check). Baixando conteúdo...`
       );
 
       const response = await drive.files.get(
@@ -147,18 +153,21 @@ export class DriveService {
         { responseType: "arraybuffer" }
       );
       console.log(
-        `[DriveService] Resposta recebida. Status: ${response.status}`
+        `[GoogleDriveService] Resposta recebida. Status: ${response.status}`
       );
 
       return Buffer.from(response.data as ArrayBuffer);
     } catch (error: any) {
       console.error(
-        `[DriveService] Erro ao baixar arquivo ${fileId}:`,
+        `[GoogleDriveService] Erro ao baixar arquivo ${fileId}:`,
         error.message
       );
       // Log do erro completo se possível
       if (error.response) {
-        console.error(`[DriveService] Detalhes do erro:`, error.response.data);
+        console.error(
+          `[GoogleDriveService] Detalhes do erro:`,
+          error.response.data
+        );
       }
       throw error;
     }
