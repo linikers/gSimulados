@@ -20,7 +20,12 @@ export async function extractQuestionsFromPdf(
   }>;
   confidence: number;
 }> {
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+    },
+  });
 
   const prompt = `
 Você é um professor especialista em extrair questões de provas de vestibular ${vestibularCodigo.toUpperCase()}.
@@ -70,26 +75,39 @@ RETORNE JSON ARRAY no formato:
     },
   };
 
-  const result = await model.generateContent([prompt, pdfPart]);
-  const response = await result.response;
-  const text = response.text();
+  try {
+    console.log(
+      `[Gemini] Enviando prompt para o modelo gemini-flash-latest...`
+    );
+    const result = await model.generateContent([prompt, pdfPart]);
+    console.log(`[Gemini] Resposta recebida. Processando texto...`);
+    const response = await result.response;
+    const text = response.text();
 
-  // Limpar markdown blocks se houver
-  const cleanText = text
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
+    // Limpar markdown blocks se houver
+    const cleanText = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-  // Parse JSON
-  const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("IA não retornou JSON válido");
+    // Parse JSON
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("IA não retornou JSON válido");
+    }
+
+    const data = JSON.parse(jsonMatch[0]);
+
+    return {
+      questoes: data.questoes || [],
+      confidence: 85,
+    };
+  } catch (error: any) {
+    console.error(`[Gemini] Erro ao chamar API: ${error.message}`);
+    if (error.status)
+      console.error(
+        `[Gemini] Status HTTP: ${error.status} ${error.statusText}`
+      );
+    throw error;
   }
-
-  const data = JSON.parse(jsonMatch[0]);
-
-  return {
-    questoes: data.questoes || [],
-    confidence: 85,
-  };
 }

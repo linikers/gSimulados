@@ -15,6 +15,7 @@ import {
   MenuItem,
   TextField,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { useToast } from "../../../store/useToast";
 import {
@@ -32,6 +33,12 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 export function ListaPdfs() {
   const { showToast } = useToast();
+  // const [loading, setLoading] = useState(false); // Removido em favor de extractingIds
+  const [pdfs, setPdfs] = useState<IPdfSource[]>([]);
+  const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
+  const [filterVestibular, setFilterVestibular] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   // Estado para controlar quais PDFs estão sendo extraídos individualmente
   const [extractingIds, setExtractingIds] = useState<string[]>([]);
 
@@ -62,6 +69,7 @@ export function ListaPdfs() {
       const result = await PdfExtractionService.extractFromPdf(id);
       showToast(`${result.message}`, "success");
       await loadData();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const msg =
         error.response?.data?.error || error.message || "Erro desconhecido";
