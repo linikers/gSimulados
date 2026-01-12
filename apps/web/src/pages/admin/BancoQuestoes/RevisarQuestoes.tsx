@@ -115,27 +115,58 @@ export function RevisarQuestoes() {
             <Typography variant="h6" sx={{ mt: 2 }}>
               Alternativas
             </Typography>
-            {questao.alternativas.map((alt, index) => (
-              <TextField
-                key={index}
-                label={`Alternativa ${String.fromCharCode(65 + index)}`}
-                value={alt}
-                onChange={(e) =>
-                  setQuestoes((prev) => {
-                    const copy = [...prev];
-                    const newAlts = [...copy[currentIndex].alternativas];
-                    newAlts[index] = e.target.value;
-                    copy[currentIndex] = {
-                      ...copy[currentIndex],
-                      alternativas: newAlts,
-                    };
-                    return copy;
-                  })
+            {questao.alternativas.map((alt, index) => {
+              // Determinar se esta alternativa está correta
+              const isCorrect = (() => {
+                if (!questao.respostaCorreta) return false;
+
+                if (questao.tipoQuestao === "somatoria") {
+                  // Para somatória, extrair números das alternativas (ex: "01) Texto" -> 1)
+                  const altNumber = parseInt(alt.match(/^(\d+)/)?.[1] || "0");
+                  const correctSum = parseInt(questao.respostaCorreta);
+                  // Verificar se este número está na soma (bit a bit)
+                  return (correctSum & altNumber) === altNumber;
+                } else {
+                  // Para múltipla escolha, comparar letra
+                  const letter = String.fromCharCode(65 + index); // A, B, C...
+                  return questao.respostaCorreta.toUpperCase() === letter;
                 }
-                fullWidth
-                sx={{ mb: 1 }}
-              />
-            ))}
+              })();
+
+              return (
+                <TextField
+                  key={index}
+                  label={`Alternativa ${String.fromCharCode(65 + index)}`}
+                  value={alt}
+                  onChange={(e) =>
+                    setQuestoes((prev) => {
+                      const copy = [...prev];
+                      const newAlts = [...copy[currentIndex].alternativas];
+                      newAlts[index] = e.target.value;
+                      copy[currentIndex] = {
+                        ...copy[currentIndex],
+                        alternativas: newAlts,
+                      };
+                      return copy;
+                    })
+                  }
+                  fullWidth
+                  sx={{
+                    mb: 1,
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: isCorrect
+                        ? "rgba(76, 175, 80, 0.1)"
+                        : "transparent",
+                      "&:hover": {
+                        backgroundColor: isCorrect
+                          ? "rgba(76, 175, 80, 0.15)"
+                          : "transparent",
+                      },
+                    },
+                  }}
+                />
+              );
+            })}
 
             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
               {questao.tipoQuestao === "somatoria" ? (
