@@ -7,9 +7,10 @@ export interface IExtractedQuestion extends Document {
 
   // Dados extraídos
   rawText: string; // Texto bruto da página
+  numeroQuestao?: number; // Número da questão na prova
   enunciado: string;
-  alternativas: string[]; // Array de 5 alternativas
-  respostaCorreta?: string; // A, B, C, D, E
+  alternativas: string[]; // Array de alternativas
+  respostaCorreta?: string; // A, B, C, D, E ou numérico
   tipoQuestao: "multipla_escolha" | "alternativa";
   temGabarito: boolean;
 
@@ -49,6 +50,7 @@ const ExtractedQuestionSchema: Schema = new Schema(
     pageNumber: { type: Number, required: true },
 
     rawText: { type: String, required: false },
+    numeroQuestao: { type: Number },
     enunciado: { type: String, required: true },
     alternativas: [{ type: String }],
     respostaCorreta: { type: String }, // Removido enum estrito para evitar quebras na extração

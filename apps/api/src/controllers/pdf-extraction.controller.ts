@@ -65,16 +65,14 @@ export class PdfExtractionController {
       // 3. Salvar questões
       const totalQuestions: any[] = [];
       for (const q of extractionResult.questoes) {
-        // Sanitizar a resposta correta para garantir que seja A, B, C, D ou E
-        let sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
-        if (!["A", "B", "C", "D", "E"].includes(sanitizedResposta || "")) {
-          sanitizedResposta = undefined;
-        }
+        // Remove verificação estrita de resposta pois agora pode ser número (01, 02...)
+        const sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
 
         const extractedQ = await ExtractedQuestion.create({
           pdfSourceId: pdfSource._id,
           vestibularCodigo: pdfSource.vestibularCodigo,
           pageNumber: q.pageNumber || 1,
+          numeroQuestao: q.numeroQuestao,
           enunciado: q.enunciado,
           alternativas: q.alternativas,
           respostaCorreta: sanitizedResposta,
