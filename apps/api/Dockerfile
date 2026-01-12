@@ -10,6 +10,17 @@ COPY packages ./packages
 COPY apps/api ./apps/api
 COPY apps/web/package.json ./apps/web/package.json
 
+# Install build dependencies for canvas
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev
+
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
@@ -25,6 +36,14 @@ RUN yarn build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
+
+# Install runtime dependencies for canvas
+RUN apk add --no-cache \
+    cairo \
+    pango \
+    jpeg \
+    giflib \
+    librsvg
 
 ENV NODE_ENV=production
 

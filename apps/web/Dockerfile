@@ -10,6 +10,17 @@ COPY packages ./packages
 COPY apps/web ./apps/web
 COPY apps/api/package.json ./apps/api/package.json
 
+# Install build dependencies for canvas (needed for the mono-repo install)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev
+
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
