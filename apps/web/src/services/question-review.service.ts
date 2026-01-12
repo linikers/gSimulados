@@ -5,7 +5,7 @@ export interface IQuestionReview {
   enunciado: string;
   alternativas: string[];
   respostaCorreta: string;
-  tipoQuestao: "multipla_escolha" | "alternativa";
+  tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
   temGabarito: boolean;
   materia: string;
   assunto: string;

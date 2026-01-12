@@ -73,7 +73,9 @@ export function RevisarQuestoes() {
               )}
               <Chip
                 label={
-                  questao.tipoQuestao === "alternativa"
+                  questao.tipoQuestao === "somatoria"
+                    ? "Somatória"
+                    : questao.tipoQuestao === "alternativa"
                     ? "Alternativas"
                     : "Múltipla Escolha"
                 }
@@ -136,31 +138,50 @@ export function RevisarQuestoes() {
             ))}
 
             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <TextField
-                select
-                label="Resposta Correta"
-                value={questao.respostaCorreta}
-                onChange={(e) =>
-                  setQuestoes((prev) => {
-                    const copy = [...prev];
-                    copy[currentIndex] = {
-                      ...copy[currentIndex],
-                      respostaCorreta: e.target.value,
-                    };
-                    return copy;
-                  })
-                }
-                SelectProps={{
-                  native: true,
-                }}
-                sx={{ width: 150 }}
-              >
-                {["A", "B", "C", "D", "E"].map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </TextField>
+              {questao.tipoQuestao === "somatoria" ? (
+                <TextField
+                  label="Resposta Correta (Soma)"
+                  value={questao.respostaCorreta || ""}
+                  onChange={(e) =>
+                    setQuestoes((prev) => {
+                      const copy = [...prev];
+                      copy[currentIndex] = {
+                        ...copy[currentIndex],
+                        respostaCorreta: e.target.value,
+                      };
+                      return copy;
+                    })
+                  }
+                  placeholder="Ex: 09, 15, 31"
+                  sx={{ width: 200 }}
+                />
+              ) : (
+                <TextField
+                  select
+                  label="Resposta Correta"
+                  value={questao.respostaCorreta}
+                  onChange={(e) =>
+                    setQuestoes((prev) => {
+                      const copy = [...prev];
+                      copy[currentIndex] = {
+                        ...copy[currentIndex],
+                        respostaCorreta: e.target.value,
+                      };
+                      return copy;
+                    })
+                  }
+                  SelectProps={{
+                    native: true,
+                  }}
+                  sx={{ width: 150 }}
+                >
+                  {["A", "B", "C", "D", "E"].map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </TextField>
+              )}
 
               <TextField
                 label="Matéria"
