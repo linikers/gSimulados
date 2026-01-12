@@ -11,7 +11,7 @@ export interface IExtractedQuestion extends Document {
   enunciado: string;
   alternativas: string[]; // Array de alternativas
   respostaCorreta?: string; // A, B, C, D, E ou numérico
-  tipoQuestao: "multipla_escolha" | "alternativa";
+  tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
   temGabarito: boolean;
 
   // Metadados sugeridos
@@ -56,7 +56,7 @@ const ExtractedQuestionSchema: Schema = new Schema(
     respostaCorreta: { type: String }, // Removido enum estrito para evitar quebras na extração
     tipoQuestao: {
       type: String,
-      enum: ["multipla_escolha", "alternativa"],
+      enum: ["multipla_escolha", "alternativa", "somatoria"],
       default: "multipla_escolha",
     },
     temGabarito: { type: Boolean, default: false },

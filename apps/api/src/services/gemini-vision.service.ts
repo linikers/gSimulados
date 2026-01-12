@@ -12,7 +12,7 @@ export async function extractQuestionsFromPdf(
     enunciado: string;
     alternativas: string[];
     respostaCorreta?: string;
-    tipoQuestao: "multipla_escolha" | "alternativa";
+    tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
     temGabarito: boolean;
     materia?: string;
     assunto?: string;
@@ -22,48 +22,44 @@ export async function extractQuestionsFromPdf(
   confidence: number;
 }> {
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-flash-latest",
     generationConfig: {
       responseMimeType: "application/json",
     },
   });
 
   const prompt = `
-Você é um professor especialista em extrair questões de provas de vestibular ${vestibularCodigo.toUpperCase()}.
+Você é um professor especialista em vestibulares do exame ${vestibularCodigo.toUpperCase()}.
+Sua tarefa é converter o PDF anexo em uma estrutura JSON organizada.
 
-TAREFA: Analise o documento PDF em anexo e extraia TODAS as questões, incluindo  as respectivar imagens e fórmulas contidas em cada questão.
+CARACTERÍSTICAS DA PROVA:
+- As questões podem ser SOMATÓRIAS (01, 02, 04...) ou MÚLTIPLA ESCOLHA (A, B, C, D, E).
+- Se for somatória, a "respostaCorreta" é a soma dos números verdadeiros.
 
-REGRAS:
-1. Identifique o número da questão se houver (ex: "Questão 15" -> numeroQuestao: 15).
-2. Identifique o enunciado completo de cada questão.
-3. Liste TODAS as alternativas disponíveis (A, B, C, D, E ou 01, 02, 04, 08, 16, 32...). NÃO limite a 5, capture todas que existirem.
-4. Determine o "tipoQuestao": 
-   - "alternativa": para questões do tipo somatória (01, 02, 04...) ou sequências (I, II, III).
-   - "multipla_escolha": para questões tradicionais com texto em cada alternativa.
-5. Se houver gabarito visível, marque "temGabarito": true e preencha "respostaCorreta".
-6. Classifique a matéria (Matemática, Física, Química, etc) e assunto.
-7. Se a questão contém imagem/gráfico/tabela, marque "temImagem": true.
-8. Identifique EXATAMENTE em qual página do PDF a questão começa (pageNumber).
+REGRAS DE EXTRAÇÃO:
+1. "numeroQuestao": Identifique o número (ex: 21, 22...).
+2. "enunciado": Texto base antes das alternativas.
+3. "alternativas": Capture o número/letra e o texto (ex: "01) Texto..." ou "A) Texto...").
+4. "tipoQuestao": 
+   - Use "somatoria" para questões com itens numéricos (01, 02...).
+   - Use "multipla_escolha" para itens com letras (A, B...).
+5. "respostaCorreta": Procure na folha de gabarito se houver.
+6. "materia": Identifique pelo cabeçalho da prova ou contexto.
 
-IMPORTANTE:
-- "respostaCorreta" pode ser letra (A, B...) ou número (01, 15...).
-- Mantenha formatação matemática (LaTeX).
-- Retorne apenas JSON válido.
-
-RETORNE JSON ARRAY no formato:
+FORMATO DE RETORNO (JSON APENAS):
 {
   "questoes": [
     {
-      "numeroQuestao": 15,
-      "enunciado": "Texto completo...",
-      "alternativas": ["A) ...", "B) ..."],
-      "respostaCorreta": "A",
-      "tipoQuestao": "multipla_escolha",
-      "temGabarito": true,
-      "materia": "Matemática",
-      "assunto": "Geometria",
-      "temImagem": true,
-      "pageNumber": 1
+      "numeroQuestao": number,
+      "enunciado": "string",
+      "alternativas": ["string"],
+      "respostaCorreta": "string",
+      "tipoQuestao": "somatoria" | "multipla_escolha",
+      "temGabarito": boolean,
+      "materia": "string",
+      "assunto": "string",
+      "temImagem": boolean,
+      "pageNumber": number
     }
   ]
 }
