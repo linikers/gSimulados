@@ -22,7 +22,9 @@ export function ListaQuestoes() {
   const [materias, setMaterias] = useState<string[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     loadQuestoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMateria]);
 
   const loadQuestoes = async () => {
