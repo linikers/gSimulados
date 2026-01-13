@@ -353,3 +353,31 @@ Tela completa para revisar questões extraídas com suporte a imagens.
 - [ ] Testar upload de imagem no Cloudinary
 - [ ] Testar extração com Gemini Vision
 - [ ] Testar fluxo completo
+
+-- documentar e montar ---
+baixar o binario completo é fria acima de 50mb
+stream via buffer ou referenciar blob via vertex IA
+vertex ia para monitorar
+
+---
+
+## referenciar atualizações do pdf
+
+Upload para Cloud Storage + referência (URI)
+Opção ideal:
+
+📤 Upload do PDF para Google Cloud Storage
+
+🔗 Passar somente a URI (gs://bucket/arquivo.pdf) para o Gemini / Vertex
+
+Isso:
+
+evita base64
+
+suporta PDFs grandes
+
+## é o padrão usado pelo Google internamente
+
+---
+
+criar o monitoramento de leitura do pdf (separação de questões)
