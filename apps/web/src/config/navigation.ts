@@ -54,6 +54,11 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/banco-questoes/revisar",
       icon: AssignmentIcon,
     },
+    {
+      title: "Questões Aprovadas",
+      path: "/admin/banco-questoes/questoes",
+      icon: QuizIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],
