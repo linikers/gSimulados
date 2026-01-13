@@ -83,7 +83,22 @@ FORMATO DE RETORNO (JSON APENAS):
 
 ---
 
+🔧 Criar o DTO TS do simulado
+
+📊 Criar algoritmo híbrido (IA + regra fixa)
+
+🧠 Criar sistema de dificuldade automática
+
+🗂️ Criar versão ENEM / UEL / UEM / UTFPR
+
+🔁 Criar sistema de simulado recorrente
+
+---
+
 --- auditoria - monitoramento
+
+- PROMPT AUDITORIA
+
 Você é um auditor técnico especializado em avaliação de sistemas de extração automática de provas de vestibular.
 
 Seu papel NÃO é corrigir questões.
