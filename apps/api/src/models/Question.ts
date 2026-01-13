@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IQuestion extends Document {
   enunciado: string;
   alternativas: string[]; // ["A) ...", "B) ..."]
-  respostaCorreta: string; // "A", "B", "C", "D", "E"
+  respostaCorreta: string; // "A", "B", "C", "D", "E" ou número (somatória)
   materia: string;
   assunto: string;
   dificuldade: "facil" | "medio" | "dificil";
@@ -23,12 +23,12 @@ const QuestionSchema: Schema = new Schema(
     alternativas: {
       type: [String],
       required: true,
-      validate: [arrayLimit, "{PATH} must have 5 options"],
+      // Removido validação fixa de 5 para suportar somatórias
     },
     respostaCorreta: {
       type: String,
       required: true,
-      enum: ["A", "B", "C", "D", "E"],
+      // Removido enum para aceitar números (somatória)
     },
     materia: { type: String, required: true },
     assunto: { type: String, required: true },
@@ -46,9 +46,5 @@ const QuestionSchema: Schema = new Schema(
   },
   { timestamps: { createdAt: "criadoEm", updatedAt: "atualizadoEm" } }
 );
-
-function arrayLimit(val: string[]) {
-  return val.length === 5;
-}
 
 export const Question = mongoose.model<IQuestion>("Question", QuestionSchema);
