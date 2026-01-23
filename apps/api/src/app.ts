@@ -7,6 +7,7 @@ import questionsRoutes from "./routes/questions.routes";
 import vestibularesRoutes from "./routes/vestibulares.routes";
 import driveConfigRoutes from "./routes/drive-config.routes";
 import pdfExtractionRoutes from "./routes/pdf-extraction.routes";
+import simuladoRoutes from "./routes/simulados.routes";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/questions", questionsRoutes);
 app.use("/vestibulares", vestibularesRoutes);
 app.use("/drive-config", driveConfigRoutes);
 app.use("/extraction", pdfExtractionRoutes);
+app.use("/simulados", simuladoRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello para a API");

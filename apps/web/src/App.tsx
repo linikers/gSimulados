@@ -33,6 +33,9 @@ import { Ferramentas } from "./pages/public/ferramentas/Ferramentas";
 import { Marketplace } from "./pages/public/ferramentas/Marketplace";
 import { Aprovacoes } from "./pages/public/Aprovacoes";
 import { FAQ } from "./pages/public/FAQ";
+import GerarSimulado from "./pages/public/Simulados/GerarSimulado";
+import MeusSimulados from "./pages/public/Simulados/MeusSimulados";
+import VisualizarSimulado from "./pages/public/Simulados/VisualizarSimulado";
 
 const theme = createTheme({
   palette: {
@@ -84,6 +87,9 @@ function App() {
               />
               <Route path="/aprovacoes" element={<Aprovacoes />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/simulados" element={<MeusSimulados />} />
+              <Route path="/simulados/gerar" element={<GerarSimulado />} />
+              <Route path="/simulados/:id" element={<VisualizarSimulado />} />
             </Route>
 
             {/* Auth Routes (no layout) */}
