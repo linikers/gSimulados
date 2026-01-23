@@ -1,26 +1,32 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { SimuladoService } from "../../../services/simulado.service";
+import type { ISimulado, IQuestion } from "../../../types/simulado";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 
 export default function VisualizarSimulado() {
   const { id } = useParams<{ id: string }>();
-  const [simulado, setSimulado] = useState<any>(null);
+  const [simulado, setSimulado] = useState<ISimulado | null>(null);
   const [loading, setLoading] = useState(true);
+  const { handleError } = useErrorHandler();
+
+  const loadSimulado = useCallback(
+    async (simuladoId: string) => {
+      try {
+        const data = await SimuladoService.getById(simuladoId);
+        setSimulado(data);
+      } catch (error) {
+        handleError(error, "Erro ao carregar simulado.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [handleError],
+  );
 
   useEffect(() => {
     if (id) loadSimulado(id);
-  }, [id]);
-
-  const loadSimulado = async (simuladoId: string) => {
-    try {
-      const data = await SimuladoService.getById(simuladoId);
-      setSimulado(data);
-    } catch (error) {
-      console.error("Erro ao carregar simulado:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [id, loadSimulado]);
 
   if (loading)
     return (
@@ -68,7 +74,7 @@ export default function VisualizarSimulado() {
       </header>
 
       <main className="max-w-4xl mx-auto p-6 md:p-12 space-y-12">
-        {simulado.questoes.map((questao: any, index: number) => (
+        {(simulado.questoes as IQuestion[]).map((questao, index) => (
           <div
             key={questao._id}
             className="group bg-slate-800/30 border border-slate-700/50 rounded-3xl p-8 hover:bg-slate-800/40 transition-all"

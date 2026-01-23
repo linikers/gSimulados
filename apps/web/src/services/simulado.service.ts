@@ -1,5 +1,6 @@
 // import { api } from "./api";
 import api from "./api";
+import type { ISimulado } from "../types/simulado";
 
 export interface SimuladoParams {
   nome: string;
@@ -9,17 +10,17 @@ export interface SimuladoParams {
 }
 
 export const SimuladoService = {
-  generate: async (data: SimuladoParams) => {
+  generate: async (data: SimuladoParams): Promise<ISimulado> => {
     const response = await api.post("/simulados/generate", data);
     return response.data;
   },
 
-  listMySimulados: async () => {
+  listMySimulados: async (): Promise<ISimulado[]> => {
     const response = await api.get("/simulados/my");
     return response.data;
   },
 
-  getById: async (id: string) => {
+  getById: async (id: string): Promise<ISimulado> => {
     const response = await api.get(`/simulados/${id}`);
     return response.data;
   },

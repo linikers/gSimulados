@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SimuladoService } from "../../../services/simulado.service";
 import { useNavigate } from "react-router-dom";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 
 export default function GerarSimulado() {
   const [nome, setNome] = useState("");
@@ -11,6 +12,7 @@ export default function GerarSimulado() {
   const [quantidade, setQuantidade] = useState(10);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { handleError } = useErrorHandler();
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +25,8 @@ export default function GerarSimulado() {
         quantidade,
       });
       navigate(`/simulados/${result._id}`);
-    } catch (error: unknown) {
-      alert("Erro ao gerar simulado. Tente novamente.");
+    } catch (error) {
+      handleError(error, "Erro ao carregar seus simulados.");
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,11 @@ export default function GerarSimulado() {
                 </label>
                 <select
                   value={dificuldade}
-                  onChange={(e) => setDificuldade(e.target.value as any)}
+                  onChange={(e) =>
+                    setDificuldade(
+                      e.target.value as "facil" | "medio" | "dificil" | "misto",
+                    )
+                  }
                   className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 >
                   <option value="misto">Misto</option>

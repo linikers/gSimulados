@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { SimuladoService } from "../../../services/simulado.service";
 import { Link } from "react-router-dom";
+import type { ISimulado } from "../../../types/simulado";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 
 export default function MeusSimulados() {
-  const [simulados, setSimulados] = useState<any[]>([]);
+  const [simulados, setSimulados] = useState<ISimulado[]>([]);
   const [loading, setLoading] = useState(true);
+  const { handleError } = useErrorHandler();
 
-  useEffect(() => {
-    loadSimulados();
-  }, []);
-
-  const loadSimulados = async () => {
+  const loadSimulados = useCallback(async () => {
     try {
       const data = await SimuladoService.listMySimulados();
       setSimulados(data);
     } catch (error) {
-      console.error("Erro ao carregar simulados:", error);
+      handleError(error, "Erro ao carregar seus simulados.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleError]);
+
+  useEffect(() => {
+    loadSimulados();
+  }, [loadSimulados]);
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 p-8">
@@ -64,9 +67,9 @@ export default function MeusSimulados() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {simulados.map((simulados) => (
+            {simulados.map((s: ISimulado) => (
               <div
-                key={simulados._id}
+                key={s._id}
                 className="group bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl p-6 hover:bg-slate-800/60 transition-all hover:scale-[1.02] cursor-pointer relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -80,23 +83,23 @@ export default function MeusSimulados() {
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2 truncate pr-8">
-                  {simulados.nome}
+                  {s.nome}
                 </h3>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="bg-blue-500/10 text-blue-400 text-xs px-2 py-1 rounded-lg border border-blue-500/20">
-                    {simulados.materia || "Misto"}
+                    {s.materia || "Misto"}
                   </span>
                   <span className="bg-indigo-500/10 text-indigo-400 text-xs px-2 py-1 rounded-lg border border-indigo-500/20 uppercase">
-                    {simulados.dificuldade}
+                    {s.dificuldade}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center mt-6">
                   <span className="text-slate-500 text-sm">
-                    {simulados.quantidadeQuestoes} questões
+                    {s.quantidadeQuestoes} questões
                   </span>
                   <Link
-                    to={`/simulados/${simulados._id}`}
+                    to={`/simulados/${s._id}`}
                     className="text-blue-400 font-semibold group-hover:text-blue-300 transition-colors flex items-center gap-1"
                   >
                     Abrir{" "}
