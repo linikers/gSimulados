@@ -81,7 +81,7 @@ export default function MeusSimulados() {
           </div>
 
           <Link
-            to="/simulados/gerar"
+            to="/aluno/simulados/gerar"
             className="group flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95"
           >
             <Add className="text-xl" />
@@ -112,7 +112,7 @@ export default function MeusSimulados() {
               conjunto de questões focado no que você precisa.
             </p>
             <Link
-              to="/simulados/gerar"
+              to="/aluno/simulados/gerar"
               className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-2 group"
             >
               Começar minha primeira prova
@@ -126,7 +126,7 @@ export default function MeusSimulados() {
               return (
                 <Link
                   key={s._id}
-                  to={`/simulados/${s._id}`}
+                  to={`/aluno/simulados/${s._id}`}
                   className="group relative bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] p-8 hover:bg-slate-800/40 transition-all hover:scale-[1.03] hover:shadow-2xl hover:shadow-blue-500/10"
                 >
                   {/* Subject Icon Background */}

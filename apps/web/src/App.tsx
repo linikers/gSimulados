@@ -87,9 +87,6 @@ function App() {
               />
               <Route path="/aprovacoes" element={<Aprovacoes />} />
               <Route path="/faq" element={<FAQ />} />
-              <Route path="/simulados" element={<MeusSimulados />} />
-              <Route path="/simulados/gerar" element={<GerarSimulado />} />
-              <Route path="/simulados/:id" element={<VisualizarSimulado />} />
             </Route>
 
             {/* Auth Routes (no layout) */}
@@ -100,6 +97,17 @@ function App() {
             <Route element={<AuthGuard />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+
+                {/* Patient/Student Routes */}
+                <Route path="/aluno/simulados" element={<MeusSimulados />} />
+                <Route
+                  path="/aluno/simulados/gerar"
+                  element={<GerarSimulado />}
+                />
+                <Route
+                  path="/aluno/simulados/:id"
+                  element={<VisualizarSimulado />}
+                />
 
                 {/* Admin Routes */}
                 <Route element={<AuthGuard allowedRoles={["admin"]} />}>

@@ -31,7 +31,7 @@ export default function GerarSimulado() {
         dificuldade,
         quantidade,
       });
-      navigate(`/simulados/${result._id}`);
+      navigate(`/aluno/simulados/${result._id}`);
     } catch (error) {
       handleError(error, "Erro ao gerar seu simulado. Tente novamente.");
     } finally {

@@ -30,7 +30,7 @@ export function Navbar() {
   const [vestibularesAnchor, setVestibularesAnchor] =
     useState<null | HTMLElement>(null);
   const [seriadosAnchor, setSeriadosAnchor] = useState<null | HTMLElement>(
-    null
+    null,
   );
   const [vestibularesOpenMobile, setVestibularesOpenMobile] = useState(false);
   const [seriadosOpenMobile, setSeriadosOpenMobile] = useState(false);
@@ -55,6 +55,7 @@ export function Navbar() {
     { label: "Materiais", path: "/materiais" },
     { label: "Ferramentas", path: "/ferramentas" },
     { label: "Aprovações", path: "/aprovacoes" },
+    { label: "Simulados", path: "/aluno/simulados" },
   ];
 
   // ... (rest of the file remains same, targeting the lines around 27 and title)

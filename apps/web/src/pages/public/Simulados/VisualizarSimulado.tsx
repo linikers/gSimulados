@@ -74,7 +74,7 @@ export default function VisualizarSimulado() {
         </div>
         <h2 className="text-2xl font-bold mb-4">Simulado não encontrado</h2>
         <Link
-          to="/simulados"
+          to="/aluno/simulados"
           className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-2"
         >
           <ArrowBack /> Voltar para a Dashboard
@@ -96,7 +96,7 @@ export default function VisualizarSimulado() {
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link
-              to="/simulados"
+              to="/aluno/simulados"
               className="p-2 hover:bg-slate-800 rounded-xl transition-colors text-slate-400 hover:text-white"
             >
               <ArrowBack />
