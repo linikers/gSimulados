@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Container,
@@ -13,6 +13,7 @@ import {
   Paper,
   Grid,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
 import { useNavigate } from "react-router-dom";
 import { useErrorHandler } from "../../../hooks/useErrorHandler";
@@ -156,7 +157,11 @@ export default function GerarSimulado() {
               <FormControl fullWidth>
                 <Select
                   value={dificuldade}
-                  onChange={(e) => setDificuldade(e.target.value as any)}
+                  onChange={(e: SelectChangeEvent) =>
+                    setDificuldade(
+                      e.target.value as "facil" | "medio" | "dificil" | "misto",
+                    )
+                  }
                   sx={{ borderRadius: "12px", bgcolor: "var(--input-bg)" }}
                 >
                   <MenuItem value="misto">🌊 Misto / Equilibrado</MenuItem>

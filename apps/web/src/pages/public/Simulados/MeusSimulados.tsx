@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import React from "react";
 import {
   Box,
   Container,
@@ -11,6 +10,7 @@ import {
   //   IconButton,
   Chip,
 } from "@mui/material";
+import type { ChipProps } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
 import { Link } from "react-router-dom";
 import type { ISimulado } from "../../../types/simulado";
@@ -54,7 +54,7 @@ export default function MeusSimulados() {
     return { color: "info", icon: <School /> };
   };
 
-  const getDifficultyColor = (diff: string): any => {
+  const getDifficultyColor = (diff: string): ChipProps["color"] => {
     const d = (diff || "").toLowerCase();
     if (d === "facil") return "success";
     if (d === "medio") return "warning";
@@ -191,11 +191,10 @@ export default function MeusSimulados() {
                       right: -20,
                       opacity: 0.05,
                       color: `${meta.color}.main`,
+                      "& svg": { fontSize: 160 },
                     }}
                   >
-                    {React.cloneElement(meta.icon as React.ReactElement, {
-                      sx: { fontSize: 160 },
-                    })}
+                    {meta.icon}
                   </Box>
 
                   <Box sx={{ position: "relative", zIndex: 1 }}>
