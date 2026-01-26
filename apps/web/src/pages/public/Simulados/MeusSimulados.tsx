@@ -158,11 +158,11 @@ export default function MeusSimulados() {
                       {s.nome}
                     </h3>
 
-                    <div className="flex items-center gap-2 text-slate-400 mb-8 border-b border-slate-800/50 pb-6">
+                    <div className="flex items-center gap-3 text-slate-400 mb-10 border-b border-slate-800/50 pb-8">
                       <div
-                        className={`w-2 h-2 rounded-full bg-${meta.color}-500`}
+                        className={`w-3 h-3 rounded-full bg-${meta.color}-500 shadow-lg shadow-${meta.color}-500/20`}
                       />
-                      <span className="text-sm font-medium">
+                      <span className="text-base font-semibold tracking-wide">
                         {s.materia || "Misto"}
                       </span>
                     </div>
@@ -177,9 +177,9 @@ export default function MeusSimulados() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-blue-400 font-bold group-hover:gap-3 transition-all">
-                        <span>Iniciar</span>
-                        <ArrowForward className="text-sm" />
+                      <div className="flex items-center gap-3 text-blue-400 font-bold group-hover:gap-4 transition-all">
+                        <span className="text-lg">Iniciar</span>
+                        <ArrowForward className="text-xl" />
                       </div>
                     </div>
                   </div>

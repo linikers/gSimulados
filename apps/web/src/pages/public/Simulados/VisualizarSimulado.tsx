@@ -106,9 +106,11 @@ export default function VisualizarSimulado() {
               <h1 className="text-lg md:text-xl font-black text-white truncate max-w-[200px] md:max-w-md">
                 {simulado.nome}
               </h1>
-              <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-tighter">
-                <span>{simulado.materia || "Misto"}</span>
-                <span>•</span>
+              <div className="flex items-center gap-4 text-slate-500 text-xs font-black uppercase tracking-widest">
+                <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px]">
+                  {simulado.materia || "Misto"}
+                </span>
+                <span className="text-slate-700">•</span>
                 <span className="text-blue-400">
                   {Object.keys(respostas).length} /{" "}
                   {simulado.quantidadeQuestoes} respondidas
@@ -155,24 +157,24 @@ export default function VisualizarSimulado() {
               }`}
             >
               <div className="flex items-start gap-4 md:gap-8 mb-10">
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-3">
                   <span
-                    className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl transition-all ${
+                    className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl transition-all shadow-lg ${
                       respondida
-                        ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-                        : "bg-slate-800 text-slate-400"
+                        ? "bg-emerald-500 text-white shadow-emerald-500/30"
+                        : "bg-slate-800 text-slate-500 shadow-black/20"
                     }`}
                   >
                     {index + 1}
                   </span>
                   {respondida && (
-                    <CheckCircle className="text-emerald-500 text-sm animate-in zoom-in" />
+                    <CheckCircle className="text-emerald-500 text-base animate-in zoom-in" />
                   )}
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 pt-1">
                   <div className="prose prose-invert max-w-none">
-                    <p className="text-lg md:text-xl font-medium leading-relaxed text-slate-100">
+                    <p className="text-xl md:text-2xl font-bold leading-relaxed text-slate-100 tracking-tight">
                       {questao.enunciado}
                     </p>
                   </div>
@@ -193,15 +195,15 @@ export default function VisualizarSimulado() {
                       }`}
                     >
                       <span
-                        className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black border transition-all ${
+                        className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-lg font-black border transition-all ${
                           isSelected
-                            ? "bg-blue-500 border-blue-400 text-white"
-                            : "bg-slate-900 border-slate-800 text-slate-600"
+                            ? "bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20"
+                            : "bg-slate-900 border-slate-800 text-slate-500"
                         }`}
                       >
                         {String.fromCharCode(65 + altIndex)}
                       </span>
-                      <span className="text-base md:text-lg font-medium leading-relaxed">
+                      <span className="text-lg md:text-xl font-medium leading-relaxed">
                         {alternativa}
                       </span>
                       {isSelected && (
