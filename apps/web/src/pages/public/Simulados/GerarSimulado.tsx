@@ -98,7 +98,11 @@ export default function GerarSimulado() {
                   <select
                     value={materia}
                     onChange={(e) => setMateria(e.target.value)}
-                    className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl px-8 py-5 text-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer shadow-inner"
+                    className="
+                        w-full
+                        bg-slate-950/40 
+                        border border-slate-800 
+                        rounded-2xl px-8 py-5 text-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer shadow-inner"
                   >
                     <option value="" className="bg-slate-950">
                       ✨ Todas as Matérias
