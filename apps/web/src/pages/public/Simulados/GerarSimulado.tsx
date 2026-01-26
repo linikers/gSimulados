@@ -1,4 +1,19 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  Slider,
+  Button,
+  CircularProgress,
+  Paper,
+  Grid,
+} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
 import { useNavigate } from "react-router-dom";
 import { useErrorHandler } from "../../../hooks/useErrorHandler";
@@ -40,202 +55,196 @@ export default function GerarSimulado() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-12 flex flex-col items-center relative overflow-x-hidden">
-      {/* Background Orbs for Depth */}
-      <div className="absolute top-[-5%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-5%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+    <Container maxWidth="md" sx={{ py: 8 }}>
+      <Box className="simulado-header">
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 1,
+            px: 2,
+            py: 1,
+            borderRadius: 10,
+            bgcolor: "primary.main",
+            color: "white",
+            mb: 3,
+            fontSize: "0.875rem",
+            fontWeight: "bold",
+          }}
+        >
+          <AutoAwesome fontSize="small" />
+          IA Geradora Ativa
+        </Box>
+        <Typography
+          variant="h3"
+          component="h1"
+          className="simulado-title"
+          sx={{ fontWeight: 800 }}
+        >
+          Crie seu Simulado
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            fontSize: "1.2rem",
+            maxWidth: 600,
+            mx: "auto",
+          }}
+        >
+          Personalize sua experiência de estudo com questões selecionadas por
+          nossa inteligência artificial.
+        </Typography>
+      </Box>
 
-      <div className="max-w-3xl w-full z-10 py-12">
-        {/* Header */}
-        <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-1000">
-          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-semibold mb-8 shadow-xl shadow-blue-500/5">
-            <AutoAwesome className="text-lg" />
-            <span className="tracking-wide">Inteligência Artificial Ativa</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8">
-            <span className="bg-gradient-to-r from-white via-blue-50 to-slate-400 bg-clip-text text-transparent">
-              Crie seu Simulado
-            </span>
-          </h1>
-          <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-            Nossa IA analisa milhares de questões para orquestrar o exame ideal
-            para sua evolução.
-          </p>
-        </div>
-
-        {/* glass-card */}
-        <div className="bg-slate-900/60 backdrop-blur-3xl border border-slate-800/50 rounded-[3rem] p-10 md:p-14 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
-          {/* Subtle Border Glow */}
-          <div className="absolute inset-0 border border-white/[0.03] rounded-[3rem] pointer-events-none" />
-
-          <form onSubmit={handleGenerate} className="space-y-12 relative">
-            {/* Input Nome */}
-            <div className="space-y-5">
-              <label className="flex items-center gap-3 text-base font-bold text-slate-300 ml-2">
-                <School className="text-blue-400 text-2xl" />
+      <Paper
+        className="glass-container"
+        elevation={0}
+        sx={{ p: { xs: 3, md: 6 } }}
+      >
+        <form onSubmit={handleGenerate}>
+          <Grid container spacing={4}>
+            <Grid size={{ xs: 12 }}>
+              <Box className="form-label">
+                <School color="primary" />
                 Nome do Simulado
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Ex: Maratona de Matemática - ENEM"
-                  className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl px-8 py-5 text-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-700 shadow-inner"
-                  required
-                />
-              </div>
-            </div>
+              </Box>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Ex: Revisão Fuvest - Matemática"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                    bgcolor: "var(--input-bg)",
+                  },
+                }}
+              />
+            </Grid>
 
-            {/* Grid for selects */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-5">
-                <label className="flex items-center gap-3 text-base font-bold text-slate-300 ml-2">
-                  <Psychology className="text-indigo-400 text-2xl" />
-                  Matéria Alvo
-                </label>
-                <div className="relative">
-                  <select
-                    value={materia}
-                    onChange={(e) => setMateria(e.target.value)}
-                    className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl px-8 py-5 text-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer shadow-inner"
-                  >
-                    <option value="" className="bg-slate-950">
-                      ✨ Todas as Matérias
-                    </option>
-                    <option value="Matemática" className="bg-slate-950">
-                      Matemática
-                    </option>
-                    <option value="Física" className="bg-slate-950">
-                      Física
-                    </option>
-                    <option value="Química" className="bg-slate-950">
-                      Química
-                    </option>
-                    <option value="Biologia" className="bg-slate-950">
-                      Biologia
-                    </option>
-                    <option value="Português" className="bg-slate-950">
-                      Português
-                    </option>
-                    <option value="História" className="bg-slate-950">
-                      História
-                    </option>
-                    <option value="Geografia" className="bg-slate-950">
-                      Geografia
-                    </option>
-                  </select>
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600">
-                    <ArrowForward className="rotate-90 text-xl" />
-                  </div>
-                </div>
-              </div>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box className="form-label">
+                <Psychology color="primary" />
+                Matéria
+              </Box>
+              <FormControl fullWidth>
+                <Select
+                  value={materia}
+                  onChange={(e) => setMateria(e.target.value)}
+                  displayEmpty
+                  sx={{ borderRadius: "12px", bgcolor: "var(--input-bg)" }}
+                >
+                  <MenuItem value="">✨ Todas as Matérias</MenuItem>
+                  <MenuItem value="Matemática">Matemática</MenuItem>
+                  <MenuItem value="Física">Física</MenuItem>
+                  <MenuItem value="Química">Química</MenuItem>
+                  <MenuItem value="Biologia">Biologia</MenuItem>
+                  <MenuItem value="Português">Português</MenuItem>
+                  <MenuItem value="História">História</MenuItem>
+                  <MenuItem value="Geografia">Geografia</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
 
-              <div className="space-y-5">
-                <label className="flex items-center gap-3 text-base font-bold text-slate-300 ml-2">
-                  <AutoAwesome className="text-amber-400 text-2xl" />
-                  Dificuldade
-                </label>
-                <div className="relative">
-                  <select
-                    value={dificuldade}
-                    onChange={(e) =>
-                      setDificuldade(
-                        e.target.value as
-                          | "facil"
-                          | "medio"
-                          | "dificil"
-                          | "misto",
-                      )
-                    }
-                    className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl px-8 py-5 text-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer shadow-inner"
-                  >
-                    <option value="misto" className="bg-slate-950">
-                      🌊 Misto / Equilibrado
-                    </option>
-                    <option value="facil" className="bg-slate-950">
-                      🟢 Fácil / Base
-                    </option>
-                    <option value="medio" className="bg-slate-950">
-                      🟡 Médio / Desafio
-                    </option>
-                    <option value="dificil" className="bg-slate-950">
-                      🔴 Difícil / Elite
-                    </option>
-                  </select>
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600">
-                    <ArrowForward className="rotate-90 text-xl" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box className="form-label">
+                <AutoAwesome color="primary" />
+                Dificuldade
+              </Box>
+              <FormControl fullWidth>
+                <Select
+                  value={dificuldade}
+                  onChange={(e: SelectChangeEvent) =>
+                    setDificuldade(
+                      e.target.value as "facil" | "medio" | "dificil" | "misto",
+                    )
+                  }
+                  sx={{ borderRadius: "12px", bgcolor: "var(--input-bg)" }}
+                >
+                  <MenuItem value="misto">🌊 Misto / Equilibrado</MenuItem>
+                  <MenuItem value="facil">🟢 Fácil / Base</MenuItem>
+                  <MenuItem value="medio">🟡 Médio / Desafio</MenuItem>
+                  <MenuItem value="dificil">🔴 Difícil / Elite</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
 
-            {/* Slider Section */}
-            <div className="space-y-8">
-              <div className="flex justify-between items-center ml-2">
-                <label className="flex items-center gap-3 text-base font-bold text-slate-300">
-                  <FormatListNumbered className="text-emerald-400 text-2xl" />
-                  Volume de Questões
-                </label>
-                <span className="bg-emerald-500/10 text-emerald-400 px-5 py-2 rounded-2xl text-2xl font-black border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+            <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Box className="form-label" sx={{ mb: 0 }}>
+                  <FormatListNumbered color="primary" />
+                  Quantidade de Questões
+                </Box>
+                <Typography
+                  variant="h6"
+                  color="primary"
+                  sx={{ fontWeight: 800 }}
+                >
                   {quantidade}
-                </span>
-              </div>
-              <div className="px-2">
-                <input
-                  type="range"
-                  min="5"
-                  max="50"
-                  step="5"
+                </Typography>
+              </Box>
+              <Box sx={{ px: 2 }}>
+                <Slider
                   value={quantidade}
-                  onChange={(e) => setQuantidade(parseInt(e.target.value))}
-                  className="w-full h-2.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all shadow-inner"
+                  onChange={(_, val) => setQuantidade(val as number)}
+                  min={5}
+                  max={50}
+                  step={5}
+                  marks={[
+                    { value: 5, label: "5" },
+                    { value: 25, label: "25" },
+                    { value: 50, label: "50" },
+                  ]}
+                  valueLabelDisplay="auto"
                 />
-                <div className="flex justify-between text-xs font-bold text-slate-600 px-1 mt-4 uppercase tracking-widest">
-                  <span>Expresso (5)</span>
-                  <span>Padrão (25)</span>
-                  <span>Extenso (50)</span>
-                </div>
-              </div>
-            </div>
+              </Box>
+            </Grid>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`group/btn w-full py-6 rounded-3xl font-black text-2xl text-white transition-all transform active:scale-[0.97] shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] relative overflow-hidden ${
-                loading
-                  ? "bg-slate-800 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:shadow-blue-500/30"
-              }`}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-4">
-                  <div className="w-7 h-7 border-[4px] border-white/20 border-t-white rounded-full animate-spin" />
-                  <span className="tracking-tight">Sintonizando IA...</span>
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-4">
-                  <span>Gerar Simulado Agora</span>
-                  <ArrowForward className="text-2xl group-hover/btn:translate-x-2 transition-transform duration-300" />
-                </span>
-              )}
-              {/* Animation Layer */}
-              {!loading && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-              )}
-            </button>
-          </form>
-        </div>
+            <Grid size={{ xs: 12 }} sx={{ mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={loading}
+                endIcon={!loading && <ArrowForward />}
+                sx={{
+                  py: 2,
+                  borderRadius: "12px",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={28} color="inherit" />
+                ) : (
+                  "Gerar Simulado Agora ✨"
+                )}
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Paper>
 
-        {/* Footer info */}
-        <div className="mt-12 text-center text-slate-500 text-sm font-medium tracking-wide">
-          <p>
-            O simulado será orquestrado instantaneamente e ficará disponível em
-            sua dashboard.
-          </p>
-        </div>
-      </div>
-    </div>
+      <Typography
+        variant="body2"
+        sx={{ textAlign: "center", mt: 4, color: "text.secondary" }}
+      >
+        O simulado será orquestrado instantaneamente e ficará disponível em sua
+        dashboard.
+      </Typography>
+    </Container>
   );
 }

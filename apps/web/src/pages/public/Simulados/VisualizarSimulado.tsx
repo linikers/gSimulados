@@ -1,5 +1,19 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  LinearProgress,
+  IconButton,
+  Paper,
+  //   Grid,
+  CircularProgress,
+  AppBar,
+  Toolbar,
+  Chip,
+} from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
 import type { ISimulado, IQuestion } from "../../../types/simulado";
 import { useErrorHandler } from "../../../hooks/useErrorHandler";
@@ -56,185 +70,325 @@ export default function VisualizarSimulado() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="relative">
-          <div className="w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-indigo-500/20 border-b-indigo-500 rounded-full animate-spin-reverse"></div>
-          </div>
-        </div>
-      </div>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "var(--bg-color)",
+        }}
+      >
+        <CircularProgress size={60} />
+      </Box>
     );
 
   if (!simulado)
     return (
-      <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mb-8 border border-slate-800">
-          <HelpOutline className="text-4xl text-slate-600" />
-        </div>
-        <h2 className="text-2xl font-bold mb-4">Simulado não encontrado</h2>
-        <Link
-          to="/aluno/simulados"
-          className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-2"
+      <Container
+        maxWidth="sm"
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          bgcolor: "var(--bg-color)",
+        }}
+      >
+        <Box
+          sx={{ p: 4, borderRadius: "24px", bgcolor: "var(--input-bg)", mb: 4 }}
         >
-          <ArrowBack /> Voltar para a Dashboard
-        </Link>
-      </div>
+          <HelpOutline sx={{ fontSize: 60, color: "text.disabled" }} />
+        </Box>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+          Simulado não encontrado
+        </Typography>
+        <Button
+          component={Link}
+          to="/aluno/simulados"
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          sx={{ borderRadius: "12px" }}
+        >
+          Voltar para a Dashboard
+        </Button>
+      </Container>
     );
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200">
-      {/* Scroll Progress Bar - Premium Gradient */}
-      <div className="fixed top-0 left-0 w-full h-1.5 bg-slate-950 z-[100]">
-        <div
-          className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-emerald-500 shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300"
-          style={{ width: `${scrolled}%` }}
-        ></div>
-      </div>
+    <Box sx={{ bgcolor: "var(--bg-color)", minHeight: "100vh", pb: 10 }}>
+      {/* Scroll Progress Bar */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          zIndex: 1201,
+          height: 6,
+        }}
+      >
+        <LinearProgress
+          variant="determinate"
+          value={scrolled}
+          sx={{ height: 6 }}
+        />
+      </Box>
 
-      <header className="sticky top-0 bg-[#020617]/80 backdrop-blur-2xl border-b border-slate-800/50 p-4 md:p-6 z-50">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/aluno/simulados"
-              className="p-2 hover:bg-slate-800 rounded-xl transition-colors text-slate-400 hover:text-white"
-            >
-              <ArrowBack />
-            </Link>
-            <div className="hidden sm:block h-6 w-[1px] bg-slate-800" />
-            <div>
-              <h1 className="text-lg md:text-xl font-black text-white truncate max-w-[200px] md:max-w-md">
-                {simulado.nome}
-              </h1>
-              <div className="flex items-center gap-4 text-slate-500 text-xs font-black uppercase tracking-widest">
-                <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px]">
-                  {simulado.materia || "Misto"}
-                </span>
-                <span className="text-slate-700">•</span>
-                <span className="text-blue-400">
-                  {Object.keys(respostas).length} /{" "}
-                  {simulado.quantidadeQuestoes} respondidas
-                </span>
-              </div>
-            </div>
-          </div>
+      <AppBar
+        position="sticky"
+        color="default"
+        elevation={0}
+        sx={{
+          borderBottom: "1px solid",
+          borderColor: "var(--border-color)",
+          bgcolor: "var(--bg-color)",
+          backdropFilter: "blur(12px)",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <IconButton
+                component={Link}
+                to="/aluno/simulados"
+                sx={{ bgcolor: "var(--input-bg)" }}
+              >
+                <ArrowBack />
+              </IconButton>
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}
+                >
+                  {simulado.nome}
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Chip
+                    label={simulado.materia || "Misto"}
+                    size="small"
+                    sx={{ fontWeight: 800, borderRadius: "6px" }}
+                  />
+                  <Typography
+                    variant="caption"
+                    color="primary"
+                    sx={{ fontWeight: 800 }}
+                  >
+                    {Object.keys(respostas).length} /{" "}
+                    {simulado.quantidadeQuestoes} respondidas
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
 
-          <div className="flex items-center gap-3">
-            <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-400 hover:text-white transition-all">
-              <Flag className="text-sm" />
-              Revisar
-            </button>
-            <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
-              Finalizar
-            </button>
-          </div>
-        </div>
-      </header>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Flag />}
+                sx={{
+                  borderRadius: "10px",
+                  display: { xs: "none", md: "flex" },
+                }}
+              >
+                Revisar
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ borderRadius: "10px", px: 4, fontWeight: "bold" }}
+              >
+                Finalizar
+              </Button>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-      <main className="max-w-4xl mx-auto p-4 md:p-12 space-y-16">
+      <Container maxWidth="md" sx={{ py: 6 }}>
         {/* Intro Card */}
-        <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-black text-white mb-2">
+        <Paper
+          elevation={0}
+          className="glass-container"
+          sx={{ mb: 6, position: "relative", overflow: "hidden" }}
+        >
+          <Box sx={{ position: "relative", zIndex: 1, maxWidth: "80%" }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
               Instruções da IA
-            </h2>
-            <p className="text-slate-400 leading-relaxed">
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
               Este simulado foi balanceado com base na dificuldade selecionada.
               Leia cada questão atentamente. Ao terminar, clique em finalizar
               para processar seu desempenho.
-            </p>
-          </div>
-          <AutoAwesome className="absolute top-10 right-10 text-blue-500/10 text-[8rem] pointer-events-none" />
-        </div>
+            </Typography>
+          </Box>
+          <AutoAwesome
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              fontSize: 100,
+              opacity: 0.05,
+            }}
+          />
+        </Paper>
 
-        {(simulado.questoes as IQuestion[]).map((questao, index) => {
-          const respondida = respostas[questao._id] !== undefined;
-          return (
-            <div
-              key={questao._id}
-              className={`group bg-slate-900/40 backdrop-blur-xl border transition-all duration-500 rounded-[2.5rem] p-6 md:p-10 hover:bg-slate-900/60 ${
-                respondida ? "border-emerald-500/30" : "border-slate-800/50"
-              }`}
-            >
-              <div className="flex items-start gap-4 md:gap-8 mb-10">
-                <div className="flex flex-col items-center gap-3">
-                  <span
-                    className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl transition-all shadow-lg ${
-                      respondida
-                        ? "bg-emerald-500 text-white shadow-emerald-500/30"
-                        : "bg-slate-800 text-slate-500 shadow-black/20"
-                    }`}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {(simulado.questoes as IQuestion[]).map((questao, index) => {
+            const respondida = respostas[questao._id] !== undefined;
+            return (
+              <Paper
+                key={questao._id}
+                elevation={0}
+                className="glass-container"
+                sx={{
+                  p: { xs: 3, md: 5 },
+                  borderColor: respondida
+                    ? "success.main"
+                    : "var(--border-color)",
+                  borderWidth: respondida ? 2 : 1,
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <Box sx={{ display: "flex", gap: { xs: 2, md: 4 }, mb: 4 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
                   >
-                    {index + 1}
-                  </span>
-                  {respondida && (
-                    <CheckCircle className="text-emerald-500 text-base animate-in zoom-in" />
-                  )}
-                </div>
-
-                <div className="flex-1 pt-1">
-                  <div className="prose prose-invert max-w-none">
-                    <p className="text-xl md:text-2xl font-bold leading-relaxed text-slate-100 tracking-tight">
-                      {questao.enunciado}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4 md:ml-20">
-                {questao.alternativas.map((alternativa, altIndex) => {
-                  const isSelected = respostas[questao._id] === altIndex;
-                  return (
-                    <button
-                      key={altIndex}
-                      onClick={() => selectAnswer(questao._id, altIndex)}
-                      className={`w-full text-left p-5 md:p-6 rounded-2xl border transition-all flex items-start gap-4 group/btn relative overflow-hidden ${
-                        isSelected
-                          ? "bg-blue-600/10 border-blue-500 text-white ring-1 ring-blue-500/50"
-                          : "bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-600 hover:bg-slate-800/30"
-                      }`}
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: respondida
+                          ? "success.main"
+                          : "var(--input-bg)",
+                        color: respondida ? "white" : "text.disabled",
+                        fontWeight: 800,
+                        fontSize: "1.25rem",
+                        boxShadow: respondida
+                          ? "0 8px 16px rgba(46, 125, 50, 0.2)"
+                          : "none",
+                      }}
                     >
-                      <span
-                        className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-lg font-black border transition-all ${
-                          isSelected
-                            ? "bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20"
-                            : "bg-slate-900 border-slate-800 text-slate-500"
-                        }`}
+                      {index + 1}
+                    </Box>
+                    {respondida && (
+                      <CheckCircle color="success" sx={{ fontSize: 18 }} />
+                    )}
+                  </Box>
+
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, lineHeight: 1.5 }}
+                  >
+                    {questao.enunciado}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    ml: { xs: 0, md: 10 },
+                  }}
+                >
+                  {questao.alternativas.map((alternativa, altIndex) => {
+                    const isSelected = respostas[questao._id] === altIndex;
+                    return (
+                      <Button
+                        key={altIndex}
+                        onClick={() => selectAnswer(questao._id, altIndex)}
+                        variant={isSelected ? "contained" : "outlined"}
+                        color={isSelected ? "primary" : "inherit"}
+                        sx={{
+                          justifyContent: "flex-start",
+                          textAlign: "left",
+                          p: 2.5,
+                          borderRadius: "16px",
+                          border: "1px solid",
+                          borderColor: isSelected
+                            ? "primary.main"
+                            : "var(--border-color)",
+                          bgcolor: isSelected
+                            ? "primary.main"
+                            : "var(--input-bg)",
+                          textTransform: "none",
+                          fontSize: "1.1rem",
+                          fontWeight: 500,
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            bgcolor: isSelected
+                              ? "primary.dark"
+                              : "rgba(0,0,0,0.04)",
+                          },
+                        }}
                       >
-                        {String.fromCharCode(65 + altIndex)}
-                      </span>
-                      <span className="text-lg md:text-xl font-medium leading-relaxed">
+                        <Box
+                          sx={{
+                            minWidth: 32,
+                            height: 32,
+                            borderRadius: "8px",
+                            bgcolor: isSelected
+                              ? "white"
+                              : "var(--border-color)",
+                            color: isSelected
+                              ? "primary.main"
+                              : "text.secondary",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: 900,
+                            mr: 2,
+                          }}
+                        >
+                          {String.fromCharCode(65 + altIndex)}
+                        </Box>
                         {alternativa}
-                      </span>
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+                      </Button>
+                    );
+                  })}
+                </Box>
+              </Paper>
+            );
+          })}
+        </Box>
 
         {/* Action Bar */}
-        <div className="pt-20 pb-32 flex flex-col items-center gap-8">
-          <div className="h-[2px] w-20 bg-slate-800 rounded-full" />
-          <div className="text-center space-y-4">
-            <h3 className="text-white font-bold text-xl">Fim das Questões</h3>
-            <p className="text-slate-500 max-w-xs mx-auto text-sm">
-              Revise suas respostas antes de enviar para correção definitiva.
-            </p>
-          </div>
-          <button className="group relative bg-emerald-600 hover:bg-emerald-500 text-white px-16 py-6 rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-emerald-500/20 hover:scale-[1.05] active:scale-95 overflow-hidden">
-            <span className="relative z-10 flex items-center gap-3">
-              Finalizar Simulado
-              <CheckCircle />
-            </span>
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-        </div>
-      </main>
-    </div>
+        <Box sx={{ mt: 10, mb: 10, textAlign: "center" }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
+            Fim das Questões
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 4, color: "text.secondary" }}>
+            Revise suas respostas antes de enviar para correção definitiva.
+          </Typography>
+          <Button
+            variant="contained"
+            color="success"
+            size="large"
+            sx={{
+              py: 2,
+              px: 8,
+              borderRadius: "16px",
+              fontSize: "1.2rem",
+              fontWeight: 900,
+              boxShadow: "0 8px 32px rgba(46, 125, 50, 0.3)",
+            }}
+          >
+            Finalizar Simulado ✨
+          </Button>
+        </Box>
+      </Container>
+    </Box>
   );
 }
