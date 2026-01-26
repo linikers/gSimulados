@@ -1,5 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import React from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Button,
+  CircularProgress,
+  //   IconButton,
+  Chip,
+} from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
 import { Link } from "react-router-dom";
 import type { ISimulado } from "../../../types/simulado";
@@ -34,161 +45,277 @@ export default function MeusSimulados() {
     loadSimulados();
   }, [loadSimulados]);
 
-  // Helper to get subject colors/icons
   const getSubjectMeta = (subject: string) => {
     const s = (subject || "").toLowerCase();
-    if (s.includes("mat")) return { color: "blue", icon: <BarChart /> };
-    if (s.includes("fis")) return { color: "indigo", icon: <AutoAwesome /> };
-    if (s.includes("qui")) return { color: "emerald", icon: <AutoAwesome /> };
-    if (s.includes("bio")) return { color: "rose", icon: <School /> };
-    return { color: "slate", icon: <School /> };
+    if (s.includes("mat")) return { color: "primary", icon: <BarChart /> };
+    if (s.includes("fis")) return { color: "secondary", icon: <AutoAwesome /> };
+    if (s.includes("qui")) return { color: "success", icon: <AutoAwesome /> };
+    if (s.includes("bio")) return { color: "error", icon: <School /> };
+    return { color: "info", icon: <School /> };
   };
 
-  const getDifficultyColor = (diff: string) => {
+  const getDifficultyColor = (diff: string): any => {
     const d = (diff || "").toLowerCase();
-    if (d === "facil")
-      return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
-    if (d === "medio")
-      return "text-amber-400 bg-amber-500/10 border-amber-500/20";
-    if (d === "dificil")
-      return "text-rose-400 bg-rose-500/10 border-rose-500/20";
-    return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+    if (d === "facil") return "success";
+    if (d === "medio") return "warning";
+    if (d === "dificil") return "error";
+    return "default";
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-8 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-5%] w-[30%] h-[30%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto z-10 relative">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-blue-400 text-sm font-bold uppercase tracking-widest">
-              <History className="text-sm" />
-              <span>Sua Jornada</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-              Meus{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-                Simulados
-              </span>
-            </h1>
-            <p className="text-slate-400 text-lg">
-              Gerencie e revise todos os seus exames personalizados por IA.
-            </p>
-          </div>
-
-          <Link
-            to="/aluno/simulados/gerar"
-            className="group flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95"
+    <Container maxWidth="xl" sx={{ py: 6 }}>
+      {/* Header Section */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "space-between",
+          alignItems: { xs: "flex-start", md: "center" },
+          gap: 4,
+          mb: 8,
+        }}
+      >
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              color: "primary.main",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: 2,
+              mb: 1,
+            }}
           >
-            <Add className="text-xl" />
-            <span>Gerar Novo</span>
-          </Link>
-        </div>
+            <History fontSize="small" />
+            <span>Sua Jornada</span>
+          </Box>
+          <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+            Meus Simulados
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ fontSize: "1.2rem" }}
+          >
+            Gerencie e revise todos os seus exames personalizados por IA.
+          </Typography>
+        </Box>
 
-        {/* Content */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-64 bg-slate-900/40 backdrop-blur-md animate-pulse rounded-[2rem] border border-slate-800/50"
-              />
-            ))}
-          </div>
-        ) : simulados.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 bg-slate-900/30 backdrop-blur-xl rounded-[3rem] border border-slate-800/50 text-center px-6">
-            <div className="w-20 h-20 bg-slate-800/50 rounded-3xl flex items-center justify-center mb-8 text-slate-500">
-              <AutoAwesome className="text-4xl" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Nenhum simulado ainda
-            </h2>
-            <p className="text-slate-400 max-w-md mx-auto mb-10 leading-relaxed">
-              Dê o primeiro passo na sua preparação. Use nossa IA para gerar um
-              conjunto de questões focado no que você precisa.
-            </p>
-            <Link
-              to="/aluno/simulados/gerar"
-              className="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-2 group"
-            >
-              Começar minha primeira prova
-              <ArrowForward className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {simulados.map((s: ISimulado) => {
-              const meta = getSubjectMeta(s.materia || "");
-              return (
-                <Link
-                  key={s._id}
+        <Button
+          component={Link}
+          to="/aluno/simulados/gerar"
+          variant="contained"
+          size="large"
+          startIcon={<Add />}
+          sx={{
+            borderRadius: "16px",
+            py: 2,
+            px: 4,
+            fontSize: "1.1rem",
+            fontWeight: "bold",
+            textTransform: "none",
+            boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+          }}
+        >
+          Gerar Novo
+        </Button>
+      </Box>
+
+      {/* Content */}
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : simulados.length === 0 ? (
+        <Paper
+          elevation={0}
+          className="glass-container"
+          sx={{ py: 12, textAlign: "center" }}
+        >
+          <AutoAwesome sx={{ fontSize: 80, color: "text.disabled", mb: 3 }} />
+          <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+            Nenhum simulado ainda
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 6, maxWidth: 500, mx: "auto" }}
+          >
+            Dê o primeiro passo na sua preparação. Use nossa IA para gerar um
+            conjunto de questões focado no que você precisa.
+          </Typography>
+          <Button
+            component={Link}
+            to="/aluno/simulados/gerar"
+            variant="outlined"
+            size="large"
+            endIcon={<ArrowForward />}
+            sx={{ borderRadius: "12px", fontWeight: "bold" }}
+          >
+            Começar minha primeira prova
+          </Button>
+        </Paper>
+      ) : (
+        <Grid container spacing={4}>
+          {simulados.map((s) => {
+            const meta = getSubjectMeta(s.materia || "");
+            return (
+              <Grid key={s._id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Paper
+                  component={Link}
                   to={`/aluno/simulados/${s._id}`}
-                  className="group relative bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] p-8 hover:bg-slate-800/40 transition-all hover:scale-[1.03] hover:shadow-2xl hover:shadow-blue-500/10"
+                  elevation={0}
+                  className="glass-container"
+                  sx={{
+                    display: "block",
+                    textDecoration: "none",
+                    color: "inherit",
+                    position: "relative",
+                    overflow: "hidden",
+                    transition: "all 0.3s ease",
+                    height: "100%",
+                    "&:hover": {
+                      transform: "translateY(-8px)",
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                      "& .hover-arrow": { transform: "translateX(4px)" },
+                    },
+                  }}
                 >
-                  {/* Subject Icon Background */}
-                  <div
-                    className={`absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity text-${meta.color}-500 transform group-hover:scale-110 transition-transform`}
+                  {/* Icon Background Decoration */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -20,
+                      right: -20,
+                      opacity: 0.05,
+                      color: `${meta.color}.main`,
+                    }}
                   >
-                    {React.isValidElement(meta.icon) &&
-                      React.cloneElement(
-                        meta.icon as React.ReactElement,
-                        {
-                          sx: { width: "8rem", height: "8rem" },
-                        } as unknown as React.SVGAttributes<SVGSVGElement>,
-                      )}
-                  </div>
+                    {React.cloneElement(meta.icon as React.ReactElement, {
+                      sx: { fontSize: 160 },
+                    })}
+                  </Box>
 
-                  <div className="relative z-10">
-                    <div className="flex justify-between items-start mb-6">
-                      <span
-                        className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border ${getDifficultyColor(s.dificuldade)}`}
-                      >
-                        {s.dificuldade}
-                      </span>
-                      <div className="text-slate-500">
-                        <Timer className="text-sm" />
-                      </div>
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors line-clamp-2 leading-tight">
-                      {s.nome}
-                    </h3>
-
-                    <div className="flex items-center gap-3 text-slate-400 mb-10 border-b border-slate-800/50 pb-8">
-                      <div
-                        className={`w-3 h-3 rounded-full bg-${meta.color}-500 shadow-lg shadow-${meta.color}-500/20`}
+                  <Box sx={{ position: "relative", zIndex: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 4,
+                      }}
+                    >
+                      <Chip
+                        label={s.dificuldade}
+                        color={getDifficultyColor(s.dificuldade)}
+                        size="small"
+                        sx={{
+                          fontWeight: 900,
+                          textTransform: "uppercase",
+                          borderRadius: "8px",
+                        }}
                       />
-                      <span className="text-base font-semibold tracking-wide">
+                      <Timer sx={{ color: "text.disabled", fontSize: 20 }} />
+                    </Box>
+
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 800,
+                        mb: 1,
+                        height: "3.5rem",
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {s.nome}
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 4,
+                        pb: 4,
+                        borderBottom: "1px solid",
+                        borderColor: "var(--border-color)",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          bgcolor: `${meta.color}.main`,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontWeight: 600 }}
+                      >
                         {s.materia || "Misto"}
-                      </span>
-                    </div>
+                      </Typography>
+                    </Box>
 
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <span className="text-white font-black text-xl leading-none">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: 900, lineHeight: 1 }}
+                        >
                           {s.quantidadeQuestoes}
-                        </span>
-                        <span className="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 800,
+                            textTransform: "uppercase",
+                            letterSpacing: 1,
+                          }}
+                        >
                           Questões
-                        </span>
-                      </div>
+                        </Typography>
+                      </Box>
 
-                      <div className="flex items-center gap-3 text-blue-400 font-bold group-hover:gap-4 transition-all">
-                        <span className="text-lg">Iniciar</span>
-                        <ArrowForward className="text-xl" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          color: "primary.main",
+                          fontWeight: 800,
+                        }}
+                      >
+                        <span>Iniciar</span>
+                        <ArrowForward
+                          className="hover-arrow"
+                          sx={{
+                            fontSize: 18,
+                            transition: "transform 0.3s ease",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
+      )}
+    </Container>
   );
 }
