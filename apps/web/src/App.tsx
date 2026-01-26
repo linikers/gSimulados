@@ -33,6 +33,9 @@ import { Ferramentas } from "./pages/public/ferramentas/Ferramentas";
 import { Marketplace } from "./pages/public/ferramentas/Marketplace";
 import { Aprovacoes } from "./pages/public/Aprovacoes";
 import { FAQ } from "./pages/public/FAQ";
+import GerarSimulado from "./pages/public/Simulados/GerarSimulado";
+import MeusSimulados from "./pages/public/Simulados/MeusSimulados";
+import VisualizarSimulado from "./pages/public/Simulados/VisualizarSimulado";
 
 const theme = createTheme({
   palette: {
@@ -94,6 +97,17 @@ function App() {
             <Route element={<AuthGuard />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+
+                {/* Patient/Student Routes */}
+                <Route path="/aluno/simulados" element={<MeusSimulados />} />
+                <Route
+                  path="/aluno/simulados/gerar"
+                  element={<GerarSimulado />}
+                />
+                <Route
+                  path="/aluno/simulados/:id"
+                  element={<VisualizarSimulado />}
+                />
 
                 {/* Admin Routes */}
                 <Route element={<AuthGuard allowedRoles={["admin"]} />}>
