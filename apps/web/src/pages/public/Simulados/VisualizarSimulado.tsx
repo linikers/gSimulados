@@ -289,7 +289,11 @@ export default function VisualizarSimulado() {
 
                   <Typography
                     variant="h5"
-                    sx={{ fontWeight: 700, lineHeight: 1.5 }}
+                    sx={{
+                      fontWeight: 700,
+                      lineHeight: 1.5,
+                      fontSize: { xs: "1.15rem", md: "1.5rem" },
+                    }}
                   >
                     {questao.enunciado}
                   </Typography>
