@@ -24,4 +24,41 @@ export class SchoolsController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async update(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: id, role: "escola" },
+        req.body,
+        { new: true },
+      ).select("-password");
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Escola não encontrada" });
+      }
+
+      res.json(updatedUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async delete(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const deletedUser = await User.findOneAndDelete({
+        _id: id,
+        role: "escola",
+      });
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: "Escola não encontrada" });
+      }
+
+      res.json({ message: "Escola removida com sucesso" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

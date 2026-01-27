@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { SchoolsController } from "../controllers/schools.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// TODO: Add AuthMiddleware and AdminGuard here
-router.post("/", SchoolsController.create);
-router.get("/", SchoolsController.list);
+router.post("/", authMiddleware, SchoolsController.create);
+router.get("/", authMiddleware, SchoolsController.list);
+router.put("/:id", authMiddleware, SchoolsController.update);
+router.delete("/:id", authMiddleware, SchoolsController.delete);
 
 export default router;

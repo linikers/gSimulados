@@ -10,6 +10,7 @@ const UserSchema = new Schema<IUserDocument>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    avatar: { type: String },
     role: {
       type: String,
       enum: ["admin", "escola", "aluno"],
@@ -17,7 +18,7 @@ const UserSchema = new Schema<IUserDocument>(
       default: "aluno",
     },
   },
-  { discriminatorKey: "role", timestamps: true }
+  { discriminatorKey: "role", timestamps: true },
 );
 
 export const User = mongoose.model<IUserDocument>("User", UserSchema);

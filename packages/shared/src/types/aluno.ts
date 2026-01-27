@@ -4,4 +4,5 @@ export interface ICadastroAlunoDTO {
   password?: string;
   matricula?: string;
   escolaId?: string;
+  avatar?: string;
 }

@@ -10,4 +10,12 @@ export const AlunosService = {
     const response = await api.post("/alunos", data);
     return response.data;
   },
+  update: async (id: string, data: Partial<IAluno>) => {
+    const response = await api.put(`/alunos/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/alunos/${id}`);
+    return response.data;
+  },
 };

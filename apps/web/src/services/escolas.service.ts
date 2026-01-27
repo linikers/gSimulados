@@ -10,4 +10,12 @@ export const EscolasService = {
     const response = await api.post("/schools", data);
     return response.data;
   },
+  update: async (id: string, data: Partial<IEscola>) => {
+    const response = await api.put(`/schools/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/schools/${id}`);
+    return response.data;
+  },
 };
