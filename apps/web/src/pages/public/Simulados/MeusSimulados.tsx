@@ -229,6 +229,7 @@ export default function MeusSimulados() {
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
+                        fontSize: { xs: "1.25rem", md: "1.5rem" },
                       }}
                     >
                       {s.nome}

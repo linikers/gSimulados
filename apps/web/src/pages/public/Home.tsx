@@ -13,7 +13,7 @@ export function Home() {
 
   // Pegar os 3 principais vestibulares para destaque
   const vestibularesDestaque = vestibulares.filter((v) =>
-    ["enem", "uem", "uel"].includes(v.codigo)
+    ["enem", "uem", "uel"].includes(v.codigo),
   );
 
   return (
@@ -41,7 +41,7 @@ export function Home() {
           variant="h6"
           textAlign="center"
           color="text.secondary"
-          sx={{ mb: 6 }}
+          sx={{ mb: 6, px: 2, fontSize: { xs: "1rem", md: "1.25rem" } }}
         >
           Metodologia comprovada e materiais exclusivos
         </Typography>
@@ -103,7 +103,7 @@ export function Home() {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                sm: "repeat(2, 1fr)",
+                sm: "1fr",
                 md: "repeat(3, 1fr)",
               },
               gap: 3,
