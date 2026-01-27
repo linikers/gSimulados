@@ -50,5 +50,5 @@ O backend inclui suporte para:
 
 - MongoDB (Mongoose)
 - Autenticação (JWT, Bcrypt)
-- IA (OpenAI, LangChain)
+- IA (Gemini, LangChain)
 - Scraping (Cheerio, PDF-Parse)
