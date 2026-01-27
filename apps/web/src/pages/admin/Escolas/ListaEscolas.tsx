@@ -67,6 +67,7 @@ export function ListaEscolas() {
       id: "logo",
       label: "",
       minWidth: 50,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       format: (_: any, row: IEscola) => (
         <Avatar
           src={row.logo || row.avatar}
@@ -84,6 +85,7 @@ export function ListaEscolas() {
       id: "actions",
       label: "Ações",
       minWidth: 100,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       format: (_: any, row: IEscola) => (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton

@@ -69,6 +69,7 @@ export function ListaAlunos() {
       id: "avatar",
       label: "",
       minWidth: 50,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       format: (_: any, row: IAluno) => (
         <Avatar src={row.avatar} sx={{ width: 32, height: 32 }}>
           {row.name?.[0]}
