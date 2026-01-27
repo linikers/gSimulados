@@ -6,5 +6,7 @@ const router = Router();
 
 router.post("/", authMiddleware, AlunosController.create);
 router.get("/", authMiddleware, AlunosController.list);
+router.put("/:id", authMiddleware, AlunosController.update);
+router.delete("/:id", authMiddleware, AlunosController.delete);
 
 export default router;

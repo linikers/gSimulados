@@ -48,4 +48,52 @@ export class AlunosController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async update(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { User } = require("../models/User");
+      const { userRole, userId } = req;
+
+      let query: any = { _id: id, role: "aluno" };
+      if (userRole === "escola") {
+        query.escolaId = userId;
+      }
+
+      const updatedUser = await User.findOneAndUpdate(query, req.body, {
+        new: true,
+      }).select("-password");
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Aluno não encontrado" });
+      }
+
+      res.json(updatedUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async delete(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { User } = require("../models/User");
+      const { userRole, userId } = req;
+
+      let query: any = { _id: id, role: "aluno" };
+      if (userRole === "escola") {
+        query.escolaId = userId;
+      }
+
+      const deletedUser = await User.findOneAndDelete(query);
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: "Aluno não encontrado" });
+      }
+
+      res.json({ message: "Aluno removido com sucesso" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
