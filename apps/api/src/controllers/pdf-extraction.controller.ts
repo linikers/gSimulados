@@ -4,6 +4,8 @@ import { ExtractedQuestion } from "../models/ExtractedQuestion";
 import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
 import { DriveService } from "../services/drive.service";
 import { Question } from "../models/Question";
+import { GeminiAuditService } from "../services/gemini-audit.service";
+
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -229,4 +231,33 @@ export class PdfExtractionController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  // Auditar uma questão extraída
+  static async auditExtractedQuestion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const extracted = await ExtractedQuestion.findById(id);
+
+      if (!extracted) {
+        return res.status(404).json({ error: "Questão não encontrada" });
+      }
+
+      const auditResult = await GeminiAuditService.auditQuestion(extracted);
+
+      // Se a IA corrigiu o gabarito e estava vazio, atualiza
+      if (auditResult.status === "corrected" || (!extracted.respostaCorreta && auditResult.gabaritoCorreto)) {
+        extracted.respostaCorreta = auditResult.gabaritoCorreto;
+        extracted.reviewNotes = (extracted.reviewNotes || "") + `\n[IA Audit] ${auditResult.feedback}`;
+        await extracted.save();
+      }
+
+      res.json({
+        message: "Auditoria concluída",
+        auditResult
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
+

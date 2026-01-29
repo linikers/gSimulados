@@ -13,6 +13,7 @@ router.get("/stats", PdfExtractionController.getStats);
 
 // Rotas de revisão de questões extraídas
 router.get("/questions/pending", PdfExtractionController.listPendingQuestions);
+router.post("/questions/:id/audit", PdfExtractionController.auditExtractedQuestion);
 router.post("/questions/:id/approve", PdfExtractionController.approveQuestion);
 router.post("/questions/:id/reject", PdfExtractionController.rejectQuestion);
 

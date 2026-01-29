@@ -7,6 +7,10 @@ Este documento centraliza as funcionalidades pendentes, refatorações necessár
 ## 1. Implementações Pendentes (Funcionalidades)
 
 ### Alta Prioridade
+- [ ] **Auditoria Acadêmica com Gemini**:
+    - [ ] Criar serviço `GeminiAuditService` para conferência de questões e gabaritos.
+    - [ ] Implementar sistema de logs para rastreabilidade de correções da IA.
+    - [ ] Integrar no fluxo de extração e geração de simulados.
 - [ ] **FAQ Dinâmico**:
     - [ ] Criar Collection `FAQ` no MongoDB.
     - [ ] Criar CRUD no Backend (`FaqController`).
