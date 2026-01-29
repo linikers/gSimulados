@@ -22,6 +22,7 @@ O sistema possui um fluxo completo de ingestão de questões via PDFs, utilizand
 4.  **Auditoria Acadêmica (`GeminiAuditService`)**:
     - Novo serviço que atua como Professor Revisor.
     - Valida clareza, precisão técnica e corrige gabaritos ausentes ou errados.
+    - **Importante:** A auditoria enriquece a questão com logs e sugestões, mas **NÃO a aprova automaticamente**. O status permanece "Pendente" para revisão humana.
     - Registra logs detalhados em `AuditLog` para rastreabilidade.
 5.  **Revisão e Aprovação (`/admin/banco-questoes/revisar`)**:
     - As questões extraídas entram como "Pendentes".
