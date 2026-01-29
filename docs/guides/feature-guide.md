@@ -43,17 +43,13 @@ O "Gerador" é o processo de extrair questões dos PDFs sincronizados usando IA.
 
 ## 3. Estado Atual e Próximos Passos
 
-### O que está funcionando (Frontend)
-- ✅ Telas de configuração do Drive.
-- ✅ Listagem de PDFs.
-- ✅ Botão de disparo da extração.
+### O que está funcionando (Frontend & Backend)
+- ✅ **Integração Real com Google Drive**: O sistema conecta via API oficial (Service Account) para listar e baixar arquivos.
+- ✅ **Extração com IA (Gemini)**: O sistema envia os PDFs para o Google Gemini Flash, que analisa e retorna as questões estruturadas.
+- ✅ **Fluxo de Revisão**: Interface para validar as questões extraídas pela IA antes de oficializá-las.
+- ✅ **Gestão de Vestibulares**: CRUD completo de vestibulares.
 
-### O que é "Mock" (Simulado)
-- ⚠️ **Conexão com Drive**: O sistema "finge" que leu a pasta e retorna arquivos de exemplo.
-- ⚠️ **Extração com IA**: O sistema cria questões de exemplo ("Qual é a capital do Brasil?") ao invés de ler o PDF real.
-
-### Próximos Passos (Desenvolvimento)
-Para tornar o sistema funcional com dados reais, precisamos:
-1. **Implementar Google Drive API**: Configurar credenciais reais para ler a pasta do usuário.
-2. **Conectar Gemini Vision**: Substituir o mock no `pdf-extraction.controller.ts` pela chamada real ao `gemini-vision.service.ts`.
-3. **Tela de Revisão**: Criar a tela para revisar e aprovar as questões extraídas antes de irem para o banco oficial.
+### Pontos de Atenção (Melhorias Futuras)
+- **Otimização de Imagens**: O recorte automático de imagens das questões ainda pode ser aprimorado.
+- **Feedback de Erro na IA**: Melhorar mensagens para o usuário caso o Gemini falhe em ler um PDF específico (ex: Scanned PDF de baixa qualidade).
+- **Edição Avançada**: Adicionar suporte a LaTeX no editor de enunciados da revisão.

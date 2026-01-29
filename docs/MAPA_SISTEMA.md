@@ -1,86 +1,93 @@
-# Mapa Técnico de Integração: ENEM Parser -> gSimulados
+# Mapa Técnico do Sistema - gSimulados
 
-Este documento mapeia tecnicamente como trazer a inteligência do projeto Python (`ENEM_PDF_PARSER`) para o ecossistema `gSimulados` (Node.js/React).
+Este documento descreve a arquitetura técnica atual do sistema `gSimulados`, focada em uma stack 100% TypeScript (Node.js/React) e integração direta com IAs Generativas.
 
-## 1. O que o projeto Python usa (Tech Stack)
+> **Nota Histórica:** Planejamentos anteriores consideravam integrar scripts Python (`ENEM Parser`). Essa abordagem foi substituída por serviços nativos em Node.js integrados ao Google Gemini.
 
-O projeto Python é um **Script de Linha de Comando (CLI)**, não uma API web. Isso significa que ele **não tem rotas** (endpoints HTTP), ele roda, processa e termina.
+## 1. Arquitetura Geral
 
-| Componente Python           | Biblioteca Usada | Função no Parser                                        | Equivalente Node.js (Se fosse reescrever)                                     |
-| :-------------------------- | :--------------- | :------------------------------------------------------ | :---------------------------------------------------------------------------- |
-| **Leitura de PDF**          | `pymupdf` (fitz) | Extrai texto e coordenadas (blocos) preservando layout. | `pdfjs-dist` ou `pdf-parse` (Geralmente menos robustos para layout complexo). |
-| **Regex**                   | `re` (Nativo)    | Identifica padrões como "91 - " (início de questão).    | `RegExp` (Nativo JS).                                                         |
-| **Estruturação**            | `json` (Nativo)  | Salva os dados processados em arquivo.                  | `fs` + `JSON.stringify`.                                                      |
-| **Manipulação de Arquivos** | `os` (Nativo)    | Lê pastas e cria caminhos de output.                    | `path` e `fs` (Nativo Node).                                                  |
+O projeto opera como um **Monorepo** (Nx/Turbo style) contendo:
+
+*   **Frontend (`apps/web`)**: React, Vite, Material UI.
+*   **Backend (`apps/api`)**: Node.js, Express, Mongoose.
+*   **Banco de Dados**: MongoDB (Atlas ou Local).
 
 ---
 
-## 2. Mapa de Dados: Python -> gSimulados
+## 2. Fluxo de Inteligência Artificial (Extração de Questões)
 
-Para integrar, precisaremos transformar o JSON de saída do Python para o Schema do MongoDB do gSimulados.
+O "coração" da automação do sistema é o serviço de extração de questões a partir de PDFs de vestibulares.
 
-### Estrutura de Saída (Python JSON)
+### Componentes Envolvidos
 
-```json
+| Componente | Função Técnica | Localização no Código |
+| :--- | :--- | :--- |
+| **Drive Service** | Conecta à API do Google Drive via Service Account para listar e baixar PDFs (Stream/Buffer). | `apps/api/src/services/drive.service.ts` |
+| **Gemini Vision Service** | Envia o Buffer do PDF + Prompt de Contexto para a API do Google Gemini (Flash 1.5). Recebe JSON estruturado. | `apps/api/src/services/gemini-vision.service.ts` |
+| **PDF Extraction Controller** | Orquestra o fluxo: Drive -> Gemini -> Salvar no Banco (Collection `ExtractedQuestion`). | `apps/api/src/controllers/pdf-extraction.controller.ts` |
+
+### Pipeline de Dados
+
+1.  **Ingestão**: Admin sincroniza uma pasta do Drive. O sistema salva metadados dos arquivos (`PdfSource`).
+2.  **Processamento**:
+    *   O Backend baixa o arquivo do Drive em memória.
+    *   Envia para o Gemini com prompt: *"Você é um especialista em vestibular... extraia JSON..."*.
+3.  **Persistência Temporária**:
+    *   O JSON retornado pela IA é salvo na coleção `ExtractedQuestion` com status `pending`.
+    *   Neste ponto, o dado ainda é "cru" e pode conter erros de OCR ou alucinações.
+4.  **Curadoria Humana (Human-in-the-loop)**:
+    *   Admin acessa interface de Revisão (`/admin/banco-questoes/revisar`).
+    *   Edita enunciados, corrige gabaritos e aprova.
+5.  **Persistência Definitiva**:
+    *   Ao aprovar, o sistema cria um documento na coleção final `Question`.
+
+---
+
+## 3. Modelo de Dados (Core)
+
+### `Question` (Questão Oficial)
+Entidade final utilizada para gerar simulados.
+
+```typescript
 {
-  "numero": 91,
-  "conteudo": "Texto da questão...",
-  "gabarito": "A",
-  "page_images": ["img_91_1.png"]
+  enunciado: string;      // HTML/Markdown
+  alternativas: [string]; // Lista de strings (ex: ["(A) ...", "(B) ..."])
+  respostaCorreta: string;// Ex: "A", "02", "Soma: 15"
+  materia: string;        // Ex: "Matemática"
+  assunto: string;        // Ex: "Geometria Plana"
+  dificuldade: string;    // "facil", "medio", "dificil"
+  origem: {
+      vestibular: string; // "ENEM"
+      ano: number;        // 2024
+  }
 }
 ```
 
-### Estrutura de Destino (gSimulados Schema)
+### `ExtractedQuestion` (Questão em Trânsito)
+Entidade intermediária que armazena o retorno da IA.
 
-Precisaremos de um adaptador (script Node.js) que faça este "De -> Para":
-
-| Campo Python (`json`) | Campo gSimulados (`MongoDB`) | Tratamento Necessário                                                                                                                                                                                                                    |
-| :-------------------- | :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `numero`              | `questionNumber`             | Cópia direta.                                                                                                                                                                                                                            |
-| `conteudo`            | `statement`                  | Limpeza de espaços extras.                                                                                                                                                                                                               |
-| `gabarito`            | `correctAlternative`         | Cópia direta.                                                                                                                                                                                                                            |
-| **N/A**               | `alternatives`               | **Atenção:** O Python separa as alternativas ou entrega tudo no `conteudo`? _Análise do código mostra que ele entrega tudo misturado no conteúdo atualmente._ **Ajuste necessário:** Melhorar o regex Python para separar A, B, C, D, E. |
-| `page_images`         | `images`                     | Upload para S3/Cloudinary e salvar URL, ou servir estático.                                                                                                                                                                              |
-| **N/A**               | `subject`                    | Inferir pelo número (91-135=Natureza) no momento da importação.                                                                                                                                                                          |
-| **N/A**               | `year`                       | Pegar do nome do arquivo ou parâmetro do script.                                                                                                                                                                                         |
+```typescript
+{
+  pdfSourceId: ObjectId;  // Link com o arquivo original
+  confidence: number;     // Nível de confiança da IA (ex: 85)
+  status: "pending" | "approved" | "rejected" | "edited";
+  ...campos_da_questao
+}
+```
 
 ---
 
-## 3. Fluxo de Adaptação (Roadmap)
+## 4. Integrações Externas
 
-Como o projeto Python não tem rotas, a integração não será "chamar uma API". Será um **Pipeline de Dados**.
+1.  **Google Cloud Platform**:
+    *   **Drive API**: Leitura de arquivos.
+    *   **Vertex AI / AI Studio**: Acesso aos modelos Gemini.
+2.  **Cloudinary** (Planejado/Parcial):
+    *   Armazenamento de imagens recortadas das questões.
 
-### Cenário A: Importação em Massa (Seed)
+---
 
-_Ideal para popular o banco de dados inicialmente._
+## 5. Próximos Passos Técnicos
 
-1.  **Execução Python:**
-    - Rodar `python enem_pdf_extractor.py` localmente.
-    - Gera: `output/2024_natureza.json`.
-2.  **Adaptação (Novo Script Node no gSimulados):**
-    - Criar arquivo `scripts/import_questions.ts`.
-    - Lê o JSON gerado.
-    - Para cada questão:
-      - Verifica se já existe no Banco.
-      - Salva no MongoDB usando o Mongoose model `Question`.
-
-### Cenário B: Processamento Sob Demanda (Upload no Site)
-
-_Ideal se você quiser que o professor faça upload de um PDF novo no site e o sistema processe na hora._
-
-1.  **Serviço Python:**
-    - Transformar o script Python em uma API simples usando `FastAPI` ou `Flask`.
-    - Criar rota `POST /parse-pdf`.
-2.  **Integração Node:**
-    - O Backend Node recebe o Upload.
-    - Envia o arquivo para a API Python.
-    - Recebe o JSON de volta e salva no banco.
-
-## 4. Conclusão e Recomendação
-
-O projeto `ENEM TESTE` é um **extrator simples**. Ele faz o trabalho sujo de ler PDF da prova do INEP.
-Para "ligá-lo" ao gSimulados sem mudar a stack do projeto principal para Python, a melhor rota é o **Cenário A**:
-Use o Python como uma ferramenta de bastidor para gerar os dados, e o Node.js apenas importa esses dados prontos.
-
-**Próximo Passo Prático:**
-Ajustar o Regex do Python (`extractor_utils.py`) para tentar separar o Texto Base das Alternativas, pois o gSimulados provavelmente vai querer exibir as alternativas como botões clicáveis, e não apenas texto corrido.
+*   **Filas de Processamento**: Atualmente a extração é síncrona/request-based. Para processar centenas de PDFs, migrar para filas (BullMQ/Redis).
+*   **Melhoria de Prompt**: Refinar o prompt do Gemini para identificar melhor questões com imagens e tabelas complexas.

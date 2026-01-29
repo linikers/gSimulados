@@ -40,6 +40,8 @@
 | `/admin/vestibulares/cadastro` | Criar Novo Vestibular         |
 | `/admin/banco-questoes/drive`  | Configurar Google Drive       |
 | `/admin/banco-questoes/pdfs`   | Listar/Processar PDFs         |
+| `/admin/banco-questoes/revisar`| Revisar Questões Extraídas (IA)|
+| `/admin/banco-questoes/questoes`| Listar Banco Oficial         |
 
 #### Escola Routes
 
