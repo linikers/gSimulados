@@ -19,7 +19,11 @@ O sistema possui um fluxo completo de ingestão de questões via PDFs, utilizand
     - O arquivo é enviado para o **Google Gemini 1.5 Flash**.
     - O prompt instrui a IA a extrair Enunciado, Alternativas, Gabarito e Metadados em formato JSON.
     - **Status:** Implementado e funcional (`gemini-vision.service.ts`).
-4.  **Revisão e Aprovação (`/admin/banco-questoes/revisar`)**:
+4.  **Auditoria Acadêmica (`GeminiAuditService`)**:
+    - Novo serviço que atua como Professor Revisor.
+    - Valida clareza, precisão técnica e corrige gabaritos ausentes ou errados.
+    - Registra logs detalhados em `AuditLog` para rastreabilidade.
+5.  **Revisão e Aprovação (`/admin/banco-questoes/revisar`)**:
     - As questões extraídas entram como "Pendentes".
     - O Admin revisa, ajusta texto/gabarito e aprova.
     - Ao aprovar, a questão é movida para o Banco de Questões oficial (`Question` collection).
