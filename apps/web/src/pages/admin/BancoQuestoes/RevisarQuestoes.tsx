@@ -8,6 +8,13 @@ import {
   Typography,
   Chip,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  Alert,
+  LinearProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -19,6 +26,11 @@ export function RevisarQuestoes() {
   const [questoes, setQuestoes] = useState<IQuestionReview[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const questao = questoes[currentIndex];
+
+  // Estados para Auditoria IA
+  const [auditDialogOpen, setAuditDialogOpen] = useState(false);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditResult, setAuditResult] = useState<any>(null);
 
   const loadQuestoes = async () => {
     try {
@@ -57,8 +69,14 @@ export function RevisarQuestoes() {
 
   const handleAudit = async () => {
     if (!questao) return;
+    setAuditLoading(true);
+    setAuditDialogOpen(true);
+    setAuditResult(null);
+
     try {
       const result = await QuestionReviewService.audit(questao._id);
+      setAuditResult(result.auditResult);
+
       // Atualiza a questão atual com os dados auditados (ex: gabarito corrigido)
       if (result.auditResult?.gabaritoCorreto) {
         setQuestoes((prev) => {
@@ -69,15 +87,15 @@ export function RevisarQuestoes() {
           };
           return copy;
         });
-        alert(`Auditoria Concluída!\nFeedback: ${result.auditResult.feedback}`);
-      } else if (result.auditResult?.status === "flagged") {
-        alert(`Atenção: ${result.auditResult.feedback}`);
-      } else {
-        alert(`Auditoria Concluída! Nenhuma alteração sugerida.\nFeedback: ${result.auditResult?.feedback}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro na auditoria:", error);
-      alert("Erro ao realizar auditoria.");
+      setAuditResult({
+        status: "flagged",
+        feedback: `Erro ao realizar auditoria: ${error.message || "Erro desconhecido"}.`,
+      });
+    } finally {
+      setAuditLoading(false);
     }
   };
 
@@ -287,6 +305,81 @@ export function RevisarQuestoes() {
           </CardActions>
         </Card>
       )}
+
+      {/* Dialog de Resultado da Auditoria */}
+      <Dialog
+        open={auditDialogOpen}
+        onClose={() => !auditLoading && setAuditDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: 1 }}>
+          Auditoria Acadêmica IA 🤖
+        </DialogTitle>
+        <DialogContent dividers>
+          {auditLoading ? (
+            <Box sx={{ py: 4, textAlign: "center" }}>
+              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <Typography color="text.secondary">
+                O Professor Revisor Auditing está analisando a questão...
+              </Typography>
+            </Box>
+          ) : auditResult ? (
+            <Box>
+              {auditResult.status === "corrected" && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  A IA sugeriu uma correção no gabarito para: <strong>{auditResult.gabaritoCorreto}</strong>
+                </Alert>
+              )}
+              {auditResult.status === "approved" && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  A questão foi validada com sucesso! Gabarito {auditResult.gabaritoCorreto} parece correto.
+                </Alert>
+              )}
+              {auditResult.status === "flagged" && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  Problema Identificado na Auditoria.
+                </Alert>
+              )}
+
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Análise do {auditResult.academicRole || "Professor Revisor"}:
+              </Typography>
+              <Typography variant="body1" sx={{ fontStyle: "italic", mb: 3 }}>
+                "{auditResult.feedback}"
+              </Typography>
+
+              {auditResult.confidence !== undefined && (
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                    <Typography variant="caption" color="text.secondary">Confiança da IA</Typography>
+                    <Typography variant="caption" color="text.secondary">{auditResult.confidence}%</Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={auditResult.confidence}
+                    color={auditResult.confidence > 80 ? "success" : auditResult.confidence > 50 ? "warning" : "error"}
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <Typography>Nenhum resultado recebido.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setAuditDialogOpen(false)}
+            disabled={auditLoading}
+            fullWidth
+          >
+            Entendido
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
