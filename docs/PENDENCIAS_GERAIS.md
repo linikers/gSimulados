@@ -21,8 +21,8 @@ Este documento centraliza as funcionalidades pendentes, refatorações necessár
     - [ ] Verificar pipeline de upload para Cloudinary na extração do Gemini.
     - [ ] Garantir que na revisão da questão, a imagem apareça e possa ser substituída se o recorte ficou ruim.
 - [ ] **Dashboard Admin**:
-    - [ ] Criar widgets com estatísticas reais (Total de Alunos, Escolas, Questões extraídas hoje, Gráficos de adesão).
-    - [ ] Endpoint `/dashboard/stats` no backend.
+    - [ ] Criar widgets com estatísticas reais conforme definido em [DASHBOARD_SPECS.md](./DASHBOARD_SPECS.md).
+    - [ ] Endpoint `/dashboard/stats` no backend (IA Accuracy + Funil).
 
 ### Média Prioridade
 - [ ] **Geração Avançada de Simulados** (Baseado em `IDEIAS_AJUSTES.md`):
