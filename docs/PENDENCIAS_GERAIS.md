@@ -28,8 +28,8 @@ Este documento centraliza as funcionalidades pendentes, refatorações necessár
 - [ ] **Geração Avançada de Simulados** (Baseado em `IDEIAS_AJUSTES.md`):
     - [ ] Implementar algoritmo híbrido (IA + Regras) para montagem de prova equilibrada.
     - [ ] Permitir simulados "Diagnósticos" (dificuldade progressiva).
-- [ ] **Auditoria de Extração**:
-    - [ ] Implementar logs detalhados de edição humana vs sugestão da IA para calcular "Taxa de Precisão da IA".
+- [x] **Auditoria de Extração**:
+    - [x] Implementar logs detalhados de edição humana vs sugestão da IA para calcular "Taxa de Precisão da IA".
 
 ## 2. Refatoração e Padronização de Código
 

@@ -5,6 +5,7 @@ import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
 import { DriveService } from "../services/drive.service";
 import { Question } from "../models/Question";
 import { GeminiAuditService } from "../services/gemini-audit.service";
+import { AuditLog } from "../models/AuditLog";
 
 
 export class PdfExtractionController {
@@ -166,6 +167,42 @@ export class PdfExtractionController {
         },
         tags: editedData.tags || [],
       });
+
+      // 1.1 Registrar Auditoria de Extração (IA vs Humano)
+      const hasChanges =
+        (editedData.enunciado && editedData.enunciado !== extracted.enunciado) ||
+        (editedData.respostaCorreta && editedData.respostaCorreta !== extracted.respostaCorreta) ||
+        (editedData.materia && editedData.materia !== extracted.materia) ||
+        (editedData.assunto && editedData.assunto !== extracted.assunto) ||
+        (JSON.stringify(editedData.alternativas) !== JSON.stringify(extracted.alternativas));
+
+      if (hasChanges) {
+        console.log(`[Auditoria] Registrando correção manual para questão ${extracted.numeroQuestao}`);
+        await AuditLog.create({
+          entityType: "question",
+          entityId: newQuestion._id,
+          action: "manual_correction",
+          performedBy: (req as any).userId,
+          details: {
+            previousValue: {
+              enunciado: extracted.enunciado,
+              alternativas: extracted.alternativas,
+              respostaCorreta: extracted.respostaCorreta,
+              materia: extracted.materia,
+              assunto: extracted.assunto,
+            },
+            newValue: {
+              enunciado: newQuestion.enunciado,
+              alternativas: newQuestion.alternativas,
+              respostaCorreta: newQuestion.respostaCorreta,
+              materia: newQuestion.materia,
+              assunto: newQuestion.assunto,
+            },
+          },
+        });
+      } else {
+        console.log(`[Auditoria] Questão ${extracted.numeroQuestao} aprovada sem correções.`);
+      }
 
       // 2. Atualizar status da extração
       extracted.status = "approved";
