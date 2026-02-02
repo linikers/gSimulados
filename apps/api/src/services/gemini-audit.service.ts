@@ -9,9 +9,9 @@ export class GeminiAuditService {
      * Realiza uma auditoria acadêmica de uma questão.
      * Atua como um professor revisor.
      */
-    static async auditQuestion(questionData: any, context: string = "Vestibular") {
+    static async auditQuestion(questionData: any, _context: string = "Vestibular") {
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-flash-latest",
             generationConfig: { responseMimeType: "application/json" },
         });
 
@@ -71,7 +71,14 @@ FORMATO DE RETORNO (JSON APENAS):
             return auditResult;
         } catch (error: any) {
             console.error("[GeminiAuditService] Erro na auditoria:", error.message);
-            throw error;
+
+            // Graceful Degradation: Retornar um resultado de falha em vez de estourar erro 500
+            return {
+                status: "flagged",
+                confidence: 0,
+                feedback: `IA Indisponível (Erro: ${error.message}). Por favor, revise manualmente ou tente novamente mais tarde.`,
+                academicRole: "Sistema de Auditoria (Modo de Segurança)"
+            };
         }
     }
 }

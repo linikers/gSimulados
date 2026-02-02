@@ -7,10 +7,11 @@ Este documento centraliza as funcionalidades pendentes, refatorações necessár
 ## 1. Implementações Pendentes (Funcionalidades)
 
 ### Concluído Recentemente
-- [x] **Auditoria Acadêmica com Gemini**:
-    - [x] Criar serviço `GeminiAuditService` para conferência de questões e gabaritos.
+- [x] **Auditoria Acadêmica Profissional**:
+    - [x] Criar serviço `GeminiAuditService` com resiliência (Graceful Degradation).
+    - [x] Implementar Diálogo de Auditoria no Frontend (MUI Dialog).
     - [x] Implementar sistema de logs para rastreabilidade de correções da IA.
-    - [x] Integrar no fluxo de extração e geração de simulados.
+    - [x] Integrar no fluxo de revisão humana (Manual Audit Trigger).
 - [ ] **FAQ Dinâmico**:
     - [ ] Criar Collection `FAQ` no MongoDB.
     - [ ] Criar CRUD no Backend (`FaqController`).
@@ -20,15 +21,15 @@ Este documento centraliza as funcionalidades pendentes, refatorações necessár
     - [ ] Verificar pipeline de upload para Cloudinary na extração do Gemini.
     - [ ] Garantir que na revisão da questão, a imagem apareça e possa ser substituída se o recorte ficou ruim.
 - [ ] **Dashboard Admin**:
-    - [ ] Criar widgets com estatísticas reais (Total de Alunos, Escolas, Questões extraídas hoje, Gráficos de adesão).
-    - [ ] Endpoint `/dashboard/stats` no backend.
+    - [ ] Criar widgets com estatísticas reais conforme definido em [DASHBOARD_SPECS.md](./DASHBOARD_SPECS.md).
+    - [ ] Endpoint `/dashboard/stats` no backend (IA Accuracy + Funil).
 
 ### Média Prioridade
 - [ ] **Geração Avançada de Simulados** (Baseado em `IDEIAS_AJUSTES.md`):
     - [ ] Implementar algoritmo híbrido (IA + Regras) para montagem de prova equilibrada.
     - [ ] Permitir simulados "Diagnósticos" (dificuldade progressiva).
-- [ ] **Auditoria de Extração**:
-    - [ ] Implementar logs detalhados de edição humana vs sugestão da IA para calcular "Taxa de Precisão da IA".
+- [x] **Auditoria de Extração**:
+    - [x] Implementar logs detalhados de edição humana vs sugestão da IA para calcular "Taxa de Precisão da IA".
 
 ## 2. Refatoração e Padronização de Código
 

@@ -24,21 +24,22 @@ O "coração" da automação do sistema é o serviço de extração de questões
 | :--- | :--- | :--- |
 | **Drive Service** | Conecta à API do Google Drive via Service Account para listar e baixar PDFs (Stream/Buffer). | `apps/api/src/services/drive.service.ts` |
 | **Gemini Vision Service** | Envia o Buffer do PDF + Prompt de Contexto para a API do Google Gemini (Flash 1.5). Recebe JSON estruturado. | `apps/api/src/services/gemini-vision.service.ts` |
-| **Gemini Audit Service** | Atua como Professor Revisor Acadêmico, validando questões e corrigindo gabaritos. | `apps/api/src/services/gemini-audit.service.ts` |
-| **PDF Extraction Controller** | Orquestra o fluxo: Drive -> Gemini -> Audit -> Salvar no Banco. | `apps/api/src/controllers/pdf-extraction.controller.ts` |
+| **Gemini Audit Service** | Atua como Professor Revisor Acadêmico, validando questões e corrigindo gabaritos. Possui modo de resiliência (Graceful Degradation). | `apps/api/src/services/gemini-audit.service.ts` |
+| **AI Diagnostics** | Script de saúde para validar conectividade e validade da chave do Gemini de forma independente. | `apps/api/test-ai.ts` |
+| **PDF Extraction Controller** | Orquestra o fluxo. | `apps/api/src/controllers/pdf-extraction.controller.ts` |
 
 ### Pipeline de Dados
 
 1.  **Ingestão**: Admin sincroniza uma pasta do Drive. O sistema salva metadados dos arquivos (`PdfSource`).
-2.  **Processamento e Auditoria**:
+2.  **Processamento**:
     *   O Backend baixa o arquivo do Drive em memória.
-    *   Envia para o Gemini para extração.
-    *   **Auditoria Automática**: O `GeminiAuditService` revisa o conteúdo extraído, valida o gabarito e gera logs de auditoria.
+    *   Envia para o Gemini (`gemini-flash-latest`) para extração.
 3.  **Persistência Temporária**:
     *   O JSON retornado pela IA é salvo na coleção `ExtractedQuestion` com status `pending`.
     *   Neste ponto, o dado ainda é "cru" e pode conter erros de OCR ou alucinações.
-4.  **Curadoria Humana (Human-in-the-loop)**:
+4.  **Auditoria e Curadoria (Human-in-the-loop)**:
     *   Admin acessa interface de Revisão (`/admin/banco-questoes/revisar`).
+    *   **Auditoria Manual**: Admin dispara a auditoria via botão. O sistema abre um Dialog intuitivo com o feedback da IA.
     *   Edita enunciados, corrige gabaritos e aprova.
 5.  **Persistência Definitiva**:
     *   Ao aprovar, o sistema cria um documento na coleção final `Question`.

@@ -19,10 +19,11 @@ O sistema possui um fluxo completo de ingestão de questões via PDFs, utilizand
     - O arquivo é enviado para o **Google Gemini 1.5 Flash**.
     - O prompt instrui a IA a extrair Enunciado, Alternativas, Gabarito e Metadados em formato JSON.
     - **Status:** Implementado e funcional (`gemini-vision.service.ts`).
-4.  **Auditoria Acadêmica (`GeminiAuditService`)**:
-    - Novo serviço que atua como Professor Revisor.
-    - Valida clareza, precisão técnica e corrige gabaritos ausentes ou errados.
-    - **Importante:** A auditoria enriquece a questão com logs e sugestões, mas **NÃO a aprova automaticamente**. O status permanece "Pendente" para revisão humana.
+4.  **Auditoria Acadêmica Profissional (`GeminiAuditService`)**:
+    - **Interface Visual**: Implementado o **Diálogo de Auditoria IA** no frontend, substituindo alertas nativos por um modal moderno com barras de confiança e feedback detalhado.
+    - **Robustez (Graceful Degradation)**: O backend agora possui tratamento de falhas resiliente. Se a IA falhar (ex: chave expirada), o sistema entra em modo de segurança, avisando o usuário mas permitindo a revisão manual sem travar o servidor (Erro 500).
+    - **Padronização**: Todos os serviços utilizam o modelo estável `gemini-flash-latest`.
+    - **Auditoria Manual**: Por segurança e para evitar limites de taxa (rate limits), a auditoria é disparada manualmente via botão "Auditar com IA 🤖".
     - Registra logs detalhados em `AuditLog` para rastreabilidade.
 5.  **Revisão e Aprovação (`/admin/banco-questoes/revisar`)**:
     - As questões extraídas entram como "Pendentes".
@@ -43,9 +44,7 @@ O sistema possui um fluxo completo de ingestão de questões via PDFs, utilizand
 
 ## 🚧 O que ainda não foi feito / Pontos de Atenção (Gaps)
 
-### 1. Frontend - Detalhes de UI/UX
-- A tela de **Revisão de Questões** precisa de testes de usabilidade intensos (edição de fórmulas LaTeX, imagens).
-- Tratamento de erros no frontend para falhas de extração da IA (ex: timeout, JSON inválido) pode ser melhorado.
+- A tela de **Revisar Questões** foi aprimorada com o Diálogo de Auditoria, mas ainda pode evoluir para edição de fórmulas LaTeX e tabelas complexas.
 
 ### 2. Extração de Imagens das Questões
 - **Situação:** O Gemini identifica que "temImagem: true", mas o recorte da imagem e upload para Cloudinary ainda não parece estar 100% automatizado no fluxo principal de extração massiva.
