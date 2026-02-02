@@ -9,7 +9,7 @@ export class GeminiAuditService {
      * Realiza uma auditoria acadêmica de uma questão.
      * Atua como um professor revisor.
      */
-    static async auditQuestion(questionData: any, context: string = "Vestibular") {
+    static async auditQuestion(questionData: any, _context: string = "Vestibular") {
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" },
