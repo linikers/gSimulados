@@ -70,6 +70,8 @@ export function RevisarQuestoes() {
           return copy;
         });
         alert(`Auditoria Concluída!\nFeedback: ${result.auditResult.feedback}`);
+      } else if (result.auditResult?.status === "flagged") {
+        alert(`Atenção: ${result.auditResult.feedback}`);
       } else {
         alert(`Auditoria Concluída! Nenhuma alteração sugerida.\nFeedback: ${result.auditResult?.feedback}`);
       }
