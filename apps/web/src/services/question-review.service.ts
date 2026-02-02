@@ -38,4 +38,9 @@ export const QuestionReviewService = {
     const response = await api.post(`/extraction/questions/${id}/reject`);
     return response.data;
   },
+
+  audit: async (id: string) => {
+    const response = await api.post(`/extraction/questions/${id}/audit`);
+    return response.data;
+  },
 };

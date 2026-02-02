@@ -54,6 +54,31 @@ export function RevisarQuestoes() {
     await QuestionReviewService.reject(questao._id);
     loadNext();
   };
+
+  const handleAudit = async () => {
+    if (!questao) return;
+    try {
+      const result = await QuestionReviewService.audit(questao._id);
+      // Atualiza a questão atual com os dados auditados (ex: gabarito corrigido)
+      if (result.auditResult?.gabaritoCorreto) {
+        setQuestoes((prev) => {
+          const copy = [...prev];
+          copy[currentIndex] = {
+            ...copy[currentIndex],
+            respostaCorreta: result.auditResult.gabaritoCorreto,
+          };
+          return copy;
+        });
+        alert(`Auditoria Concluída!\nFeedback: ${result.auditResult.feedback}`);
+      } else {
+        alert(`Auditoria Concluída! Nenhuma alteração sugerida.\nFeedback: ${result.auditResult?.feedback}`);
+      }
+    } catch (error) {
+      console.error("Erro na auditoria:", error);
+      alert("Erro ao realizar auditoria.");
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h4">Revisar Questões</Typography>
@@ -76,8 +101,8 @@ export function RevisarQuestoes() {
                   questao.tipoQuestao === "somatoria"
                     ? "Somatória"
                     : questao.tipoQuestao === "alternativa"
-                    ? "Alternativas"
-                    : "Múltipla Escolha"
+                      ? "Alternativas"
+                      : "Múltipla Escolha"
                 }
                 color="info"
                 variant="outlined"
@@ -250,6 +275,9 @@ export function RevisarQuestoes() {
           <CardActions>
             <Button color="error" onClick={handleReject}>
               Rejeitar
+            </Button>
+            <Button color="info" onClick={handleAudit} variant="outlined">
+              Auditar com IA 🤖
             </Button>
             <Button color="success" onClick={handleApprove}>
               Aprovar

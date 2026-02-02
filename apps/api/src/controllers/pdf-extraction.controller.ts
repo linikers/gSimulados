@@ -86,6 +86,23 @@ export class PdfExtractionController {
           confidence: extractionResult.confidence,
           status: "pending",
         });
+
+        // --- AUTOMAÇÃO DE AUDITORIA ---
+        try {
+          // Audita imediatamente a questão extraída
+          const auditResult = await GeminiAuditService.auditQuestion(extractedQ);
+
+          // Se a IA corrigir ou preencher, atualizamos
+          if (auditResult.status === "corrected" || (!extractedQ.respostaCorreta && auditResult.gabaritoCorreto)) {
+            extractedQ.respostaCorreta = auditResult.gabaritoCorreto;
+            extractedQ.reviewNotes = `[Auto-Audit] ${auditResult.feedback}`;
+            await extractedQ.save();
+          }
+        } catch (auditError) {
+          console.error(`[Extração] Falha na auditoria automática da questão ${q.numeroQuestao}:`, auditError);
+          // Não falhamos o processo todo se a auditoria falhar, apenas logamos
+        }
+
         totalQuestions.push(extractedQ);
       }
 
