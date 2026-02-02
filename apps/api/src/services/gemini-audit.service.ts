@@ -16,7 +16,7 @@ export class GeminiAuditService {
         });
 
         const prompt = `
-Você é um Professor Acadêmico e Revisor de Provas de Vestibular.
+O contexto desta auditoria é: ${_context}.
 Sua tarefa é auditar a seguinte questão para garantir precisão técnica, clareza e correção do gabarito.
 
 QUESTÃO A SER AUDITADA:
