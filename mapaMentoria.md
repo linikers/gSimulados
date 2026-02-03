@@ -8,6 +8,29 @@
 
 ---
 
+## 🏗️ Estrutura do Projeto gSimulados
+
+### Estrutura Atual (Monorepo)
+
+- **`apps/api`**: Backend robusto em Node.js e Express, integrando Mongoose e APIs de IA.
+- **`apps/web`**: Interface administrativa e do aluno moderna, construída com React, Vite e MUI v5.
+- **`packages/shared`**: Utilitários e definições de tipos compartilhadas entre frontend e backend.
+
+### Componentes Concluídos
+
+- **`DriveService`**: Orquestrador de downloads e listagem de arquivos do Google Drive.
+- **`GeminiVisionService`**: Processador de OCR e inteligência generativa para extração de questões.
+- **`GeminiAuditService`**: Validador acadêmico que assegura a qualidade dos dados extraídos.
+- **`AuthSystem`**: Controle granular de acesso baseado em Roles (Admin, Escola, Aluno).
+
+### Tarefas e Dependências Restantes
+
+- **Integração Cloudinary**: Dependência crítica para o armazenamento automatizado de imagens de questões.
+- **Centralização de Tipos**: Migração completa dos modelos para o pacote `shared`.
+- **Worker Queues**: Implementação de Redis/BullMQ para desacoplar a extração de PDFs do fluxo principal da API.
+
+---
+
 ## 🏗️ Estrutura de Navegação Mapeada
 
 ```
@@ -552,7 +575,7 @@ class SimuladoBuilderService {
     // 1. Buscar questões das provas selecionadas
     const questoesDisponiveis = await this.buscarQuestoes(
       config.vestibular,
-      config.provasSelecionadas
+      config.provasSelecionadas,
     );
 
     // 2. Filtrar por critérios
@@ -560,13 +583,13 @@ class SimuladoBuilderService {
 
     if (config.materias.length > 0) {
       questoesFiltradas = questoesFiltradas.filter((q) =>
-        config.materias.includes(q.materia)
+        config.materias.includes(q.materia),
       );
     }
 
     if (config.dificuldade !== "misto") {
       questoesFiltradas = questoesFiltradas.filter(
-        (q) => q.dificuldade === config.dificuldade
+        (q) => q.dificuldade === config.dificuldade,
       );
     }
 
@@ -577,13 +600,13 @@ class SimuladoBuilderService {
       // Embaralhar e pegar N questões
       questoesSelecionadas = this.shuffle(questoesFiltradas).slice(
         0,
-        config.quantidadeQuestoes
+        config.quantidadeQuestoes,
       );
     } else {
       // Pegar as primeiras N
       questoesSelecionadas = questoesFiltradas.slice(
         0,
-        config.quantidadeQuestoes
+        config.quantidadeQuestoes,
       );
     }
 
@@ -591,7 +614,7 @@ class SimuladoBuilderService {
     if (config.dificuldade === "misto") {
       questoesSelecionadas = this.balancearDificuldade(
         questoesFiltradas,
-        config.quantidadeQuestoes
+        config.quantidadeQuestoes,
       );
     }
 
@@ -673,7 +696,7 @@ export class SyncGoogleDriveJob {
     });
 
     const newFiles = files.filter(
-      (f) => !existingFiles.some((ef) => ef.googleDriveFileId === f.id)
+      (f) => !existingFiles.some((ef) => ef.googleDriveFileId === f.id),
     );
 
     // 3. Processar novos arquivos
@@ -738,7 +761,7 @@ export class ProcessProvaJob {
           processado: true,
           numeroQuestoes: questoesExtraidas.length,
           dataProcessamento: new Date(),
-        }
+        },
       );
     } catch (error) {
       console.error(`Erro ao processar prova ${provaId}:`, error);
@@ -749,7 +772,7 @@ export class ProcessProvaJob {
         {
           erroProcessamento: error.message,
           necessitaRevisaoManual: true,
-        }
+        },
       );
     }
   }

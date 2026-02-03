@@ -14,6 +14,29 @@ Sistema SaaS B2B2C para criação automatizada e inteligente de simulados basead
 
 ---
 
+## 📈 Status do Desenvolvimento (Atualizado em 03/02/2026)
+
+### ✅ Já Implementado
+
+- **Ingestão de PDFs**: Sincronização automática com pastas do Google Drive.
+- **Extração via IA**: Uso do Google Gemini 1.5 Flash para extrair enunciados, alternativas e gabaritos.
+- **Auditoria Acadêmica**: Sistema de revisão guiada por IA com feedback visual (Modais de Auditoria).
+- **Core Business**: Gestão de escolas, alunos e autenticação segura (JWT).
+- **Simulados**: Fluxo completo de geração e realização de simulados pelos alunos.
+
+### 🚧 Atualmente em Progresso
+
+- **Processamento de Imagens**: Automatização do recorte de imagens de questões e upload para Cloudinary.
+- **Refatoração de Tipagem**: Padronização dos tipos TypeScript em todo o monorepo.
+
+### ❌ Ainda Pendente
+
+- **Dashboard Analítico**: Visualizações de dados e métricas de desempenho para gestores.
+- **Filas de Tarefas**: Migração do processamento síncrono para workers via BullMQ/Redis.
+- **Editor LaTeX**: Integração de editor para revisão de fórmulas matemáticas complexas.
+
+---
+
 ## 🎯 Objetivos e Metas
 
 ### Objetivo Principal
