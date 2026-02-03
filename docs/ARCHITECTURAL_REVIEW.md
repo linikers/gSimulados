@@ -1,7 +1,7 @@
 # Revisão Arquitetural - gSimulados
 
 **Data:** 03/02/2026  
-**Responsável:** Antigravity (Senior SE Role)
+**Responsável:** Liniker Santos (Senior SE Role)
 
 ## 1. Resumo Executivo
 
@@ -37,3 +37,34 @@ O projeto `gSimulados` apresenta uma base sólida e moderna, utilizando uma arqu
 4. **Centralização de Tipos**: Priorizar a migração de todas as interfaces de API e Models para o pacote `@gsimulados/shared`, eliminando a necessidade de re-declaração.
 5. **Monitoramento e Observabilidade**: Implementar logs estruturados e talvez uma ferramenta de Tracing (como Sentry ou OpenTelemetry) para monitorar falhas silenciosas em chamadas de IA.
 6. **Custom Hooks para Lógica de API**: No frontend, abstrair chamadas de serviços e gerenciamento de estado de loading/error para Hooks customizados, limpando os componentes de página.
+
+---
+
+## 5. Planejamento de Migração para AWS (Future-Proofing)
+
+Atualmente no Fly.io, o `gSimulados` pode se beneficiar da robustez e serviços gerenciados da AWS conforme a base de usuários cresce. Sugestões de serviços:
+
+- **Frontend**: **AWS Amplify** ou **S3 + CloudFront**. Recomendado S3 + CloudFront para maior controle sobre cache e custos.
+- **Backend**: **AWS ECS (Fargate)**. Oferece escalabilidade automática sem necessidade de gerenciar instâncias EC2, sendo ideal para o processamento de PDFs.
+- **Banco de Dados**: Permanecer no **MongoDB Atlas** (rodando em AWS peering) ou migrar para **AWS DocumentDB** para total integração com a rede da AWS.
+- **Mensageria/Filas**: **AWS MQ (RabbitMQ)** ou **AWS SQS**. SQS é altamente escalável e sem servidor, ideal se o backend for desacoplado.
+- **Armazenamento**: **AWS S3**. Substituir o armazenamento local e integrar com CloudFront para entrega de imagens das questões.
+
+---
+
+## 6. Parâmetros de Configuração Ajustáveis
+
+Para facilitar a migração e o ajuste de performance, os seguintes parâmetros devem ser mantidos como variáveis de ambiente:
+
+| Parâmetro           | Descrição                                   | Sugestão (Prod)            |
+| :------------------ | :------------------------------------------ | :------------------------- |
+| `NODE_ENV`          | Ambiente de execução                        | `production`               |
+| `PORT`              | Porta de escuta da API                      | `3001`                     |
+| `MONGO_URI`         | String de conexão com MongoDB/DocumentDB    | `<uri>`                    |
+| `JWT_SECRET`        | Segredo para assinatura de tokens           | `<strong_secret>`          |
+| `GEMINI_API_KEY`    | Chave de acesso à API do Google Gemini      | `<api_key>`                |
+| `CLOUDINARY_URL`    | Configuração de integração de imagens       | `<cloudinary_url>`         |
+| `AWS_REGION`        | Região de deploy (AWS)                      | `us-east-1` ou `sa-east-1` |
+| `MAX_FILE_SIZE`     | Limite de tamanho de PDF para processamento | `20MB`                     |
+| `QUEUE_CONCURRENCY` | Número de processamentos simultâneos de PDF | `2 a 5`                    |
+| `IA_MODEL_NAME`     | Modelo do Gemini utilizado                  | `gemini-1.5-flash`         |
