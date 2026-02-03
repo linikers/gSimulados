@@ -317,5 +317,7 @@ Nunca misture integração com setup inicial.
 
 https://github.com/glittercowboy/get-shit-done
 
+---
+
 skill google para testes futuros
 https://github.com/sickn33/antigravity-awesome-skills
