@@ -6,7 +6,7 @@ import { DriveService } from "../services/drive.service";
 import { Question } from "../models/Question";
 import { GeminiAuditService } from "../services/gemini-audit.service";
 import { AuditLog } from "../models/AuditLog";
-
+import { pdfExtractionQueue } from "../queues/pdf-extraction.queue";
 
 export class PdfExtractionController {
   // Listar PDFs
@@ -28,7 +28,7 @@ export class PdfExtractionController {
     }
   }
 
-  // Extrair questões de um PDF
+  // Extrair questões de um PDF (via fila assíncrona)
   static async extractFromPdf(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -38,80 +38,44 @@ export class PdfExtractionController {
         return res.status(404).json({ error: "PDF não encontrado" });
       }
 
-      // Atualizar status
-      await PdfSource.findByIdAndUpdate(id, { status: "processing" });
+      // 1. Atualizar status para processando
+      await PdfSource.findByIdAndUpdate(id, {
+        status: "processing",
+        errorMessage: null, // Limpar erros anteriores
+      });
 
-      // Limpar questões pendentes anteriores para este PDF (Redo/Retry)
+      // 2. Limpar questões pendentes anteriores para este PDF (Redo/Retry)
       await ExtractedQuestion.deleteMany({
         pdfSourceId: id,
         status: "pending",
       });
 
-      console.log(
-        `[Extração] Iniciando extração direta do PDF ${pdfSource.driveFileId}...`
+      console.log(`[Queue] Adicionando PDF ${id} à fila de extração...`);
+
+      // 3. Adicionar tarefa à fila
+      const job = await pdfExtractionQueue.add(
+        `extração-pdf-${id}`,
+        {
+          pdfSourceId: id,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        },
       );
-
-      // 1. Obter Buffer do PDF
-      const pdfBuffer = await DriveService.downloadFile(pdfSource.driveFileId);
-      console.log(
-        `[Extração] Download concluído. Tamanho: ${pdfBuffer.length} bytes`
-      );
-
-      // 2. Extrair com Gemini (Passando o PDF diretamente)
-      console.log(`[Extração] Enviando PDF diretamente para o Gemini...`);
-      const extractionResult = await extractQuestionsFromPdf(
-        pdfBuffer,
-        pdfSource.vestibularCodigo
-      );
-      console.log(`[Extração] Resposta do Gemini recebida.`);
-
-      // 3. Salvar questões
-      const totalQuestions: any[] = [];
-      for (const q of extractionResult.questoes) {
-        const sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
-
-        const extractedQ = await ExtractedQuestion.create({
-          pdfSourceId: pdfSource._id,
-          vestibularCodigo: pdfSource.vestibularCodigo,
-          pageNumber: q.pageNumber || 1,
-          numeroQuestao: q.numeroQuestao,
-          enunciado: q.enunciado,
-          alternativas: q.alternativas,
-          respostaCorreta: sanitizedResposta,
-          tipoQuestao: q.tipoQuestao || "multipla_escolha",
-          temGabarito: q.temGabarito || false,
-          materia: q.materia,
-          assunto: q.assunto,
-          temImagem: q.temImagem,
-          confidence: extractionResult.confidence,
-          status: "pending",
-        });
-
-        totalQuestions.push(extractedQ);
-      }
-
-      // Atualizar PDF
-      await PdfSource.findByIdAndUpdate(id, {
-        status: "completed",
-        questoesExtraidas: totalQuestions.length,
-        processedAt: new Date(),
-      });
-
-      console.log(`[Extração] Concluído: ${totalQuestions.length} questões.`);
 
       res.json({
-        message: `${totalQuestions.length} questões extraídas com sucesso`,
-        questions: totalQuestions,
+        message: "Extração iniciada em segundo plano",
+        jobId: job.id,
+        pdfId: id,
       });
     } catch (error: any) {
-      console.error(`[Extração] ERRO FATAL:`, error);
-
-      // Atualizar status de erro
-      await PdfSource.findByIdAndUpdate(req.params.id, {
-        status: "error",
-        errorMessage: error.message,
-      });
-
+      console.error(`[Controller] Erro ao enfileirar extração:`, error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -138,9 +102,8 @@ export class PdfExtractionController {
       const { id } = req.params;
       const editedData = req.body;
 
-      const extracted = await ExtractedQuestion.findById(id).populate(
-        "pdfSourceId"
-      );
+      const extracted =
+        await ExtractedQuestion.findById(id).populate("pdfSourceId");
       if (!extracted) {
         return res.status(404).json({ error: "Questão não encontrada" });
       }
@@ -170,14 +133,19 @@ export class PdfExtractionController {
 
       // 1.1 Registrar Auditoria de Extração (IA vs Humano)
       const hasChanges =
-        (editedData.enunciado && editedData.enunciado !== extracted.enunciado) ||
-        (editedData.respostaCorreta && editedData.respostaCorreta !== extracted.respostaCorreta) ||
+        (editedData.enunciado &&
+          editedData.enunciado !== extracted.enunciado) ||
+        (editedData.respostaCorreta &&
+          editedData.respostaCorreta !== extracted.respostaCorreta) ||
         (editedData.materia && editedData.materia !== extracted.materia) ||
         (editedData.assunto && editedData.assunto !== extracted.assunto) ||
-        (JSON.stringify(editedData.alternativas) !== JSON.stringify(extracted.alternativas));
+        JSON.stringify(editedData.alternativas) !==
+          JSON.stringify(extracted.alternativas);
 
       if (hasChanges) {
-        console.log(`[Auditoria] Registrando correção manual para questão ${extracted.numeroQuestao}`);
+        console.log(
+          `[Auditoria] Registrando correção manual para questão ${extracted.numeroQuestao}`,
+        );
         await AuditLog.create({
           entityType: "question",
           entityId: newQuestion._id,
@@ -201,7 +169,9 @@ export class PdfExtractionController {
           },
         });
       } else {
-        console.log(`[Auditoria] Questão ${extracted.numeroQuestao} aprovada sem correções.`);
+        console.log(
+          `[Auditoria] Questão ${extracted.numeroQuestao} aprovada sem correções.`,
+        );
       }
 
       // 2. Atualizar status da extração
@@ -282,15 +252,20 @@ export class PdfExtractionController {
       const auditResult = await GeminiAuditService.auditQuestion(extracted);
 
       // Se a IA corrigiu o gabarito e estava vazio, atualiza
-      if (auditResult.status === "corrected" || (!extracted.respostaCorreta && auditResult.gabaritoCorreto)) {
+      if (
+        auditResult.status === "corrected" ||
+        (!extracted.respostaCorreta && auditResult.gabaritoCorreto)
+      ) {
         extracted.respostaCorreta = auditResult.gabaritoCorreto;
-        extracted.reviewNotes = (extracted.reviewNotes || "") + `\n[IA Audit] ${auditResult.feedback}`;
+        extracted.reviewNotes =
+          (extracted.reviewNotes || "") +
+          `\n[IA Audit] ${auditResult.feedback}`;
         await extracted.save();
       }
 
       res.json({
         message: "Auditoria concluída",
-        auditResult
+        auditResult,
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
