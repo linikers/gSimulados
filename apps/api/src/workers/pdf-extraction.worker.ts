@@ -97,12 +97,12 @@ export const setupPdfExtractionWorker = () => {
     },
   );
 
-  worker.on("completed", (job) => {
+  worker.on("completed", (job: Job) => {
     console.log(`[Worker] Job ${job.id} concluído.`);
   });
 
-  worker.on("failed", (job, err) => {
-    console.error(`[Worker] Job ${job?.id} falhou: ${err.message}`);
+  worker.on("failed", (job: Job | undefined, err: Error) => {
+    console.log(`[Worker] Job ${job?.id} falhou: ${err.message}`);
   });
 
   console.log("[Worker] PDF Extraction Worker iniciado e aguardando tarefas.");

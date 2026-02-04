@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { PdfSource } from "../models/PdfSource";
 import { ExtractedQuestion } from "../models/ExtractedQuestion";
-import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
-import { DriveService } from "../services/drive.service";
+// import { extractQuestionsFromPdf } from "../services/gemini-vision.service";
+// import { DriveService } from "../services/drive.service";
 import { Question } from "../models/Question";
 import { GeminiAuditService } from "../services/gemini-audit.service";
 import { AuditLog } from "../models/AuditLog";
