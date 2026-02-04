@@ -7,6 +7,7 @@ Resumo do que está operacional e o que está em desenvolvimento.
 - **Ingestão de Questões**: Fluxo completo de sincronização com Google Drive.
 - **Extração via IA**: Extração de enunciados, alternativas e gabaritos usando Gemini 1.5 Flash.
 - **Auditoria de IA**: Sistema de auditoria acadêmica com feedback visual e resiliência (Graceful Degradation).
+- **Filas de Processamento**: Implementação de RabbitMQ/Redis (BullMQ) para processamento assíncrono de PDFs.
 - **Gestão Multi-tenancy**: Cadastro de escolas e alunos com controle de acesso (Roles).
 - **Geração de Simulados**: Alunos podem gerar simulados por matéria/assunto.
 
@@ -19,4 +20,3 @@ Resumo do que está operacional e o que está em desenvolvimento.
 ## ❌ Pendente
 
 - **Dashboard Analítico**: Gráficos e métricas de desempenho avançadas.
-- **Filas de Processamento**: Implementação de RabbitMQ/Redis para processamento em larga escala.

@@ -12,7 +12,7 @@ Plano de evolução do sistema `gSimulados`.
 
 - [ ] **Extração Automatizada de Imagens**: Finalizar integração com Cloudinary.
 - [ ] **Tipagem Centralizada**: Finalizar migração para `packages/shared` ou pacotes externos.
-- [ ] **Escalabilidade**: Migrar extração síncrona para workers de fila (Redis).
+- [x] **Escalabilidade**: Migrado processamento síncrono para workers de fila (BullMQ/Redis).
 
 ## Fase 3: User Experience e Analytics (Próximo)
 
