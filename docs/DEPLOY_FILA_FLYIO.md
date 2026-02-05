@@ -26,21 +26,26 @@ fly secrets set REDIS_URL="redis://default:SEU_PASSWORD@SEU_HOST.upstash.io:6379
 
 ---
 
+### Problemas Comuns:
+
+Se o comando `fly redis create` não for reconhecido ou der erro de "unknown command":
+
+1. **Atualize o flyctl**: No Windows, rode o comando abaixo no PowerShell:
+   ```powershell
+   iwr https://fly.io/install.ps1 -useb | iex
+   ```
+2. **Login**: Verifique se está logado:
+   ```bash
+   fly auth login
+   ```
+3. **Alternativa via Dashboard**:
+   Você também pode criar o Redis diretamente pelo navegador em: [https://fly.io/dashboard](https://fly.io/dashboard) -> selecione sua Org -> **Redis** -> **Create Redis Database**.
+
+---
+
 ## Opção 2: Fly.io Redis Addon
 
-O Fly.io oferece Redis gerenciado na mesma região da sua aplicação.
-
-### Passos:
-
-```bash
-# Criar instância Redis no Fly.io
-fly redis create
-
-# Nome sugerido: gsimulados-redis
-# Região: mesma da sua API (iad ou gru)
-
-# O Fly.io automaticamente configura a variável REDIS_URL na sua app
-```
+O Fly.io oferece Redis gerenciado (via Upstash) integrado na mesma infraestrutura.
 
 **Vantagens:**
 
