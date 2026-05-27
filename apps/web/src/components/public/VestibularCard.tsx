@@ -36,7 +36,7 @@ export function VestibularCard({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        transition: "transform 0.2s, box-shadow 0.2s",
+        transition: "transform 0.2s ease-out, box-shadow 0.2s ease-out",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: 6,

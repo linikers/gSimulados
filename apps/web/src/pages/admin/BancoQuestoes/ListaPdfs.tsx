@@ -72,7 +72,6 @@ export function ListaPdfs() {
 
     try {
       setExtractingIds((prev) => [...prev, id]);
-
       const result = await PdfExtractionService.extractFromPdf(id);
       showToast(`${result.message}`, "success");
       await loadData();

@@ -20,7 +20,7 @@ export function InfoCard({
     <Card
       sx={{
         height: "100%",
-        transition: "transform 0.2s",
+        transition: "transform 0.2s ease-out, box-shadow 0.2s ease-out",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: 4,
