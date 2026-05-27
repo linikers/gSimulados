@@ -40,10 +40,63 @@ import VisualizarSimulado from "./pages/public/Simulados/VisualizarSimulado";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2",
+      main: "#1565C0",
+      light: "#1E88E5",
+      dark: "#0D47A1",
+      contrastText: "#FFFFFF",
     },
     secondary: {
-      main: "#dc004e",
+      main: "#2E7D32",
+      light: "#43A047",
+      dark: "#1B5E20",
+      contrastText: "#FFFFFF",
+    },
+    background: {
+      default: "#FAFBFC",
+      paper: "#FFFFFF",
+    },
+    text: {
+      primary: "#1A1A2E",
+      secondary: "#546E7A",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h3: {
+      fontWeight: 700,
+    },
+    h4: {
+      fontWeight: 700,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+    button: {
+      textTransform: "none",
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          padding: "10px 24px",
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+        },
+      },
     },
   },
 });
