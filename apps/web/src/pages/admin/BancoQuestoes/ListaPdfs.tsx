@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  //   Button,
   Chip,
   IconButton,
   MenuItem,
@@ -30,17 +29,20 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import DescriptionIcon from "@mui/icons-material/Description";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function ListaPdfs() {
   const { showToast } = useToast();
-  // const [loading, setLoading] = useState(false); // Removido em favor de extractingIds
   const [pdfs, setPdfs] = useState<IPdfSource[]>([]);
   const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
   const [filterVestibular, setFilterVestibular] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Estado para controlar quais PDFs estão sendo extraídos individualmente
   const [extractingIds, setExtractingIds] = useState<string[]>([]);
+  const [extractTarget, setExtractTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -59,11 +61,16 @@ export function ListaPdfs() {
     }
   };
 
-  const handleExtract = async (id: string, fileName: string) => {
-    if (!window.confirm(`Extrair questões de ${fileName}?`)) return;
+  const handleExtractClick = (id: string, fileName: string) => {
+    setExtractTarget({ id, name: fileName });
+  };
+
+  const handleExtractConfirm = async () => {
+    if (!extractTarget) return;
+    const { id } = extractTarget;
+    setExtractTarget(null);
 
     try {
-      // Adiciona ID ao array de extração
       setExtractingIds((prev) => [...prev, id]);
 
       const result = await PdfExtractionService.extractFromPdf(id);
@@ -239,7 +246,7 @@ export function ListaPdfs() {
                           <IconButton
                             size="small"
                             color="primary"
-                            onClick={() => handleExtract(pdf._id, pdf.fileName)}
+                            onClick={() => handleExtractClick(pdf._id, pdf.fileName)}
                             title="Extrair Questões"
                           >
                             <PlayArrowIcon fontSize="small" />
@@ -249,7 +256,7 @@ export function ListaPdfs() {
                           <IconButton
                             size="small"
                             color="secondary"
-                            onClick={() => handleExtract(pdf._id, pdf.fileName)}
+                            onClick={() => handleExtractClick(pdf._id, pdf.fileName)}
                             title="Refazer Extração"
                           >
                             <RefreshIcon fontSize="small" />
@@ -272,6 +279,16 @@ export function ListaPdfs() {
           </Typography>
         </Paper>
       )}
+
+      <ConfirmDialog
+        open={!!extractTarget}
+        title="Extrair questões"
+        message={`Deseja extrair questões de "${extractTarget?.name}"? A extração pode levar alguns segundos.`}
+        confirmText="Extrair"
+        confirmColor="primary"
+        onConfirm={handleExtractConfirm}
+        onCancel={() => setExtractTarget(null)}
+      />
     </Box>
   );
 }

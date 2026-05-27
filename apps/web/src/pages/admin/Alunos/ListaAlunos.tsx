@@ -11,12 +11,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useToast } from "../../../store/useToast";
 import { useAuth } from "../../../hooks/useAuth";
 import { EditAlunoDialog } from "./EditAlunoDialog";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function ListaAlunos() {
   const [alunos, setAlunos] = useState<IAluno[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAluno, setSelectedAluno] = useState<IAluno | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<IAluno | null>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -53,14 +55,16 @@ export function ListaAlunos() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir este aluno?")) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget?._id) return;
     try {
-      await AlunosService.delete(id);
+      await AlunosService.delete(deleteTarget._id);
       showToast("Aluno excluído com sucesso!", "success");
       loadAlunos();
     } catch {
       showToast("Erro ao excluir aluno.", "error");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -78,11 +82,10 @@ export function ListaAlunos() {
     },
     { id: "name", label: "Nome", minWidth: 170 },
     { id: "email", label: "Email", minWidth: 170 },
-    // Only show "Escola" column if user is Admin
     ...(user?.role === "admin"
       ? [
           {
-            id: "escolaId",
+            id: "escolaId" as const,
             label: "Escola",
             minWidth: 170,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +109,7 @@ export function ListaAlunos() {
           </IconButton>
           <IconButton
             size="small"
-            onClick={() => handleDelete(row._id!)}
+            onClick={() => setDeleteTarget(row)}
             color="error"
           >
             <DeleteIcon fontSize="small" />
@@ -146,6 +149,16 @@ export function ListaAlunos() {
         onClose={() => setIsEditDialogOpen(false)}
         onSave={handleSave}
         aluno={selectedAluno}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Excluir aluno"
+        message={`Tem certeza que deseja excluir "${deleteTarget?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        confirmColor="error"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </Box>
   );

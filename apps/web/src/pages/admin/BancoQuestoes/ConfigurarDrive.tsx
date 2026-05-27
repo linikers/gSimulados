@@ -25,6 +25,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import SyncIcon from "@mui/icons-material/Sync";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderIcon from "@mui/icons-material/Folder";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function ConfigurarDrive() {
   const { showToast } = useToast();
@@ -37,6 +38,7 @@ export function ConfigurarDrive() {
     folderName: "",
     folderUrl: "",
   });
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -96,15 +98,16 @@ export function ConfigurarDrive() {
     }
   };
 
-  const handleDelete = async (codigo: string) => {
-    if (!window.confirm("Deseja realmente remover esta configuração?")) return;
-
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
     try {
-      await DriveConfigService.delete(codigo);
+      await DriveConfigService.delete(deleteTarget);
       showToast("Configuração removida", "success");
       loadData();
     } catch (error) {
       showToast(`Erro ao remover: ${error}`);
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -232,7 +235,7 @@ export function ConfigurarDrive() {
                   <IconButton
                     size="small"
                     color="error"
-                    onClick={() => handleDelete(config.vestibularCodigo)}
+                    onClick={() => setDeleteTarget(config.vestibularCodigo)}
                     title="Remover"
                   >
                     <DeleteIcon />
@@ -251,6 +254,16 @@ export function ConfigurarDrive() {
           </Paper>
         )}
       </Stack>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Remover configuração"
+        message="Deseja realmente remover esta configuração? Os PDFs sincronizados não serão afetados."
+        confirmText="Remover"
+        confirmColor="error"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </Box>
   );
 }
