@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 export function Navbar() {
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [vestibularesAnchor, setVestibularesAnchor] =
     useState<null | HTMLElement>(null);
