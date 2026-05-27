@@ -22,7 +22,7 @@ export function Hero({
 }: HeroProps) {
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         position: "relative",
         height: {
           xs: "250px",
@@ -31,7 +31,7 @@ export function Hero({
         },
         backgroundImage: imagemFundo
           ? `url(${imagemFundo})`
-          : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
@@ -44,10 +44,10 @@ export function Hero({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          backgroundColor: "rgba(0, 0, 0, 0.4)",
           zIndex: 1,
         },
-      }}
+      })}
     >
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
         <Typography
