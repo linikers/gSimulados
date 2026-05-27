@@ -9,10 +9,8 @@
   --bg-color: #FAFBFC;
   --text-color: #1A1A2E;
   --text-secondary: #546E7A;
-  --card-bg: rgba(255, 255, 255, 0.9);
   --border-color: rgba(0, 0, 0, 0.12);
   --input-bg: #f5f5f5;
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
 html,
@@ -42,13 +40,16 @@ body {
 
 /* Premium UI Classes */
 .glass-container {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--bg-color);
   border: 1px solid var(--border-color);
-  border-radius: 24px;
-  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   padding: 2rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.glass-container:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .simulado-header {
@@ -60,10 +61,7 @@ body {
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
-  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary-color);
 }
 
 .form-label {
