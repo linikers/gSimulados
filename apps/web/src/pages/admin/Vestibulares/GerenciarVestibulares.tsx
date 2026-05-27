@@ -14,6 +14,7 @@ import {
   IconButton,
   Chip,
   Stack,
+  Skeleton,
 } from "@mui/material";
 import {
   VestibularesService,
@@ -25,10 +26,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SyncIcon from "@mui/icons-material/Sync";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function GerenciarVestibulares() {
   const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    codigo: string;
+    nome: string;
+  } | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -47,28 +54,23 @@ export function GerenciarVestibulares() {
     loadVestibulares();
   }, [loadVestibulares]);
 
-  const handleDelete = async (codigo: string, nome: string) => {
-    if (!window.confirm(`Deseja realmente excluir ${nome}?`)) return;
-
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
     try {
-      await VestibularesService.delete(codigo);
+      await VestibularesService.delete(deleteTarget.codigo);
       showToast("Vestibular removido com sucesso", "success");
       loadVestibulares();
     } catch (error) {
       showToast(`Erro ao remover vestibular: ${error}`);
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
-  const handleSync = async () => {
-    if (
-      !window.confirm(
-        "Deseja sincronizar vestibulares? Isso pode levar alguns segundos."
-      )
-    )
-      return;
-
+  const handleSyncConfirm = async () => {
+    setSyncOpen(false);
+    setLoading(true);
     try {
-      setLoading(true);
       const result = await VestibularesService.sync();
       showToast(
         `Sincronização concluída! Criados: ${result.created}, Atualizados: ${result.updated}, Ignorados: ${result.skipped}`,
@@ -83,7 +85,43 @@ export function GerenciarVestibulares() {
   };
 
   if (loading) {
-    return <Typography>Carregando...</Typography>;
+    return (
+      <Box sx={{ p: 3 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ mb: 3 }}>
+          <Skeleton variant="text" width={300} height={40} />
+          <Stack direction="row" spacing={2}>
+            <Skeleton variant="rounded" width={140} height={40} />
+            <Skeleton variant="rounded" width={160} height={40} />
+          </Stack>
+        </Stack>
+        <Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {["Código", "Nome", "Nome Completo", "Cidade/Estado", "Status", "Ações"].map(
+                    (h) => (
+                      <TableCell key={h}>{h}</TableCell>
+                    )
+                  )}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton variant="text" width={j === 5 ? 60 : "70%"} height={24} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
+    );
   }
 
   return (
@@ -99,7 +137,7 @@ export function GerenciarVestibulares() {
           <Button
             variant="outlined"
             startIcon={<SyncIcon />}
-            onClick={handleSync}
+            onClick={() => setSyncOpen(true)}
             disabled={loading}
           >
             Sincronizar
@@ -170,7 +208,10 @@ export function GerenciarVestibulares() {
                     size="small"
                     color="error"
                     onClick={() =>
-                      handleDelete(vestibular.codigo, vestibular.nome)
+                      setDeleteTarget({
+                        codigo: vestibular.codigo,
+                        nome: vestibular.nome,
+                      })
                     }
                     title="Excluir"
                   >
@@ -190,6 +231,26 @@ export function GerenciarVestibulares() {
           </Typography>
         </Box>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Excluir vestibular"
+        message={`Deseja realmente excluir "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        confirmColor="error"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={syncOpen}
+        title="Sincronizar vestibulares"
+        message="Deseja sincronizar vestibulares? Isso pode levar alguns segundos."
+        confirmText="Sincronizar"
+        confirmColor="primary"
+        onConfirm={handleSyncConfirm}
+        onCancel={() => setSyncOpen(false)}
+      />
     </Box>
   );
 }

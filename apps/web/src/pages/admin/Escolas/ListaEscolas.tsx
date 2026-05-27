@@ -10,12 +10,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useToast } from "../../../store/useToast";
 import { EditEscolaDialog } from "./EditEscolaDialog";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function ListaEscolas() {
   const [escolas, setEscolas] = useState<IEscola[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEscola, setSelectedEscola] = useState<IEscola | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<IEscola | null>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -51,14 +53,16 @@ export function ListaEscolas() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta escola?")) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget?._id) return;
     try {
-      await EscolasService.delete(id);
+      await EscolasService.delete(deleteTarget._id);
       showToast("Escola excluída com sucesso!", "success");
       loadEscolas();
     } catch {
       showToast("Erro ao excluir escola.", "error");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -97,7 +101,7 @@ export function ListaEscolas() {
           </IconButton>
           <IconButton
             size="small"
-            onClick={() => handleDelete(row._id!)}
+            onClick={() => setDeleteTarget(row)}
             color="error"
           >
             <DeleteIcon fontSize="small" />
@@ -132,6 +136,16 @@ export function ListaEscolas() {
         onClose={() => setIsEditDialogOpen(false)}
         onSave={handleSave}
         escola={selectedEscola}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Excluir escola"
+        message={`Tem certeza que deseja excluir "${deleteTarget?.nomeEscola || deleteTarget?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        confirmColor="error"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </Box>
   );

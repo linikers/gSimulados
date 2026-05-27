@@ -7,8 +7,8 @@ import {
   TableRow,
   Paper,
   TablePagination,
-  // Box,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -51,7 +51,38 @@ export function Table<T extends { _id?: string; id?: string }>({
   };
 
   if (loading) {
-    return <Typography sx={{ p: 2 }}>Carregando dados...</Typography>;
+    return (
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <TableContainer>
+          <MuiTable>
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell key={String(column.id)}>
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {columns.map((column) => (
+                    <TableCell key={String(column.id)}>
+                      <Skeleton
+                        variant="text"
+                        width={column.id === "actions" ? 60 : "80%"}
+                        height={24}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </MuiTable>
+        </TableContainer>
+      </Paper>
+    );
   }
 
   if (rows.length === 0) {
