@@ -8,6 +8,7 @@ import vestibularesRoutes from "./routes/vestibulares.routes";
 import driveConfigRoutes from "./routes/drive-config.routes";
 import pdfExtractionRoutes from "./routes/pdf-extraction.routes";
 import simuladoRoutes from "./routes/simulados.routes";
+import { dbReady } from "./config/database";
 
 const app = express();
 
@@ -25,6 +26,20 @@ app.use("/simulados", simuladoRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello para a API");
+});
+
+// Liveness: o processo está vivo (usado pelo health check do Fly).
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
+
+// Readiness: o processo consegue atender requisições que dependem do banco.
+app.get("/ready", (_req, res) => {
+  const ok = dbReady();
+  res.status(ok ? 200 : 503).json({
+    status: ok ? "ready" : "unavailable",
+    mongo: ok ? "connected" : "disconnected",
+  });
 });
 
 export { app };
