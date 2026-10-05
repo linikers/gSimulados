@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { env } from "../config/env";
-import { User } from "../models/User";
+import { User, Admin } from "../models/User";
 
 /**
  * Cria um usuário administrador.
@@ -34,7 +34,7 @@ async function main() {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const admin = await User.create({
+  const admin = await Admin.create({
     name,
     email,
     password: hashedPassword,
