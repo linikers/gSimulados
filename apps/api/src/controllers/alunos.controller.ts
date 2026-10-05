@@ -11,15 +11,14 @@ export class AlunosController {
       if (userRole === "escola") {
         studentData.escolaId = userId;
       }
-      // If created by 'admin', escolaId must be provided in body
-      else if (userRole === "admin") {
-        if (!studentData.escolaId) {
-          return res
-            .status(400)
-            .json({ error: "escolaId is required for admin" });
-        }
-      } else {
+      // Admin pode criar aluno com ou sem escola (aluno individual).
+      // escolaId fica opcional e pode ser definido depois.
+      else if (userRole !== "admin") {
         return res.status(403).json({ error: "Permission denied" });
+      }
+
+      if (studentData.escolaId === "") {
+        delete studentData.escolaId;
       }
 
       const { user } = await AuthService.register(studentData);
