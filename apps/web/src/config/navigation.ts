@@ -59,6 +59,12 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/banco-questoes/questoes",
       icon: QuizIcon,
     },
+    { title: "Pagamentos", path: "/admin/pagamentos", icon: AssignmentIcon },
+    {
+      title: "Configurar PIX",
+      path: "/admin/pagamentos/pix",
+      icon: SettingsIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],

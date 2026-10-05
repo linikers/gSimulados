@@ -55,6 +55,7 @@ export function Navbar() {
     { label: "Materiais", path: "/materiais" },
     { label: "Ferramentas", path: "/ferramentas" },
     { label: "Aprovações", path: "/aprovacoes" },
+    { label: "Planos", path: "/planos" },
     { label: "Simulados", path: "/aluno/simulados" },
   ];
 
