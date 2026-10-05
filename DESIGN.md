@@ -2,7 +2,7 @@
 
 ## Marca
 
-- **Nome:** Mentoria GS / Prof. Jean Ribeiro
+- **Nome:** G-Simulados
 - **Segmento:** Educação / Preparatório para Vestibulares
 - **Foco:** Vestibulares do Paraná (UEM, UEL, UEPG, UNICENTRO, UFPR) + ENEM
 
