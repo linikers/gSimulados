@@ -1,0 +1,15 @@
+# Não enviar dependências e artefatos de build para o contexto Docker
+**/node_modules
+**/dist
+**/coverage
+**/*.log
+
+# Nunca embutir segredos na imagem (o Dockerfile copia apps/api inteiro)
+.env
+.env.*
+!.env.example
+**/service-account.json
+
+# Metadados do git/CI
+.git
+.github
