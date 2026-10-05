@@ -10,7 +10,7 @@ export function Sobre() {
   return (
     <>
       <Hero
-        titulo="Sobre o Prof. Jean Ribeiro"
+        titulo="Sobre o G-Simulados"
         subtitulo="Dedicação e excelência na preparação para vestibulares"
         altura="300px"
       />
@@ -26,7 +26,7 @@ export function Sobre() {
             gap: 6,
           }}
         >
-          {/* Foto e Apresentação */}
+          {/* Logo e Apresentação */}
           <Box sx={{ textAlign: "center" }}>
             <Avatar
               sx={{
@@ -38,34 +38,34 @@ export function Sobre() {
                 backgroundColor: "primary.main",
               }}
             >
-              JR
+              GS
             </Avatar>
             <Typography variant="h5" fontWeight="bold">
-              Prof. Jean Ribeiro
+              G-Simulados
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Especialista em Vestibulares
+              Plataforma Inteligente de Simulados
             </Typography>
           </Box>
 
-          {/* Biografia */}
+          {/* Apresentação */}
           <Box>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Quem sou eu
+              Quem somos
             </Typography>
             <Typography variant="body1" paragraph>
-              Olá! Sou o Professor Jean Ribeiro, educador apaixonado por ajudar
+              O G-Simulados é uma plataforma educacional criada para ajudar
               estudantes a alcançarem seus sonhos de ingressar nas melhores
               universidades do Paraná e do Brasil.
             </Typography>
             <Typography variant="body1" paragraph>
               Com anos de experiência na preparação para vestibulares,
-              desenvolvi uma metodologia única que combina conhecimento técnico,
+              desenvolvemos uma metodologia que combina conhecimento técnico,
               materiais exclusivos e acompanhamento personalizado para cada
               aluno.
             </Typography>
             <Typography variant="body1" paragraph>
-              Minha missão é não apenas ensinar conteúdos, mas formar pensadores
+              Nossa missão é não apenas ensinar conteúdos, mas formar pensadores
               críticos, preparados para os desafios acadêmicos e profissionais
               que virão.
             </Typography>
@@ -80,7 +80,7 @@ export function Sobre() {
             textAlign="center"
             gutterBottom
           >
-            Meus Valores
+            Nossos Valores
           </Typography>
           <Typography
             variant="body1"
@@ -88,7 +88,7 @@ export function Sobre() {
             color="text.secondary"
             sx={{ mb: 4 }}
           >
-            O que guia meu trabalho
+            O que guia nosso trabalho
           </Typography>
 
           <Box
@@ -115,7 +115,7 @@ export function Sobre() {
             />
             <InfoCard
               titulo="Paixão"
-              descricao="Amor genuíno pela educação e pelo sucesso dos meus alunos"
+              descricao="Amor genuíno pela educação e pelo sucesso dos nossos alunos"
               icone={<FavoriteIcon sx={{ fontSize: 60 }} />}
               cor="error.main"
             />

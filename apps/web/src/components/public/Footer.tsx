@@ -42,7 +42,7 @@ export function Footer() {
           {/* Sobre */}
           <Box>
             <Typography variant="h6" gutterBottom fontWeight="bold">
-              Prof. Jean Ribeiro
+              G-Simulados
             </Typography>
             <Typography variant="body2">
               Mentoria educacional especializada em vestibulares do Paraná e
@@ -150,7 +150,7 @@ export function Footer() {
               </IconButton>
             </Box>
             <Typography variant="body2">
-              contato@profjeanribeiro.com.br
+              contato@gsimulados.com.br
             </Typography>
           </Box>
         </Box>
@@ -164,8 +164,8 @@ export function Footer() {
           }}
         >
           <Typography variant="body2">
-            © {new Date().getFullYear()} Prof. Jean Ribeiro - Mentoria
-            Educacional. Todos os direitos reservados.
+            © {new Date().getFullYear()} G-Simulados - Plataforma de Simulados.
+            Todos os direitos reservados.
           </Typography>
         </Box>
       </Container>

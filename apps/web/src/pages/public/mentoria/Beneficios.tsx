@@ -107,7 +107,7 @@ export function Beneficios() {
           >
             <Box sx={{ p: 3, backgroundColor: "grey.100", borderRadius: 2 }}>
               <Typography variant="body1" paragraph>
-                "A mentoria do Prof. Jean foi fundamental para minha aprovação
+                "A mentoria do G-Simulados foi fundamental para minha aprovação
                 na UEM. O material é excelente e o acompanhamento personalizado
                 fez toda a diferença!"
               </Typography>

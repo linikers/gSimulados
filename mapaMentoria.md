@@ -1,4 +1,4 @@
-# 🗺️ Mapeamento Completo - Site Prof. Jean Ribeiro
+# 🗺️ Mapeamento Completo - G-Simulados
 
 ## 📊 Visão Geral do Site
 
