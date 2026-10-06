@@ -13,6 +13,13 @@ export interface IQuestion extends Document {
     prova?: string; // e.g., "1ª Fase"
   };
   tags: string[];
+  temImagem?: boolean;
+  imagemUrl?: string;
+  /** Região da figura dentro da imagem da página, em fração (0 a 1). */
+  imagemBbox?: { x: number; y: number; w: number; h: number };
+  imagemDescricao?: string;
+  imagemLargura?: number;
+  imagemAltura?: number;
   criadoEm: Date;
   atualizadoEm: Date;
 }
@@ -43,6 +50,12 @@ const QuestionSchema: Schema = new Schema(
       prova: { type: String },
     },
     tags: { type: [String], default: [] },
+    temImagem: { type: Boolean, default: false },
+    imagemUrl: { type: String },
+    imagemBbox: { x: Number, y: Number, w: Number, h: Number },
+    imagemDescricao: { type: String },
+    imagemLargura: { type: Number },
+    imagemAltura: { type: Number },
   },
   { timestamps: { createdAt: "criadoEm", updatedAt: "atualizadoEm" } }
 );

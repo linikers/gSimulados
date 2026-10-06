@@ -46,6 +46,10 @@ RUN apk add --no-cache \
     giflib \
     librsvg
 
+# poppler-utils: rasteriza as páginas do PDF que contêm figura (o node-canvas
+# falha com "Image or Canvas expected" justamente nessas páginas).
+RUN apk add --no-cache poppler-utils
+
 ENV NODE_ENV=production
 
 # Copy necessary files

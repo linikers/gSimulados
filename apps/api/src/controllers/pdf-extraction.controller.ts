@@ -6,6 +6,7 @@ import { DriveService } from "../services/drive.service";
 import { Question } from "../models/Question";
 import { GeminiAuditService } from "../services/gemini-audit.service";
 import { AuditLog } from "../models/AuditLog";
+import { publicarPaginasDoPdf } from "../services/question-image.service";
 
 
 export class PdfExtractionController {
@@ -83,11 +84,36 @@ export class PdfExtractionController {
           materia: q.materia,
           assunto: q.assunto,
           temImagem: q.temImagem,
+          imagemBbox: q.imagemBbox,
+          imagemDescricao: q.descricaoFigura,
           confidence: extractionResult.confidence,
           status: "pending",
         });
 
         totalQuestions.push(extractedQ);
+      }
+
+      // 4. Publicar as figuras: renderiza as páginas que têm figura e sobe para
+      // o Cloudinary, vinculando a imagem (e a região) a cada questão.
+      const comFigura = totalQuestions.filter((q) => q.temImagem && q.pageNumber);
+      if (comFigura.length > 0) {
+        console.log(
+          `[Extração] ${comFigura.length} questão(ões) com figura — publicando páginas...`,
+        );
+        const paginas = await publicarPaginasDoPdf(
+          pdfBuffer,
+          comFigura.map((q) => q.pageNumber),
+          `pdf-${id}`,
+        );
+        for (const q of comFigura) {
+          const pagina = paginas.get(q.pageNumber);
+          if (!pagina) continue;
+          q.imagemUrl = pagina.url;
+          q.imagemPublicId = pagina.publicId;
+          q.imagemLargura = pagina.largura;
+          q.imagemAltura = pagina.altura;
+          await q.save();
+        }
       }
 
       // Atualizar PDF
@@ -166,6 +192,12 @@ export class PdfExtractionController {
           prova: pdfSource.fileName.replace(".pdf", ""),
         },
         tags: editedData.tags || [],
+        temImagem: extracted.temImagem,
+        imagemUrl: extracted.imagemUrl,
+        imagemBbox: extracted.imagemBbox,
+        imagemLargura: extracted.imagemLargura,
+        imagemAltura: extracted.imagemAltura,
+        imagemDescricao: editedData.imagemDescricao || extracted.imagemDescricao,
       });
 
       // 1.1 Registrar Auditoria de Extração (IA vs Humano)

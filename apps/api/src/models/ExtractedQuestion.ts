@@ -24,6 +24,12 @@ export interface IExtractedQuestion extends Document {
   temImagem: boolean;
   imagemUrl?: string;
   imagemPublicId?: string;
+  /** Região da figura dentro da página, em fração (0 a 1). */
+  imagemBbox?: { x: number; y: number; w: number; h: number };
+  imagemDescricao?: string;
+  /** Dimensões (px) da imagem da página, para recortar a figura sem distorção. */
+  imagemLargura?: number;
+  imagemAltura?: number;
   temFormula: boolean;
 
   // Controle de revisão
@@ -69,6 +75,10 @@ const ExtractedQuestionSchema: Schema = new Schema(
     temImagem: { type: Boolean, default: false },
     imagemUrl: { type: String },
     imagemPublicId: { type: String },
+    imagemBbox: { x: Number, y: Number, w: Number, h: Number },
+    imagemDescricao: { type: String },
+    imagemLargura: { type: Number },
+    imagemAltura: { type: Number },
     temFormula: { type: Boolean, default: false },
 
     status: {

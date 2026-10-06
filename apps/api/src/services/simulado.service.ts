@@ -158,6 +158,11 @@ export class SimuladoService {
         respostaCorreta: questoes[i].respostaCorreta,
         enunciado: questoes[i].enunciado,
         alternativas: questoes[i].alternativas,
+        imagemUrl: questoes[i].imagemUrl,
+        imagemBbox: questoes[i].imagemBbox,
+        imagemLargura: questoes[i].imagemLargura,
+        imagemAltura: questoes[i].imagemAltura,
+        imagemDescricao: questoes[i].imagemDescricao,
       })),
     };
   }
