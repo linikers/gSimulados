@@ -9,6 +9,8 @@ export interface IUser {
   role: UserRole;
   password?: string;
   avatar?: string;
+  plano?: string;
+  planoExpiraEm?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

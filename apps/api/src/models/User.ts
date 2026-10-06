@@ -17,6 +17,8 @@ const UserSchema = new Schema<IUserDocument>(
       required: true,
       default: "aluno",
     },
+    plano: { type: String, default: "free" },
+    planoExpiraEm: { type: Date },
   },
   { discriminatorKey: "role", timestamps: true },
 );
