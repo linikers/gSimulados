@@ -1,0 +1,55 @@
+name: Deploy (Fly.io)
+
+# Manual por padrão: nada vai para produção sem você disparar.
+# Para publicar automaticamente a cada merge na master, descomente o bloco `push`.
+on:
+  # push:
+  #   branches: [master]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "O que publicar"
+        type: choice
+        options: [api, web, ambos]
+        default: ambos
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  api:
+    if: ${{ inputs.target == 'api' || inputs.target == 'ambos' }}
+    name: API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Contexto de build = raiz do repo (os Dockerfiles copiam packages/ e apps/).
+      # O build roda no runner do GitHub (não no builder remoto do Fly).
+      - name: Deploy da API
+        run: >
+          flyctl deploy --config apps/api/fly.toml
+          --dockerfile apps/api/Dockerfile
+          --remote-only=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  web:
+    if: ${{ inputs.target == 'web' || inputs.target == 'ambos' }}
+    name: Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy da Web
+        run: >
+          flyctl deploy --config apps/web/fly.toml
+          --dockerfile apps/web/Dockerfile
+          --remote-only=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

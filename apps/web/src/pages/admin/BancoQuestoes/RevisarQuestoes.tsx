@@ -22,6 +22,14 @@ import {
   type IQuestionReview,
 } from "src/services/question-review.service";
 
+export interface IAuditResult {
+  status: "corrected" | "approved" | "flagged";
+  gabaritoCorreto?: string;
+  feedback?: string;
+  academicRole?: string;
+  confidence?: number;
+}
+
 export function RevisarQuestoes() {
   const [questoes, setQuestoes] = useState<IQuestionReview[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,7 +38,7 @@ export function RevisarQuestoes() {
   // Estados para Auditoria IA
   const [auditDialogOpen, setAuditDialogOpen] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
-  const [auditResult, setAuditResult] = useState<any>(null);
+  const [auditResult, setAuditResult] = useState<IAuditResult | null>(null);
 
   const loadQuestoes = async () => {
     try {
@@ -88,11 +96,13 @@ export function RevisarQuestoes() {
           return copy;
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erro na auditoria:", error);
+      const mensagem =
+        error instanceof Error ? error.message : "Erro desconhecido";
       setAuditResult({
         status: "flagged",
-        feedback: `Erro ao realizar auditoria: ${error.message || "Erro desconhecido"}.`,
+        feedback: `Erro ao realizar auditoria: ${mensagem}.`,
       });
     } finally {
       setAuditLoading(false);
