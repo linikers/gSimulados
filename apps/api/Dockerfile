@@ -54,6 +54,10 @@ COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+# Necessário para resolver o workspace @gsimulados/shared em runtime
+# (o node_modules aponta para ../../packages/shared).
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
 
 WORKDIR /app/apps/api
 

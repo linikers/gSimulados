@@ -28,6 +28,8 @@ dist-ssr
 # Secrets
 .env
 *.env
+.env.*
+!.env.example
 service-account.json
 apps/api/service-account.json
 names_new.json
