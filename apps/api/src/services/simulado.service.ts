@@ -1,10 +1,7 @@
 import { Question } from "../models/Question";
 import { Simulado } from "../models/Simulado";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { env } from "../config/env";
+import { gerarConteudoGemini } from "./gemini/gemini-client.service";
 import mongoose from "mongoose";
-
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
 export class SimuladoService {
   static async generate(params: {
@@ -58,11 +55,6 @@ export class SimuladoService {
     quantidade: number,
     dificuldade: string,
   ): Promise<mongoose.Types.ObjectId[]> {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-flash-latest",
-      generationConfig: { responseMimeType: "application/json" },
-    });
-
     const poolMetadata = pool.map((q) => ({
       id: q._id.toString(),
       enunciadoCurto: q.enunciado.substring(0, 100),
@@ -88,9 +80,11 @@ export class SimuladoService {
     `;
 
     try {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const data = JSON.parse(response.text());
+      const texto = await gerarConteudoGemini(prompt, {
+        json: true,
+        contexto: "simulado",
+      });
+      const data = JSON.parse(texto);
 
       const ids = data.selectedIds || [];
       return ids.map((id: string) => new mongoose.Types.ObjectId(id));
