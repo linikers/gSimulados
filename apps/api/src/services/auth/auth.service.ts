@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { User, IUserDocument, Escola, Aluno } from "../../models/User";
+import { User, IUserDocument, Escola, Aluno, Admin } from "../../models/User";
 import { env } from "../../config/env";
 
 export class AuthService {
@@ -28,8 +28,10 @@ export class AuthService {
       user = new Escola(baseData);
     } else if (role === "aluno") {
       user = new Aluno(baseData);
+    } else if (role === "admin") {
+      user = new Admin(baseData);
     } else {
-      user = new User(baseData); // Admin or generic
+      user = new User(baseData);
     }
 
     await user.save();

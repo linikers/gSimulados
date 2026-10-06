@@ -17,6 +17,8 @@ const UserSchema = new Schema<IUserDocument>(
       required: true,
       default: "aluno",
     },
+    plano: { type: String, default: "free" },
+    planoExpiraEm: { type: Date },
   },
   { discriminatorKey: "role", timestamps: true },
 );
@@ -41,5 +43,9 @@ const AlunoSchema = new Schema({
   escolaId: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
+// Schema do Admin (necessário para o discriminatorKey "role")
+const AdminSchema = new Schema({});
+
 export const Escola = User.discriminator("escola", EscolaSchema);
 export const Aluno = User.discriminator("aluno", AlunoSchema);
+export const Admin = User.discriminator("admin", AdminSchema);

@@ -21,3 +21,21 @@ export interface ISimulado {
   criadoEm: string;
   atualizadoEm: string;
 }
+
+export interface IRespostaCorrigida {
+  questaoId: string;
+  respostaSelecionada: string;
+  correta: boolean;
+  respostaCorreta: string;
+  enunciado: string;
+  alternativas: string[];
+}
+
+export interface IResultadoSimulado {
+  simuladoId: string;
+  total: number;
+  acertos: number;
+  erros: number;
+  percentual: number;
+  respostas: IRespostaCorrigida[];
+}

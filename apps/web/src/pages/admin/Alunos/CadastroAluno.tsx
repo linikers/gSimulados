@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -35,14 +35,14 @@ export function CadastroAluno() {
   } | null>(null);
 
   // Carregar escolas se for admin
-  useState(() => {
+  useEffect(() => {
     if (user?.role === "admin") {
       api
         .get("/schools")
         .then((res) => setSchools(res.data))
         .catch((err) => console.error(err));
     }
-  });
+  }, [user?.role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,20 +125,32 @@ export function CadastroAluno() {
 
           {user?.role === "admin" && (
             <FormControl fullWidth margin="normal">
-              <InputLabel>Selecione a Escola</InputLabel>
+              <InputLabel id="escola-label">Escola (opcional)</InputLabel>
               <Select
+                labelId="escola-label"
                 value={formData.escolaId}
-                label="Selecione a Escola"
+                label="Escola (opcional)"
                 onChange={(e) =>
                   setFormData({ ...formData, escolaId: e.target.value })
                 }
               >
+                <MenuItem value="">
+                  <em>Sem escola (aluno individual)</em>
+                </MenuItem>
                 {schools.map((school) => (
                   <MenuItem key={school._id} value={school._id}>
                     {school.nomeEscola || "Escola sem nome"}
                   </MenuItem>
                 ))}
               </Select>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, ml: 2 }}
+              >
+                Deixe em "Sem escola" para cadastrar um aluno individual. O
+                vínculo pode ser definido depois.
+              </Typography>
             </FormControl>
           )}
 

@@ -36,6 +36,9 @@ import { FAQ } from "./pages/public/FAQ";
 import GerarSimulado from "./pages/public/Simulados/GerarSimulado";
 import MeusSimulados from "./pages/public/Simulados/MeusSimulados";
 import VisualizarSimulado from "./pages/public/Simulados/VisualizarSimulado";
+import { Planos } from "./pages/public/Planos";
+import { ListaPagamentos } from "./pages/admin/Pagamentos/ListaPagamentos";
+import { ConfigurarPix } from "./pages/admin/Pagamentos/ConfigurarPix";
 
 const theme = createTheme({
   palette: {
@@ -140,6 +143,7 @@ function App() {
               />
               <Route path="/aprovacoes" element={<Aprovacoes />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/planos" element={<Planos />} />
             </Route>
 
             {/* Auth Routes (no layout) */}
@@ -209,6 +213,16 @@ function App() {
                   <Route
                     path="/admin/banco-questoes/questoes"
                     element={<ListaQuestoes />}
+                  />
+
+                  {/* Pagamentos */}
+                  <Route
+                    path="/admin/pagamentos"
+                    element={<ListaPagamentos />}
+                  />
+                  <Route
+                    path="/admin/pagamentos/pix"
+                    element={<ConfigurarPix />}
                   />
                 </Route>
 

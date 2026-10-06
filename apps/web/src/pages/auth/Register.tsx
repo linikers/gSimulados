@@ -109,7 +109,6 @@ export function RegisterPage() {
             >
               <MenuItem value="aluno">Aluno</MenuItem>
               <MenuItem value="escola">Escola</MenuItem>
-              <MenuItem value="admin">Administrador</MenuItem>
             </Select>
           </FormControl>
 
