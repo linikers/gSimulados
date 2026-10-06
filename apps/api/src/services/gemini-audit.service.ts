@@ -1,8 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { env } from "../config/env";
+import { gerarConteudoGemini } from "./gemini/gemini-client.service";
 import { AuditLog } from "../models/AuditLog";
-
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
 export class GeminiAuditService {
     /**
@@ -10,11 +7,6 @@ export class GeminiAuditService {
      * Atua como um professor revisor.
      */
     static async auditQuestion(questionData: any, _context: string = "Vestibular") {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-flash-latest",
-            generationConfig: { responseMimeType: "application/json" },
-        });
-
         const prompt = `
 O contexto desta auditoria é: ${_context}.
 Sua tarefa é auditar a seguinte questão para garantir precisão técnica, clareza e correção do gabarito.
@@ -44,9 +36,10 @@ FORMATO DE RETORNO (JSON APENAS):
 `;
 
         try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+            const text = await gerarConteudoGemini(prompt, {
+                json: true,
+                contexto: "gemini-audit",
+            });
 
             const auditResult = JSON.parse(text);
 

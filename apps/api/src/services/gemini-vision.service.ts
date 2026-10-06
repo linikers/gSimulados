@@ -1,7 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { env } from "../config/env";
-
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+import { gerarConteudoGemini } from "./gemini/gemini-client.service";
 
 export async function extractQuestionsFromPdf(
   pdfBuffer: Buffer,
@@ -21,13 +18,6 @@ export async function extractQuestionsFromPdf(
   }>;
   confidence: number;
 }> {
-  const model = genAI.getGenerativeModel({
-    model: "gemini-flash-latest",
-    generationConfig: {
-      responseMimeType: "application/json",
-    },
-  });
-
   const prompt = `
 Você é um professor especialista em vestibulares do exame ${vestibularCodigo.toUpperCase()}.
 Sua tarefa é converter o PDF anexo em uma estrutura JSON organizada.
@@ -73,13 +63,12 @@ FORMATO DE RETORNO (JSON APENAS):
   };
 
   try {
-    console.log(
-      `[Gemini] Enviando prompt para o modelo gemini-flash-latest...`
-    );
-    const result = await model.generateContent([prompt, pdfPart]);
+    console.log(`[Gemini] Enviando PDF para extração (com fallback de modelo)...`);
+    const text = await gerarConteudoGemini([prompt, pdfPart], {
+      json: true,
+      contexto: "gemini-vision",
+    });
     console.log(`[Gemini] Resposta recebida. Processando texto...`);
-    const response = await result.response;
-    const text = response.text();
 
     // Limpar markdown blocks se houver
     const cleanText = text
