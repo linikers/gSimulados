@@ -14,6 +14,7 @@ import {
   Chip,
 } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
+import { QuestaoFigura } from "../../../components/questao/QuestaoFigura";
 import type {
   ISimulado,
   IQuestion,
@@ -206,6 +207,16 @@ export default function VisualizarSimulado() {
                 <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
                   {r.enunciado}
                 </Typography>
+
+                {r.imagemUrl && (
+                  <QuestaoFigura
+                    imagemUrl={r.imagemUrl}
+                    bbox={r.imagemBbox}
+                    larguraPagina={r.imagemLargura}
+                    alturaPagina={r.imagemAltura}
+                    descricao={r.imagemDescricao}
+                  />
+                )}
 
                 <Typography variant="body2" color="text.secondary">
                   Sua resposta:{" "}
@@ -415,6 +426,18 @@ export default function VisualizarSimulado() {
                     {questao.enunciado}
                   </Typography>
                 </Box>
+
+                {questao.imagemUrl && (
+                  <Box sx={{ ml: { xs: 0, md: 10 }, mb: 3 }}>
+                    <QuestaoFigura
+                      imagemUrl={questao.imagemUrl}
+                      bbox={questao.imagemBbox}
+                      larguraPagina={questao.imagemLargura}
+                      alturaPagina={questao.imagemAltura}
+                      descricao={questao.imagemDescricao}
+                    />
+                  </Box>
+                )}
 
                 <Box
                   sx={{

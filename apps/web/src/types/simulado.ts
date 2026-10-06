@@ -8,6 +8,10 @@ export interface IQuestion {
   dificuldade: "facil" | "medio" | "dificil";
   temImagem?: boolean;
   imagemUrl?: string;
+  imagemBbox?: { x: number; y: number; w: number; h: number };
+  imagemDescricao?: string;
+  imagemLargura?: number;
+  imagemAltura?: number;
 }
 
 export interface ISimulado {
@@ -29,6 +33,11 @@ export interface IRespostaCorrigida {
   respostaCorreta: string;
   enunciado: string;
   alternativas: string[];
+  imagemUrl?: string;
+  imagemBbox?: { x: number; y: number; w: number; h: number };
+  imagemDescricao?: string;
+  imagemLargura?: number;
+  imagemAltura?: number;
 }
 
 export interface IResultadoSimulado {

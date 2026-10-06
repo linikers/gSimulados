@@ -15,6 +15,8 @@ export async function extractQuestionsFromPdf(
     assunto?: string;
     temImagem: boolean;
     pageNumber: number;
+    descricaoFigura?: string;
+    imagemBbox?: { x: number; y: number; w: number; h: number };
   }>;
   confidence: number;
 }> {
@@ -35,6 +37,13 @@ REGRAS DE EXTRAÇÃO:
    - Use "multipla_escolha" para itens com letras (A, B...).
 5. "respostaCorreta": Procure na folha de gabarito se houver.
 6. "materia": Identifique pelo cabeçalho da prova ou contexto.
+7. "temImagem": true quando a QUESTÃO depende de uma figura para ser respondida
+   (gráfico, tabela de dados, esquema, diagrama, mapa, fotografia).
+   "conforme a figura/gráfico/tabela abaixo" => SEMPRE true.
+8. "imagemBbox": SOMENTE quando temImagem=true. É a região da figura na página,
+   em FRAÇÃO da página (0 a 1): x,y = canto superior esquerdo; w,h = largura/altura.
+   Seja preciso — a região deve conter a figura inteira, e nada além dela.
+9. "descricaoFigura": descrição curta do que a figura mostra.
 
 FORMATO DE RETORNO (JSON APENAS):
 {
@@ -49,7 +58,9 @@ FORMATO DE RETORNO (JSON APENAS):
       "materia": "string",
       "assunto": "string",
       "temImagem": boolean,
-      "pageNumber": number
+      "pageNumber": number,
+      "descricaoFigura": "string (só se temImagem)",
+      "imagemBbox": {"x": number, "y": number, "w": number, "h": number}
     }
   ]
 }
