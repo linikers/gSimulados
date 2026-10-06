@@ -1,5 +1,5 @@
 import api from "./api";
-import type { ISimulado } from "../types/simulado";
+import type { ISimulado, IResultadoSimulado } from "../types/simulado";
 
 export interface SimuladoParams {
   nome: string;
@@ -21,6 +21,14 @@ export const SimuladoService = {
 
   getById: async (id: string): Promise<ISimulado> => {
     const response = await api.get(`/simulados/${id}`);
+    return response.data;
+  },
+
+  submit: async (
+    id: string,
+    respostas: { questaoId: string; respostaSelecionada: string }[],
+  ): Promise<IResultadoSimulado> => {
+    const response = await api.post(`/simulados/${id}/attempt`, { respostas });
     return response.data;
   },
 };

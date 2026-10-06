@@ -38,7 +38,7 @@ describe("AuthService Unit Tests", () => {
           password: "123",
           role: "aluno",
         })
-      ).rejects.toThrow("User already exists");
+      ).rejects.toThrow("Usuário já cadastrado");
     });
 
     it("should hash password and create user if new", async () => {

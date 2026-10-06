@@ -113,4 +113,74 @@ export class SimuladoService {
   static async getById(id: string) {
     return await Simulado.findById(id).populate("questoes");
   }
+
+  static async submitAttempt(params: {
+    simuladoId: string;
+    alunoId: string;
+    respostas: { questaoId: string; respostaSelecionada: string }[];
+  }) {
+    const { simuladoId, alunoId, respostas } = params;
+
+    const simulado = await Simulado.findById(simuladoId).populate("questoes");
+    if (!simulado) {
+      throw new Error("Simulado não encontrado");
+    }
+
+    const questoes = simulado.questoes as any[];
+    const respostasMap = new Map(
+      respostas.map((r) => [String(r.questaoId), r.respostaSelecionada]),
+    );
+
+    const respostasCorrigidas = questoes.map((q) => {
+      const selecionada = String(respostasMap.get(String(q._id)) ?? "");
+      return {
+        questaoId: q._id,
+        respostaSelecionada: selecionada,
+        correta: isRespostaCorreta(q.respostaCorreta, selecionada),
+      };
+    });
+
+    const total = questoes.length;
+    const acertos = respostasCorrigidas.filter((r) => r.correta).length;
+
+    simulado.tentativas.push({
+      aluno: new mongoose.Types.ObjectId(alunoId),
+      respostas: respostasCorrigidas,
+      notaSoma: acertos,
+      finalizadoEm: new Date(),
+    });
+    await simulado.save();
+
+    return {
+      simuladoId: simulado._id,
+      total,
+      acertos,
+      erros: total - acertos,
+      percentual: total ? Math.round((acertos / total) * 100) : 0,
+      respostas: respostasCorrigidas.map((r, i) => ({
+        questaoId: r.questaoId,
+        respostaSelecionada: r.respostaSelecionada,
+        correta: r.correta,
+        respostaCorreta: questoes[i].respostaCorreta,
+        enunciado: questoes[i].enunciado,
+        alternativas: questoes[i].alternativas,
+      })),
+    };
+  }
+}
+
+/**
+ * Compara o gabarito com a resposta marcada.
+ * Múltipla escolha (A-E): compara a letra.
+ * Somatória/numérico: comparação direta normalizada.
+ */
+export function isRespostaCorreta(
+  gabarito: unknown,
+  selecionada: string,
+): boolean {
+  const g = String(gabarito ?? "").trim().toUpperCase();
+  const s = String(selecionada ?? "").trim().toUpperCase();
+  if (!s) return false;
+  if (/^[A-E]$/.test(g)) return g === s;
+  return g === s;
 }

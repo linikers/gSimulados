@@ -14,11 +14,16 @@ import {
   Chip,
 } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
-import type { ISimulado, IQuestion } from "../../../types/simulado";
+import type {
+  ISimulado,
+  IQuestion,
+  IResultadoSimulado,
+} from "../../../types/simulado";
 import { useErrorHandler } from "../../../hooks/useErrorHandler";
 import {
   ArrowBack,
   CheckCircle,
+  Cancel,
   Flag,
   HelpOutline,
   AutoAwesome,
@@ -30,6 +35,8 @@ export default function VisualizarSimulado() {
   const [loading, setLoading] = useState(true);
   const [respostas, setRespostas] = useState<Record<string, number>>({});
   const [scrolled, setScrolled] = useState(0);
+  const [resultado, setResultado] = useState<IResultadoSimulado | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const { handleError } = useErrorHandler();
 
   const loadSimulado = useCallback(
@@ -65,6 +72,29 @@ export default function VisualizarSimulado() {
 
   const selectAnswer = (questionId: string, index: number) => {
     setRespostas((prev) => ({ ...prev, [questionId]: index }));
+  };
+
+  const handleFinalizar = async () => {
+    if (!simulado) return;
+
+    const payload = (simulado.questoes as IQuestion[]).map((q) => ({
+      questaoId: q._id,
+      respostaSelecionada:
+        respostas[q._id] !== undefined
+          ? String.fromCharCode(65 + respostas[q._id])
+          : "",
+    }));
+
+    setSubmitting(true);
+    try {
+      const res = await SimuladoService.submit(simulado._id, payload);
+      setResultado(res);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      handleError(error, "Erro ao finalizar o simulado.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading)
@@ -115,6 +145,92 @@ export default function VisualizarSimulado() {
         </Button>
       </Container>
     );
+
+  if (resultado) {
+    return (
+      <Box sx={{ bgcolor: "var(--bg-color)", minHeight: "100vh", pb: 10 }}>
+        <Container maxWidth="md" sx={{ py: 6 }}>
+          <Paper
+            elevation={0}
+            className="glass-container"
+            sx={{ p: { xs: 3, md: 5 }, mb: 4, textAlign: "center" }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: 800, mb: 2 }}>
+              Resultado do Simulado
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                lineHeight: 1,
+                color:
+                  resultado.percentual >= 60 ? "success.main" : "error.main",
+              }}
+            >
+              {resultado.acertos}/{resultado.total}
+            </Typography>
+            <Typography variant="h6" color="text.secondary" sx={{ mt: 1 }}>
+              {resultado.percentual}% de acerto · {resultado.erros} erro(s)
+            </Typography>
+          </Paper>
+
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+            Correção
+          </Typography>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {resultado.respostas.map((r, index) => (
+              <Paper
+                key={r.questaoId}
+                elevation={0}
+                className="glass-container"
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  borderLeft: "6px solid",
+                  borderColor: r.correta ? "success.main" : "error.main",
+                }}
+              >
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
+                  {r.correta ? (
+                    <CheckCircle color="success" />
+                  ) : (
+                    <Cancel color="error" />
+                  )}
+                  <Typography sx={{ fontWeight: 800 }}>
+                    Questão {index + 1}
+                  </Typography>
+                </Box>
+
+                <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
+                  {r.enunciado}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  Sua resposta:{" "}
+                  <strong>{r.respostaSelecionada || "— (em branco)"}</strong> ·
+                  Gabarito: <strong>{r.respostaCorreta}</strong>
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+
+          <Box sx={{ mt: 6, textAlign: "center" }}>
+            <Button
+              component={Link}
+              to="/aluno/simulados"
+              variant="contained"
+              startIcon={<ArrowBack />}
+              sx={{ borderRadius: "12px" }}
+            >
+              Voltar para Meus Simulados
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: "var(--bg-color)", minHeight: "100vh", pb: 10 }}>
@@ -197,9 +313,11 @@ export default function VisualizarSimulado() {
               <Button
                 variant="contained"
                 color="success"
+                onClick={handleFinalizar}
+                disabled={submitting}
                 sx={{ borderRadius: "10px", px: 4, fontWeight: "bold" }}
               >
-                Finalizar
+                {submitting ? "Corrigindo..." : "Finalizar"}
               </Button>
             </Box>
           </Toolbar>
@@ -379,6 +497,8 @@ export default function VisualizarSimulado() {
             variant="contained"
             color="success"
             size="large"
+            onClick={handleFinalizar}
+            disabled={submitting}
             sx={{
               py: 2,
               px: 8,
@@ -388,7 +508,7 @@ export default function VisualizarSimulado() {
               boxShadow: "0 8px 32px rgba(46, 125, 50, 0.3)",
             }}
           >
-            Finalizar Simulado ✨
+            {submitting ? "Corrigindo..." : "Finalizar Simulado ✨"}
           </Button>
         </Box>
       </Container>
