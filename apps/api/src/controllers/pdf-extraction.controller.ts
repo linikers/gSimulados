@@ -42,12 +42,6 @@ export class PdfExtractionController {
       // Atualizar status
       await PdfSource.findByIdAndUpdate(id, { status: "processing" });
 
-      // Limpar questões pendentes anteriores para este PDF (Redo/Retry)
-      await ExtractedQuestion.deleteMany({
-        pdfSourceId: id,
-        status: "pending",
-      });
-
       console.log(
         `[Extração] Iniciando extração direta do PDF ${pdfSource.driveFileId}...`
       );
@@ -66,7 +60,39 @@ export class PdfExtractionController {
       );
       console.log(`[Extração] Resposta do Gemini recebida.`);
 
-      // 3. Salvar questões
+      // 3. Trava anti-regressão.
+      //
+      // O modelo é errático: já devolveu 2 questões para um PDF que já tinha 50
+      // extraídas. Reprocessar é útil para melhorar, nunca para piorar — então
+      // se a extração nova vier MENOR que a que já está no banco, mantemos a
+      // existente.
+      const pendentesAtuais = await ExtractedQuestion.countDocuments({
+        pdfSourceId: id,
+        status: "pending",
+      });
+
+      if (pendentesAtuais > extractionResult.questoes.length) {
+        console.warn(
+          `[Extração] nova extração trouxe ${extractionResult.questoes.length} questões, ` +
+            `mas já existem ${pendentesAtuais} — mantendo as atuais (anti-regressão).`,
+        );
+        await PdfSource.findByIdAndUpdate(id, {
+          status: "completed",
+          questoesExtraidas: pendentesAtuais,
+        });
+        return res.json({
+          message: `mantidas as ${pendentesAtuais} questões já extraídas (a nova extração trouxe apenas ${extractionResult.questoes.length})`,
+          questions: [],
+        });
+      }
+
+      // Limpar questões pendentes anteriores para este PDF (Redo/Retry)
+      await ExtractedQuestion.deleteMany({
+        pdfSourceId: id,
+        status: "pending",
+      });
+
+      // 4. Salvar questões
       const totalQuestions: any[] = [];
       for (const q of extractionResult.questoes) {
         const sanitizedResposta = q.respostaCorreta?.toUpperCase().trim();
