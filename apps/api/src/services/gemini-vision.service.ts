@@ -1,23 +1,38 @@
 import { gerarConteudoGemini } from "./gemini/gemini-client.service";
 
+export interface QuestaoExtraida {
+  numeroQuestao?: number;
+  enunciado: string;
+  alternativas: string[];
+  respostaCorreta?: string;
+  tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
+  temGabarito: boolean;
+  materia?: string;
+  assunto?: string;
+  temImagem: boolean;
+  pageNumber: number;
+  descricaoFigura?: string;
+  imagemBbox?: { x: number; y: number; w: number; h: number };
+}
+
+/**
+ * Quantas tentativas fazer quando o modelo devolve um resultado pobre.
+ *
+ * O modelo em uso (flash-lite) é instável: no mesmo PDF ele já devolveu 46
+ * questões numa chamada e 1 questão (resposta curta, finishReason=STOP) na
+ * seguinte. Não é erro nem truncamento — é resposta ruim mesmo. Então a defesa
+ * é repetir e ficar com a melhor tentativa.
+ */
+const MAX_TENTATIVAS = Number(process.env.EXTRACAO_TENTATIVAS || 3);
+
+/** A partir daqui consideramos o resultado bom e paramos de tentar. */
+const MINIMO_CONFIAVEL = Number(process.env.EXTRACAO_MINIMO || 5);
+
 export async function extractQuestionsFromPdf(
   pdfBuffer: Buffer,
   vestibularCodigo: string
 ): Promise<{
-  questoes: Array<{
-    numeroQuestao?: number;
-    enunciado: string;
-    alternativas: string[];
-    respostaCorreta?: string;
-    tipoQuestao: "multipla_escolha" | "alternativa" | "somatoria";
-    temGabarito: boolean;
-    materia?: string;
-    assunto?: string;
-    temImagem: boolean;
-    pageNumber: number;
-    descricaoFigura?: string;
-    imagemBbox?: { x: number; y: number; w: number; h: number };
-  }>;
+  questoes: QuestaoExtraida[];
   confidence: number;
 }> {
   const prompt = `
@@ -73,38 +88,61 @@ FORMATO DE RETORNO (JSON APENAS):
     },
   };
 
-  try {
-    console.log(`[Gemini] Enviando PDF para extração (com fallback de modelo)...`);
-    const text = await gerarConteudoGemini([prompt, pdfPart], {
-      json: true,
-      contexto: "gemini-vision",
-    });
-    console.log(`[Gemini] Resposta recebida. Processando texto...`);
-
-    // Limpar markdown blocks se houver
+  const parsearQuestoes = (text: string): QuestaoExtraida[] => {
     const cleanText = text
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
 
-    // Parse JSON
     const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("IA não retornou JSON válido");
     }
 
     const data = JSON.parse(jsonMatch[0]);
+    return data.questoes || [];
+  };
 
-    return {
-      questoes: data.questoes || [],
-      confidence: 85,
-    };
-  } catch (error: any) {
-    console.error(`[Gemini] Erro ao chamar API: ${error.message}`);
-    if (error.status)
-      console.error(
-        `[Gemini] Status HTTP: ${error.status} ${error.statusText}`
+  let melhor: QuestaoExtraida[] = [];
+  let ultimoErro: unknown;
+
+  for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
+    try {
+      console.log(
+        `[Gemini] Extração — tentativa ${tentativa}/${MAX_TENTATIVAS}...`,
       );
-    throw error;
+      const text = await gerarConteudoGemini([prompt, pdfPart], {
+        json: true,
+        contexto: "gemini-vision",
+      });
+
+      const questoes = parsearQuestoes(text);
+      console.log(
+        `[Gemini] tentativa ${tentativa}: ${questoes.length} questões (${text.length} chars)`,
+      );
+
+      if (questoes.length > melhor.length) melhor = questoes;
+      if (melhor.length >= MINIMO_CONFIAVEL) break;
+
+      if (tentativa < MAX_TENTATIVAS) {
+        console.warn(
+          `[Gemini] resultado pobre (${melhor.length} < ${MINIMO_CONFIAVEL}) — repetindo`,
+        );
+      }
+    } catch (error: any) {
+      ultimoErro = error;
+      console.error(
+        `[Gemini] tentativa ${tentativa} falhou: ${error.message}` +
+          (error.status ? ` (status ${error.status})` : ""),
+      );
+    }
   }
+
+  if (melhor.length === 0) {
+    throw ultimoErro instanceof Error
+      ? ultimoErro
+      : new Error("A extração não retornou nenhuma questão");
+  }
+
+  return { questoes: melhor, confidence: 85 };
 }
