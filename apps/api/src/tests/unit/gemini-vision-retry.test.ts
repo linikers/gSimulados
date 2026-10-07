@@ -63,4 +63,35 @@ describe("extractQuestionsFromPdf — robustez contra resposta pobre", () => {
 
     expect(r.questoes).toHaveLength(12);
   });
+
+  it("remove questões repetidas na mesma resposta, ficando com a mais completa", async () => {
+    // Aconteceu de verdade: a prova de 2021 voltou com 140 questões, sendo 90
+    // repetições do mesmo número.
+    const questao = (numeroQuestao: number, enunciado: string) => ({
+      numeroQuestao,
+      enunciado,
+      alternativas: ["A) a", "B) b"],
+      tipoQuestao: "multipla_escolha",
+      temGabarito: false,
+      temImagem: false,
+      pageNumber: 1,
+    });
+
+    mockGerar.mockResolvedValue(
+      JSON.stringify({
+        questoes: [
+          questao(1, "versão curta"),
+          questao(1, "versão bem mais completa da questão 1 com todo o contexto"),
+          questao(2, "questão 2"),
+        ],
+      }),
+    );
+
+    const r = await extractQuestionsFromPdf(Buffer.from("pdf"), "UEM");
+
+    expect(r.questoes).toHaveLength(2);
+    expect(r.questoes.find((q) => q.numeroQuestao === 1)?.enunciado).toContain(
+      "mais completa",
+    );
+  });
 });

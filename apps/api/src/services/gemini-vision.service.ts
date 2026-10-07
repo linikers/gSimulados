@@ -144,5 +144,41 @@ FORMATO DE RETORNO (JSON APENAS):
       : new Error("A extração não retornou nenhuma questão");
   }
 
-  return { questoes: melhor, confidence: 85 };
+  const semDuplicatas = removerDuplicadas(melhor);
+  if (semDuplicatas.length !== melhor.length) {
+    console.log(
+      `[Gemini] removidas ${melhor.length - semDuplicatas.length} questões duplicadas`,
+    );
+  }
+
+  return { questoes: semDuplicatas, confidence: 85 };
+}
+
+/** Tamanho do conteúdo da questão — usado para escolher a versão mais completa. */
+function tamanhoDaQuestao(q: QuestaoExtraida): number {
+  return (q.enunciado || "").length + (q.alternativas || []).join("").length;
+}
+
+/**
+ * Remove questões repetidas na mesma resposta.
+ *
+ * O modelo já devolveu a MESMA prova com 140 questões, sendo 90 repetições do
+ * mesmo número. Fica a versão mais completa de cada número.
+ */
+function removerDuplicadas(questoes: QuestaoExtraida[]): QuestaoExtraida[] {
+  const porNumero = new Map<number, QuestaoExtraida>();
+  const semNumero: QuestaoExtraida[] = [];
+
+  for (const questao of questoes) {
+    if (typeof questao.numeroQuestao !== "number") {
+      semNumero.push(questao);
+      continue;
+    }
+    const atual = porNumero.get(questao.numeroQuestao);
+    if (!atual || tamanhoDaQuestao(questao) > tamanhoDaQuestao(atual)) {
+      porNumero.set(questao.numeroQuestao, questao);
+    }
+  }
+
+  return [...porNumero.values(), ...semNumero];
 }
