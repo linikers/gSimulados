@@ -4,7 +4,9 @@ import { SimuladoService } from "../services/simulado.service";
 export class SimuladoController {
   static async generate(req: Request, res: Response) {
     try {
-      const { nome, materia, dificuldade, quantidade } = req.body;
+      const { nome, materia, quantidade } = req.body;
+      // Sem dificuldade informada a busca não filtrava e voltava vazia.
+      const dificuldade = req.body.dificuldade || "misto";
       const usuarioId = req.userId;
 
       if (!nome || !quantidade) {
