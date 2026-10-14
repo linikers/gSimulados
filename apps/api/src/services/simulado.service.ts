@@ -87,6 +87,11 @@ export class SimuladoService {
       const data = JSON.parse(texto);
 
       const ids = data.selectedIds || [];
+      // A IA pode devolver lista vazia sem dar erro — e aí o simulado sairia
+      // sem nenhuma questão. Nesse caso vale o sorteio aleatório.
+      if (ids.length === 0) {
+        throw new Error("IA não selecionou nenhuma questão");
+      }
       return ids.map((id: string) => new mongoose.Types.ObjectId(id));
     } catch (error) {
       console.error("[SimuladoService] Erro na seleção por IA:", error);
@@ -99,9 +104,11 @@ export class SimuladoService {
   }
 
   static async listByUser(usuarioId: string) {
+    // Sem allowlist de campos: o aluno precisa de alternativas e da figura para
+    // conseguir responder o simulado.
     return await Simulado.find({ usuario: usuarioId })
       .sort({ criadoEm: -1 })
-      .populate("questoes", "enunciado materia assunto");
+      .populate("questoes");
   }
 
   static async getById(id: string) {
