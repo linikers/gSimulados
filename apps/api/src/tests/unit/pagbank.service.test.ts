@@ -187,18 +187,61 @@ describe("PagBankService - criarPedido (PIX)", () => {
     })).rejects.toThrow(/cartão/);
   });
 
-  it("envia cartão com parcelas quando informado", async () => {
+  it("envia cartão no formato que a API aceita (verificado no sandbox)", async () => {
     postMock.mockResolvedValue(respostaOk());
     await PagBankService.criarPedido({
       referencia: "GS-6",
       cliente,
       itens,
       metodo: "CREDIT_CARD",
-      cartao: { numero: "4111111111111111", titular: "ALUNO TESTE", mes: "12", ano: "2030", cvv: "123", parcelas: 3 },
+      cartao: {
+        numero: "4539620659922097",
+        titular: "ALUNO TESTE",
+        titularTaxId: "12345678909",
+        mes: "12",
+        ano: "2026",
+        cvv: "123",
+        parcelas: 3,
+      },
     });
-    const cartao = postMock.mock.calls[0][1].charges[0].payment_method.credit_card;
-    expect(cartao.installments).toBe(3);
-    expect(cartao.card.number).toBe("4111111111111111");
+    const pm = postMock.mock.calls[0][1].charges[0].payment_method;
+    // card/holder/installments/capture/soft_descriptor ficam TODOS em payment_method
+    expect(pm.type).toBe("CREDIT_CARD");
+    expect(pm.installments).toBe(3);
+    expect(pm.capture).toBe(true);
+    expect(pm.soft_descriptor).toBeTruthy();
+    expect(pm.card.number).toBe("4539620659922097");
+    expect(pm.card.holder).toEqual({ name: "ALUNO TESTE", tax_id: "12345678909" });
+    // o formato `credit_card` aninhado não existe na API
+    expect(pm.credit_card).toBeUndefined();
+    // `seller` no nível da cobrança faz a API responder
+    // "charges[0].seller.soft_descriptor: must not be empty"
+    expect(postMock.mock.calls[0][1].charges[0].seller).toBeUndefined();
+  });
+
+  it("exige CPF do titular do cartão", async () => {
+    await expect(PagBankService.criarPedido({
+      referencia: "GS-6b",
+      cliente,
+      itens,
+      metodo: "CREDIT_CARD",
+      cartao: { numero: "4539620659922097", titular: "X", titularTaxId: "", mes: "12", ano: "2026", cvv: "123" },
+    })).rejects.toThrow(/CPF do titular/);
+    expect(postMock).not.toHaveBeenCalled();
+  });
+
+  it("usa o soft_descriptor configurado por env", async () => {
+    process.env.PAGBANK_SOFT_DESCRIPTOR = "SIMULADOS GS";
+    postMock.mockResolvedValue(respostaOk());
+    await PagBankService.criarPedido({
+      referencia: "GS-6c",
+      cliente,
+      itens,
+      metodo: "CREDIT_CARD",
+      cartao: { numero: "4539620659922097", titular: "ALUNO", titularTaxId: "12345678909", mes: "12", ano: "2026", cvv: "123" },
+    });
+    expect(postMock.mock.calls[0][1].charges[0].payment_method.soft_descriptor).toBe("SIMULADOS GS");
+    delete process.env.PAGBANK_SOFT_DESCRIPTOR;
   });
 });
 
@@ -220,7 +263,62 @@ describe("PagBankService - status", () => {
   });
 });
 
+describe("PagBankService - notificação (webhook)", () => {
+  const notificacaoReal = {
+    id: "ORDE_7A40F34A-657A-48C1-9F42-FEE722BE5680",
+    reference_id: "GS-WH-123",
+    charges: [
+      {
+        id: "CHAR_F41B2AC9",
+        reference_id: "GS-WH-123-1",
+        status: "PAID",
+        paid_at: "2026-10-14T15:48:16.000-03:00",
+        amount: { value: 1990, currency: "BRL", summary: { total: 1990, paid: 1990 } },
+        payment_method: { type: "CREDIT_CARD" },
+      },
+    ],
+    qr_codes: null,
+  };
+
+  it("lê a notificação real do PagBank (payload = response da API)", () => {
+    const n = PagBankService.extrairNotificacao(notificacaoReal);
+    expect(n.status).toBe("pago");
+    expect(n.statusBruto).toBe("PAID");
+    expect(n.chargeId).toBe("CHAR_F41B2AC9");
+    expect(n.pedidoId).toBe("ORDE_7A40F34A-657A-48C1-9F42-FEE722BE5680");
+    expect(n.referencia).toBe("GS-WH-123");
+    expect(n.valorCentavos).toBe(1990);
+  });
+
+  it("notificação sem cobrança não derruba o handler", () => {
+    const n = PagBankService.extrairNotificacao({ reference_id: "GS-X" });
+    expect(n.status).toBe("pendente");
+    expect(n.chargeId).toBeUndefined();
+    expect(n.valorCentavos).toBe(0);
+  });
+
+  it("não libera acesso com status que não conhecemos", () => {
+    const n = PagBankService.extrairNotificacao({
+      reference_id: "GS-Y",
+      charges: [{ id: "CHAR_1", status: "ALGO_NOVO", amount: { value: 1990 } }],
+    });
+    expect(n.status).toBe("pendente");
+  });
+});
+
 describe("PagBankService - erros e retry", () => {
+  it("conta sem chave PIX ativa recebe explicação, não erro genérico", async () => {
+    postMock.mockRejectedValue(erroHttp(400, {
+      error_messages: [{ code: "40002", description: "Pix key was not found for pix payment method" }],
+    }));
+    await expect(PagBankService.criarPedido({
+      referencia: "GS-pix",
+      cliente,
+      itens,
+      metodo: "PIX",
+    })).rejects.toThrow(/chave PIX ativa/i);
+    expect(postMock).toHaveBeenCalledTimes(1);
+  });
   it("401 explica token errado e não repete", async () => {
     postMock.mockRejectedValue(erroHttp(401, { error_messages: [{ description: "invalid token" }] }));
     await expect(PagBankService.criarPedido({

@@ -73,6 +73,8 @@ export interface ItemPedido {
 export interface CartaoCredito {
   numero: string;
   titular: string;
+  /** CPF do titular — o PagBank exige (campo `holder.tax_id`). */
+  titularTaxId: string;
   mes: string;
   ano: string;
   cvv: string;
@@ -91,6 +93,8 @@ export interface CriarPedidoParams {
   /** URLs que recebem o POST de mudança de status. */
   notificationUrls?: string[];
   cartao?: CartaoCredito;
+  /** Nome que aparece na fatura do cliente (default: env ou GSIMULADOS). */
+  softDescriptor?: string;
 }
 
 export interface PedidoNormalizado {
@@ -201,6 +205,16 @@ export class PagBankService {
           );
         }
         if (status && status < 500) {
+          // Erro conhecido e que não é do código: a conta recebedora precisa de
+          // pelo menos uma chave PIX de endereçamento ativa (doc do QR Code PIX).
+          const descricoes = JSON.stringify(dados ?? "");
+          if (/Pix key was not found/i.test(descricoes)) {
+            throw new PagBankErro(
+              "A conta PagBank recebedora não tem chave PIX ativa. Cadastre uma chave PIX na conta (app/site do PagBank) antes de cobrar por PIX.",
+              status,
+              dados,
+            );
+          }
           throw new PagBankErro(
             `PagBank recusou a requisição (${status}).`,
             status,
@@ -239,6 +253,12 @@ export class PagBankService {
       type: params.metodo,
     };
 
+    const softDescriptor =
+      (params.softDescriptor ?? process.env.PAGBANK_SOFT_DESCRIPTOR ?? "GSIMULADOS")
+        .replace(/[^\w\s.-]/g, "")
+        .slice(0, 22)
+        .trim() || "GSIMULADOS";
+
     if (params.metodo === "PIX") {
       const minutos = params.expiracaoPixMinutos ?? 3 * 24 * 60;
       metodoPagamento.pix = {
@@ -247,15 +267,25 @@ export class PagBankService {
     }
 
     if (params.metodo === "CREDIT_CARD" && params.cartao) {
-      metodoPagamento.credit_card = {
-        installments: params.cartao.parcelas ?? 1,
-        capture: true,
-        holder: { name: params.cartao.titular },
-        card: {
-          number: params.cartao.numero,
-          exp_month: params.cartao.mes,
-          exp_year: params.cartao.ano,
-          security_code: params.cartao.cvv,
+      // Forma VERIFICADA ao vivo no sandbox (201 + PAID / DECLINED):
+      // `card` e `holder` ficam dentro de payment_method, junto de
+      // installments/capture, e o soft_descriptor também é do payment_method
+      // (não existe em `seller` — mandar em `seller` devolve
+      // "charges[0].seller.soft_descriptor: must not be empty").
+      if (!/^\d{11}$/.test(String(params.cartao.titularTaxId ?? ""))) {
+        throw new PagBankErro("O CPF do titular do cartão é obrigatório (11 dígitos).");
+      }
+      metodoPagamento.installments = params.cartao.parcelas ?? 1;
+      metodoPagamento.capture = true;
+      metodoPagamento.soft_descriptor = softDescriptor;
+      metodoPagamento.card = {
+        number: params.cartao.numero,
+        exp_month: params.cartao.mes,
+        exp_year: params.cartao.ano,
+        security_code: params.cartao.cvv,
+        holder: {
+          name: params.cartao.titular,
+          tax_id: String(params.cartao.titularTaxId).replace(/\D/g, ""),
         },
       };
     }
@@ -307,6 +337,14 @@ export class PagBankService {
       `/charges/${encodeURIComponent(chargeId)}/cancel`,
     );
     return statusInterno(resposta?.status);
+  }
+
+  /**
+   * Lê a notificação (webhook) do PagBank. O payload da notificação tem o
+   * mesmo formato do response síncrono da API — então basta normalizar.
+   */
+  static extrairNotificacao(payload: unknown): PedidoNormalizado {
+    return this.normalizar(payload, (payload as any)?.reference_id ?? "");
   }
 
   /** Achata a resposta do PagBank no que o nosso código usa. */
