@@ -245,6 +245,77 @@ describe("PagBankService - criarPedido (PIX)", () => {
   });
 });
 
+describe("PagBankService - boleto", () => {
+  const holder = {
+    nome: "Aluno Teste",
+    taxId: "123.456.789-09",
+    email: "aluno@teste.com",
+    endereco: {
+      cep: "87010-000",
+      logradouro: "Av Brasil",
+      numero: "100",
+      bairro: "Centro",
+      cidade: "Maringa",
+      uf: "PR",
+    },
+  };
+
+  it("monta o boleto no formato aceito (verificado no sandbox)", async () => {
+    postMock.mockResolvedValue(respostaOk());
+    await PagBankService.criarPedido({
+      referencia: "GS-BOL",
+      cliente,
+      itens,
+      metodo: "BOLETO",
+      boleto: { holder, dueDate: "2026-10-20" },
+    });
+
+    const boleto = postMock.mock.calls[0][1].charges[0].payment_method.boleto;
+    expect(boleto.due_date).toBe("2026-10-20");
+    expect(boleto.holder.tax_id).toBe("12345678909"); // só dígitos
+    expect(boleto.holder.email).toBe("aluno@teste.com");
+    // a API exige region E region_code (complemento é opcional)
+    expect(boleto.holder.address.region).toBe("PR");
+    expect(boleto.holder.address.region_code).toBe("PR");
+    expect(boleto.holder.address.postal_code).toBe("87010000");
+    expect(boleto.holder.address.country).toBe("BRA");
+  });
+
+  it("usa vencimento de 5 dias quando não informado", async () => {
+    postMock.mockResolvedValue(respostaOk());
+    await PagBankService.criarPedido({
+      referencia: "GS-BOL2",
+      cliente,
+      itens,
+      metodo: "BOLETO",
+      boleto: { holder },
+    });
+    const due = postMock.mock.calls[0][1].charges[0].payment_method.boleto.due_date;
+    expect(due).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("recusa boleto sem os dados do pagador", async () => {
+    await expect(PagBankService.criarPedido({
+      referencia: "GS-BOL3",
+      cliente,
+      itens,
+      metodo: "BOLETO",
+    })).rejects.toThrow(/dados do pagador/);
+    expect(postMock).not.toHaveBeenCalled();
+  });
+
+  it("recusa boleto com endereço incompleto", async () => {
+    await expect(PagBankService.criarPedido({
+      referencia: "GS-BOL4",
+      cliente,
+      itens,
+      metodo: "BOLETO",
+      boleto: { holder: { ...holder, endereco: { ...holder.endereco, uf: "" } } },
+    })).rejects.toThrow(/Endereço incompleto/);
+    expect(postMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("PagBankService - status", () => {
   it("mapeia os status da API para os nossos", () => {
     expect(statusInterno("PAID")).toBe("pago");

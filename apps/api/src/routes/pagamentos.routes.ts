@@ -10,6 +10,7 @@ router.get("/planos", PagamentosController.listarPlanos);
 router.get("/pix", PagamentosController.getPixPublico);
 
 // Autenticado (aluno/escola/admin)
+router.get("/assinatura", authMiddleware, PagamentosController.assinaturaStatus);
 router.post("/checkout", authMiddleware, PagamentosController.checkout);
 router.get("/meus", authMiddleware, PagamentosController.meusPagamentos);
 
