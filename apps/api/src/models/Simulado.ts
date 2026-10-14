@@ -4,6 +4,7 @@ export interface ISimulado extends Document {
   nome: string;
   questoes: mongoose.Types.ObjectId[];
   materia?: string;
+  vestibular?: string;
   dificuldade: "facil" | "medio" | "dificil" | "misto";
   quantidadeQuestoes: number;
   usuario: mongoose.Types.ObjectId;
@@ -28,6 +29,7 @@ const SimuladoSchema: Schema = new Schema(
       { type: Schema.Types.ObjectId, ref: "Question", required: true },
     ],
     materia: { type: String },
+    vestibular: { type: String },
     dificuldade: {
       type: String,
       enum: ["facil", "medio", "dificil", "misto"],
