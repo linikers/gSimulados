@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { PdfExtractionController } from "../controllers/pdf-extraction.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { requireAssinaturaAtiva } from "../middlewares/assinatura.middleware";
 
 const router = Router();
 
 // Todas as rotas protegidas (Admin only)
 router.use(authMiddleware);
+// Ingestão é recurso pago: sem assinatura ativa, 402.
+router.use(requireAssinaturaAtiva);
 
 router.get("/pdfs", PdfExtractionController.listPdfs);
 router.post("/pdfs/:id/extract", PdfExtractionController.extractFromPdf);

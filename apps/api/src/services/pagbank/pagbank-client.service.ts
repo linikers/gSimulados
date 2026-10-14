@@ -81,6 +81,30 @@ export interface CartaoCredito {
   parcelas?: number;
 }
 
+/** Endereço do pagador — o boleto exige (PIX não). */
+export interface EnderecoCobranca {
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  /** UF, ex.: "PR". Usado como `region` e `region_code`. */
+  uf: string;
+}
+
+export interface DadosBoleto {
+  /** Vencimento (YYYY-MM-DD). Default: 5 dias. */
+  dueDate?: string;
+  instrucoes?: string[];
+  holder: {
+    nome: string;
+    taxId: string;
+    email: string;
+    endereco: EnderecoCobranca;
+  };
+}
+
 export interface CriarPedidoParams {
   /** Nosso identificador (ex.: a referência do pagamento). */
   referencia: string;
@@ -93,6 +117,7 @@ export interface CriarPedidoParams {
   /** URLs que recebem o POST de mudança de status. */
   notificationUrls?: string[];
   cartao?: CartaoCredito;
+  boleto?: DadosBoleto;
   /** Nome que aparece na fatura do cliente (default: env ou GSIMULADOS). */
   softDescriptor?: string;
 }
@@ -146,6 +171,11 @@ export class PagBankService {
     return (
       process.env.PAGBANK_BASE_URL?.trim().replace(/\/+$/, "") || PAGBANK_SANDBOX
     );
+  }
+
+  /** Há token configurado? Sem ele não dá para criar cobrança real. */
+  static configurado(): boolean {
+    return Boolean(process.env.PAGBANK_TOKEN?.trim());
   }
 
   static producao(): boolean {
@@ -215,8 +245,13 @@ export class PagBankService {
               dados,
             );
           }
+          // Leva o motivo do PagBank junto: sem isso o erro vira um "400" mudo.
+          const detalhe = (dados as any)?.error_messages?.[0];
+          const motivo = detalhe
+            ? `${detalhe.parameter_name ? `${detalhe.parameter_name}: ` : ""}${detalhe.description ?? ""}`
+            : "";
           throw new PagBankErro(
-            `PagBank recusou a requisição (${status}).`,
+            `PagBank recusou a requisição (${status})${motivo ? `: ${motivo}` : "."}`,
             status,
             dados,
           );
@@ -263,6 +298,49 @@ export class PagBankService {
       const minutos = params.expiracaoPixMinutos ?? 3 * 24 * 60;
       metodoPagamento.pix = {
         expiration_date: new Date(Date.now() + minutos * 60_000).toISOString(),
+      };
+    }
+
+    if (params.metodo === "BOLETO") {
+      // O boleto exige o endereço do PAGADOR (verificado ao vivo: sem
+      // `holder.address` a API devolve invalid_parameter em
+      // charges[0].payment_method.boleto.holder.address).
+      if (!params.boleto?.holder) {
+        throw new PagBankErro(
+          "Boleto exige os dados do pagador (nome, CPF, e-mail e endereço).",
+        );
+      }
+      const { holder, dueDate, instrucoes } = params.boleto;
+      const e = holder.endereco;
+      if (!e?.cep || !e?.logradouro || !e?.numero || !e?.bairro || !e?.cidade || !e?.uf) {
+        throw new PagBankErro(
+          "Endereço incompleto para o boleto: informe CEP, logradouro, número, bairro, cidade e UF.",
+        );
+      }
+      metodoPagamento.boleto = {
+        due_date:
+          dueDate ??
+          new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        instruction_lines: {
+          line_1: instrucoes?.[0] ?? "Nao receber apos o vencimento",
+          line_2: instrucoes?.[1] ?? "Assinatura gSimulados",
+        },
+        holder: {
+          name: holder.nome,
+          tax_id: String(holder.taxId).replace(/\D/g, ""),
+          email: holder.email,
+          address: {
+            street: e.logradouro,
+            number: e.numero,
+            ...(e.complemento ? { complement: e.complemento } : {}),
+            locality: e.bairro,
+            city: e.cidade,
+            region: e.uf,
+            region_code: e.uf,
+            postal_code: String(e.cep).replace(/\D/g, ""),
+            country: "BRA",
+          },
+        },
       };
     }
 

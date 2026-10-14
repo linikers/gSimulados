@@ -9,17 +9,12 @@ export interface Plano {
 
 /**
  * Catálogo de planos (fonte da verdade no servidor).
- * Valores conforme PIT-INVESTIMENTO-v2.
+ *
+ * **Não existe plano gratuito**: todo acesso é pago. O que existe é desconto
+ * para aluno vinculado a escola (ver `Escola.descontoAlunosPercentual`) e
+ * acesso coberto pela escola quando o ciclo dela está ativo.
  */
 export const PLANOS: Plano[] = [
-  {
-    codigo: "free",
-    nome: "Free",
-    preco: 0,
-    alunos: 1,
-    descricao: "Até 3 simulados por mês",
-    publico: "individual",
-  },
   {
     codigo: "individual",
     nome: "Individual",
@@ -57,3 +52,6 @@ export const PLANOS: Plano[] = [
 export function getPlano(codigo: string): Plano | undefined {
   return PLANOS.find((p) => p.codigo === codigo);
 }
+
+/** Planos que o público pode assinar sozinho (escola é negociada). */
+export const PLANOS_PUBLICOS = PLANOS.filter((p) => p.publico === "individual");

@@ -19,6 +19,10 @@ const UserSchema = new Schema<IUserDocument>(
     },
     plano: { type: String, default: "free" },
     planoExpiraEm: { type: Date },
+    /** CPF (11) ou CNPJ (14), só dígitos — exigido pelo PagBank na cobrança. */
+    taxId: { type: String },
+    /** Endereço do pagador (reaproveitado no boleto). */
+    enderecoCobranca: { type: Schema.Types.Mixed },
   },
   { discriminatorKey: "role", timestamps: true },
 );
@@ -34,6 +38,12 @@ const EscolaSchema = new Schema({
   endereco: String,
   telefone: String,
   logo: String,
+  /**
+   * Desconto que a escola dá para os alunos dela assinarem sozinhos (%). Vale
+   * só quando a escola NÃO está com o ciclo ativo — se estiver, o aluno é
+   * coberto pela escola e nem é cobrado.
+   */
+  descontoAlunosPercentual: { type: Number, default: 0, min: 0, max: 100 },
 });
 
 // Schema do Aluno

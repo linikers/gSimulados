@@ -84,6 +84,23 @@ export class AssinaturaService {
     return { escolaId: String(escolaId), escola };
   }
 
+  /**
+   * Desconto (%) que a escola do aluno concede para ele assinar sozinho.
+   * Só vale quando a escola não está cobrindo o acesso (nesse caso nem há
+   * cobrança — ver `escolaPagante`).
+   */
+  static async descontoDoAluno(usuarioId: string): Promise<number> {
+    const aluno = await Aluno.findById(usuarioId).select("escolaId");
+    const escolaId = (aluno as any)?.escolaId;
+    if (!escolaId) return 0;
+
+    const escola = await User.findById(escolaId).select(
+      "descontoAlunosPercentual",
+    );
+    const desconto = Number((escola as any)?.descontoAlunosPercentual ?? 0);
+    return Number.isFinite(desconto) ? Math.min(Math.max(desconto, 0), 100) : 0;
+  }
+
   /** O usuário pode usar o sistema? (assinatura própria ou escola pagando) */
   static async acessoLiberado(
     usuarioId: string,
