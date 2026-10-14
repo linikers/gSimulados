@@ -143,7 +143,35 @@ produção (PF, que já usa PagBank) a chave PIX provavelmente já existe.
 criptografia de cartão (chave pública) *pode* ser usada — confirmar com o PagBank se produção
 exige `card.encrypted` para quem não é PCI.
 
-## 7. Pendências para começar
+## 8. Status atual (14/10/2026)
+
+**Mergeado e no ar:**
+
+- PR #64 — gerador do aluno (dificuldade default, alternativas/figura, IA vazia).
+- PR #65 — gerador: `$sample`, quantidade garantida, sem vazar gabarito.
+- PR #66 — cliente PagBank (PIX/boleto/cartão), `POST /webhooks/pagbank` idempotente, models
+  `Assinatura` e `EventoWebhook`, `AssinaturaService`.
+- PR #67 — `requireAssinaturaAtiva` (402) em `POST /simulados/generate` e na ingestão; checkout
+  criando cobrança real no PagBank; desconto de escola no servidor; `free` fora do catálogo.
+
+**Testado ao vivo no sandbox:** boleto ✅ · cartão ✅ (PAID/DECLINED) · webhook ✅ ·
+PIX ⛔ (chave PIX da conta no sandbox — PagBank).
+
+**Falta para vender de verdade:**
+
+1. **Chave PIX ativa no sandbox** — só o time de integrações do PagBank (chamado escrito; a chave
+   **não** vai no payload: já testado com `pix.key`/`pix.chave`/`pix.pix_key`/`pix.enderecamento`).
+2. **Produção**: homologação aprovada → token de produção (Vendas → Integrações) → secrets
+   `PAGBANK_TOKEN` e `PAGBANK_BASE_URL=https://api.pagseguro.com` no Fly. Sem isso, **nada cobra
+   dinheiro real**: o default é sandbox e não há segredo configurado.
+3. **Front**: tela de planos/checkout (o `Planos.tsx` existe no repo mas **não está no ar**) e
+   tratamento do 402. O deploy da web está parado num build de 27/05/2026.
+4. **Cartão em produção**: confirmar com o PagBank se exige criptografia com chave pública (PCI);
+   enquanto isso, cobrar por PIX/boleto.
+5. Cupom de desconto por escola (hoje o desconto é `Escola.descontoAlunosPercentual`, sem código
+   promocional avulso).
+
+## 9. Pendências para começar
 
 - [ ] Login no Portal do Desenvolvedor (feito por você, no painel).
 - [ ] Confirmar se a conta PagBank é **PF ou PJ**.
