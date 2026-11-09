@@ -5,6 +5,7 @@ import { User } from "../models/User";
 import { PLANOS, getPlano } from "../config/planos";
 import { AssinaturaService } from "../services/assinatura.service";
 import { PagBankService } from "../services/pagbank/pagbank-client.service";
+import { MercadoPagoService } from "../services/mercadopago/mercadopago-client.service";
 
 /** Gera um código curto de referência (também é a referência no PagBank). */
 function gerarReferencia(): string {
@@ -170,6 +171,55 @@ export class PagamentosController {
         referencia,
         expiraEm: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       };
+
+      // Mercado Pago primeiro: é a conta que já tem credencial de produção e
+      // PIX habilitado. PagBank segue como alternativa e o PIX manual fecha.
+      if (metodo === "pix" && MercadoPagoService.configurado()) {
+        const cobranca = await MercadoPagoService.criarCobrancaPix({
+          referencia,
+          valorCentavos: Math.round(valorFinal * 100),
+          descricao,
+          cliente: {
+            nome: usuario.name,
+            email: usuario.email,
+            taxId: taxId || usuario.taxId,
+          },
+        });
+
+        const pagamento = await Pagamento.create({
+          ...base,
+          gateway: "mercadopago",
+          mercadopagoPedidoId: cobranca.pedidoId,
+          mercadopagoPaymentId: cobranca.pagamentoId,
+          qrCodeTexto: cobranca.qrCodeTexto,
+          qrCodePngUrl: cobranca.qrCodeImagem,
+          status: cobranca.status === "pago" ? "pago" : "pendente",
+        });
+
+        // PIX raramente confirma na criação, mas se confirmar, libera agora.
+        if (cobranca.status === "pago") {
+          pagamento.pagoEm = new Date();
+          await pagamento.save();
+          await AssinaturaService.renovar({
+            usuarioId: String(usuario._id),
+            plano: planoEscolhido.codigo,
+            agora: pagamento.pagoEm,
+          });
+        }
+
+        return res.status(201).json({
+          pagamento,
+          valorFinal,
+          descontoPercentual,
+          mercadopago: {
+            pedidoId: cobranca.pedidoId,
+            status: cobranca.statusBruto,
+            qrCode: cobranca.qrCodeTexto,
+            qrCodeImagem: cobranca.qrCodeImagem,
+            linkPagamento: cobranca.linkPagamento,
+          },
+        });
+      }
 
       if (PagBankService.configurado()) {
         const documento = normalizarDocumento(taxId || usuario.taxId);

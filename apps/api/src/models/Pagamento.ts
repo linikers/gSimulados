@@ -19,9 +19,11 @@ export interface IPagamento extends Document {
   /** Nosso identificador (GS-XXXXXX ou UUID) — vai como `reference_id`. */
   referencia: string;
   /** `manual` = PIX conferido à mão pelo admin (fluxo antigo, ainda válido). */
-  gateway?: "pagbank" | "manual";
+  gateway?: "pagbank" | "mercadopago" | "manual";
   pagbankPedidoId?: string;
   pagbankChargeId?: string;
+  mercadopagoPedidoId?: string;
+  mercadopagoPaymentId?: string;
   /** PIX copia-e-cola devolvido pelo PagBank. */
   qrCodeTexto?: string;
   qrCodePngUrl?: string;
@@ -52,9 +54,11 @@ const PagamentoSchema: Schema = new Schema(
       index: true,
     },
     referencia: { type: String, required: true, unique: true },
-    gateway: { type: String, enum: ["pagbank", "manual"] },
+    gateway: { type: String, enum: ["pagbank", "mercadopago", "manual"] },
     pagbankPedidoId: { type: String, index: true },
     pagbankChargeId: { type: String, index: true },
+    mercadopagoPedidoId: { type: String, index: true },
+    mercadopagoPaymentId: { type: String, index: true },
     qrCodeTexto: { type: String },
     qrCodePngUrl: { type: String },
     boletoBarcode: { type: String },

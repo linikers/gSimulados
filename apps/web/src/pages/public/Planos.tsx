@@ -165,55 +165,141 @@ export function Planos() {
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: 800 }}>
-          Pagamento via PIX
+          {checkout?.mercadopago
+            ? "Pagamento via PIX — Mercado Pago"
+            : "Pagamento via PIX"}
         </DialogTitle>
         <DialogContent>
           {checkout && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Alert severity="info">
-                Pague o valor abaixo pelo PIX e envie o comprovante. A liberação
-                do plano é feita manualmente após a confirmação.
-              </Alert>
+              {checkout.mercadopago ? (
+                <>
+                  <Alert severity="info">
+                    Escaneie o QR Code ou use o PIX copia e cola. A liberação é
+                    automática assim que o pagamento for confirmado.
+                  </Alert>
 
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Valor
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                  {brl(checkout.pagamento.valor)}
-                </Typography>
-              </Box>
+                  {checkout.mercadopago.qrCodeImagem && (
+                    <Box
+                      component="img"
+                      src={checkout.mercadopago.qrCodeImagem}
+                      alt="QR Code do PIX"
+                      sx={{
+                        width: 220,
+                        height: 220,
+                        alignSelf: "center",
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    />
+                  )}
 
-              <Divider />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Valor
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                      {brl(checkout.pagamento.valor)}
+                    </Typography>
+                  </Box>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Chave PIX
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                    {checkout.pix.chave}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {checkout.pix.nomeBeneficiario}
-                    {checkout.pix.cidade ? ` · ${checkout.pix.cidade}` : ""}
-                  </Typography>
-                </Box>
-                <Tooltip title="Copiar chave">
-                  <IconButton onClick={() => copiar(checkout.pix.chave)}>
-                    <ContentCopyIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+                  {checkout.mercadopago.qrCode && (
+                    <>
+                      <Divider />
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            PIX copia e cola
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              wordBreak: "break-all",
+                              maxHeight: 72,
+                              overflow: "hidden",
+                            }}
+                          >
+                            {checkout.mercadopago.qrCode}
+                          </Typography>
+                        </Box>
+                        <Tooltip title="Copiar código PIX">
+                          <IconButton
+                            onClick={() =>
+                              copiar(checkout.mercadopago?.qrCode ?? "")
+                            }
+                          >
+                            <ContentCopyIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </>
+                  )}
+
+                  {checkout.mercadopago.linkPagamento && (
+                    <Button
+                      variant="outlined"
+                      href={checkout.mercadopago.linkPagamento}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Abrir no Mercado Pago
+                    </Button>
+                  )}
+                </>
+              ) : checkout.pix?.chave ? (
+                <>
+                  <Alert severity="info">
+                    Pague o valor abaixo pelo PIX e envie o comprovante. A
+                    liberação do plano é feita manualmente após a confirmação.
+                  </Alert>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Valor
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                      {brl(checkout.pagamento.valor)}
+                    </Typography>
+                  </Box>
+
+                  <Divider />
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Chave PIX
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {checkout.pix.chave}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {checkout.pix.nomeBeneficiario}
+                        {checkout.pix.cidade ? ` · ${checkout.pix.cidade}` : ""}
+                      </Typography>
+                    </Box>
+                    <Tooltip title="Copiar chave">
+                      <IconButton onClick={() => copiar(checkout.pix?.chave ?? "")}>
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </>
+              ) : (
+                <Alert severity="info">
+                  Pagamento criado. Acompanhe a confirmação em Meus Pagamentos.
+                </Alert>
+              )}
 
               <Divider />
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    Referência (informe no comprovante)
+                    Referência
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 800 }}>
                     {checkout.pagamento.referencia}
@@ -228,7 +314,7 @@ export function Planos() {
                 </Tooltip>
               </Box>
 
-              {checkout.pix.instrucoes && (
+              {checkout.pix?.instrucoes && (
                 <Alert severity="success" icon={<CheckCircleIcon />}>
                   {checkout.pix.instrucoes}
                 </Alert>
