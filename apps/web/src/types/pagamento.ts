@@ -31,11 +31,21 @@ export interface IPagamento {
 
 export interface ICheckoutResponse {
   pagamento: IPagamento;
-  pix: {
+  valorFinal?: number;
+  /** true = PIX manual (chave estática conferida pelo admin). */
+  manual?: boolean;
+  pix?: {
     chave: string;
     nomeBeneficiario: string;
     cidade: string;
     instrucoes: string;
+  };
+  mercadopago?: {
+    pedidoId: string;
+    status?: string;
+    qrCode?: string;
+    qrCodeImagem?: string;
+    linkPagamento?: string;
   };
 }
 
