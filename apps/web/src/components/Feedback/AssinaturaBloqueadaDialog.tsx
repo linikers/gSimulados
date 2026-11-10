@@ -23,13 +23,14 @@ export function AssinaturaBloqueadaDialog() {
 
   const verPlanos = () => {
     fechar();
-    navigate(
-      user?.role === "escola"
-        ? "/escola/assinatura"
-        : user?.role === "aluno"
-          ? "/aluno/assinatura"
-          : "/planos",
-    );
+    if (user?.role === "escola") {
+      navigate("/escola/assinatura");
+    } else if (user?.role === "aluno") {
+      // cai na tela de pagamento com o checkout do plano individual já aberto
+      navigate("/aluno/assinatura?pagar=individual");
+    } else {
+      navigate("/planos");
+    }
   };
 
   return (
@@ -49,7 +50,7 @@ export function AssinaturaBloqueadaDialog() {
           Agora não
         </Button>
         <Button onClick={verPlanos} variant="contained" disableElevation>
-          Ver planos
+          {user?.role === "aluno" ? "Pagar com PIX" : "Ver planos"}
         </Button>
       </DialogActions>
     </Dialog>

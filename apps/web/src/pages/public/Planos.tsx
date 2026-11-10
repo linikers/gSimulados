@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Container,
@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PagamentosService } from "../../services/pagamentos.service";
 import type { IPlano, ICheckoutResponse } from "../../types/pagamento";
 import { useAuth } from "../../hooks/useAuth";
@@ -36,6 +36,8 @@ export function Planos() {
   const [processando, setProcessando] = useState<string | null>(null);
   const { signed, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const autoCheckoutFeito = useRef(false);
   const { showToast } = useToast();
   const { handleError } = useErrorHandler();
 
@@ -61,6 +63,17 @@ export function Planos() {
       setProcessando(null);
     }
   };
+
+  // Veio do dialog de 402 com ?pagar=individual: abre o checkout sem outro clique.
+  useEffect(() => {
+    if (autoCheckoutFeito.current || loading || !signed) return;
+    const codigo = searchParams.get("pagar");
+    if (!codigo) return;
+    const plano = planos.find((p) => p.codigo === codigo);
+    if (!plano) return;
+    autoCheckoutFeito.current = true;
+    void handleAssinar(plano);
+  }, [loading, planos, signed, searchParams, handleAssinar]);
 
   const copiar = (texto: string) => {
     navigator.clipboard?.writeText(texto);
