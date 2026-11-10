@@ -4,6 +4,7 @@ import type { ISimulado, IResultadoSimulado } from "../types/simulado";
 export interface SimuladoParams {
   nome: string;
   materia?: string;
+  vestibular?: string;
   dificuldade: "facil" | "medio" | "dificil" | "misto";
   quantidade: number;
 }

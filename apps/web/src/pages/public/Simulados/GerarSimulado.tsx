@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -15,6 +15,10 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { SimuladoService } from "../../../services/simulado.service";
+import {
+  VestibularesService,
+  type IVestibular,
+} from "../../../services/vestibulares.service";
 import { useNavigate } from "react-router-dom";
 import { useErrorHandler } from "../../../hooks/useErrorHandler";
 import {
@@ -27,6 +31,8 @@ import {
 
 export default function GerarSimulado() {
   const [nome, setNome] = useState("");
+  const [vestibular, setVestibular] = useState("");
+  const [vestibulares, setVestibulares] = useState<IVestibular[]>([]);
   const [materia, setMateria] = useState("");
   const [dificuldade, setDificuldade] = useState<
     "facil" | "medio" | "dificil" | "misto"
@@ -35,6 +41,17 @@ export default function GerarSimulado() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { handleError } = useErrorHandler();
+
+  // Só oferece vestibular que tem questão aprovada: evita 404 do gerador.
+  useEffect(() => {
+    VestibularesService.list()
+      .then((lista) =>
+        setVestibulares(
+          lista.filter((v) => (v.questoesCount ?? 0) > 0),
+        ),
+      )
+      .catch(() => setVestibulares([]));
+  }, []);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +62,7 @@ export default function GerarSimulado() {
         materia,
         dificuldade,
         quantidade,
+        ...(vestibular ? { vestibular } : {}),
       });
       navigate(`/aluno/simulados/${result._id}`);
     } catch (error) {
@@ -123,6 +141,28 @@ export default function GerarSimulado() {
                   },
                 }}
               />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box className="form-label">
+                <School color="primary" />
+                Vestibular
+              </Box>
+              <FormControl fullWidth>
+                <Select
+                  value={vestibular}
+                  onChange={(e) => setVestibular(e.target.value)}
+                  displayEmpty
+                  sx={{ borderRadius: "12px", bgcolor: "var(--input-bg)" }}
+                >
+                  <MenuItem value="">Todos os disponíveis</MenuItem>
+                  {vestibulares.map((v) => (
+                    <MenuItem key={v.codigo} value={v.codigo}>
+                      {v.nome} — {v.questoesCount} questões
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>

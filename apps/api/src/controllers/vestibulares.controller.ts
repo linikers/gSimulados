@@ -1,13 +1,29 @@
 import { Request, Response } from "express";
 import { Vestibular } from "../models/Vestibular";
+import { Question } from "../models/Question";
 
 export class VestibularesController {
   static async list(_req: Request, res: Response) {
     try {
-      const vestibulares = await Vestibular.find({ ativo: true }).sort({
-        ordem: 1,
-      });
-      res.json(vestibulares);
+      const [vestibulares, contagens] = await Promise.all([
+        Vestibular.find({ ativo: true }).sort({ ordem: 1 }),
+        // Quantas questões aprovadas existem por vestibular. O gerador usa isso
+        // para não oferecer um vestibular que devolveria 404.
+        Question.aggregate([
+          { $group: { _id: "$origem.vestibular", total: { $sum: 1 } } },
+        ]),
+      ]);
+
+      const porCodigo = new Map(
+        contagens.map((c) => [String(c._id ?? "").toLowerCase(), c.total]),
+      );
+
+      res.json(
+        vestibulares.map((v) => ({
+          ...v.toObject(),
+          questoesCount: porCodigo.get(v.codigo.toLowerCase()) ?? 0,
+        })),
+      );
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

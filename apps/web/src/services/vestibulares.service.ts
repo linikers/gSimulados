@@ -23,6 +23,8 @@ export interface IVestibular {
   regiao: string;
   ativo: boolean;
   ordem: number;
+  /** Quantas questões aprovadas existem para este vestibular. */
+  questoesCount?: number;
 }
 
 export const VestibularesService = {
