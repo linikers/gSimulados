@@ -7,6 +7,11 @@ export function useErrorHandler() {
 
   const handleError = useCallback(
     (error: unknown, customMessage?: string) => {
+      // 402 já foi tratado no interceptor (dialog de assinatura): não duplica toast.
+      if ((error as { __assinaturaTratada?: boolean })?.__assinaturaTratada) {
+        return;
+      }
+
       console.error("[ErrorHandler]:", error);
 
       let message = customMessage || "Ocorreu um erro inesperado.";

@@ -70,7 +70,7 @@ export const navigationConfig: NavigationConfig = {
   escola: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
     { title: "Alunos", path: "/escola/alunos", icon: PersonIcon },
-    { title: "Assinatura", path: "/planos", icon: AssignmentIcon },
+    { title: "Assinatura", path: "/escola/assinatura", icon: AssignmentIcon },
   ],
   aluno: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
@@ -81,5 +81,6 @@ export const navigationConfig: NavigationConfig = {
       icon: AssignmentIcon,
     },
     { title: "Meu Desempenho", path: "/aluno/desempenho", icon: BarChartIcon },
+    { title: "Assinatura", path: "/aluno/assinatura", icon: AssignmentIcon },
   ],
 };
