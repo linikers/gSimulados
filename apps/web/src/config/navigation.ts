@@ -4,7 +4,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import ClassIcon from "@mui/icons-material/Class";
 import QuizIcon from "@mui/icons-material/Quiz";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 
@@ -71,9 +70,7 @@ export const navigationConfig: NavigationConfig = {
   escola: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
     { title: "Alunos", path: "/escola/alunos", icon: PersonIcon },
-    { title: "Turmas", path: "/escola/turmas", icon: ClassIcon },
-    { title: "Simulados", path: "/escola/simulados", icon: QuizIcon },
-    { title: "Relatórios", path: "/escola/relatorios", icon: BarChartIcon },
+    { title: "Assinatura", path: "/planos", icon: AssignmentIcon },
   ],
   aluno: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },

@@ -34,7 +34,7 @@ export function Planos() {
   const [loading, setLoading] = useState(true);
   const [checkout, setCheckout] = useState<ICheckoutResponse | null>(null);
   const [processando, setProcessando] = useState<string | null>(null);
-  const { signed } = useAuth();
+  const { signed, user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { handleError } = useErrorHandler();
@@ -87,7 +87,13 @@ export function Planos() {
       </Box>
 
       <Grid container spacing={4}>
-        {planos.map((plano) => {
+        {planos
+          .filter((plano) => {
+            if (user?.role === "escola") return plano.publico === "escola";
+            if (user?.role === "aluno") return plano.publico === "individual";
+            return true;
+          })
+          .map((plano) => {
           const gratuito = plano.preco <= 0;
           return (
             <Grid key={plano.codigo} size={{ xs: 12, sm: 6, md: 4 }}>
