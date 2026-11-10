@@ -17,6 +17,7 @@ import { RevisarQuestoes } from "./pages/admin/BancoQuestoes/RevisarQuestoes";
 import { ListaQuestoes } from "./pages/admin/BancoQuestoes/ListaQuestoes";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
+import { AssinaturaBloqueadaDialog } from "./components/Feedback/AssinaturaBloqueadaDialog";
 import { AuthGuard } from "./routes/AuthGuard";
 import { useAuth } from "./hooks/useAuth";
 
@@ -165,6 +166,7 @@ function App() {
                   path="/aluno/simulados/:id"
                   element={<VisualizarSimulado />}
                 />
+                <Route path="/aluno/assinatura" element={<Planos />} />
 
                 {/* Admin Routes */}
                 <Route element={<AuthGuard allowedRoles={["admin"]} />}>
@@ -229,10 +231,12 @@ function App() {
                 {/* Rotas de Escola */}
                 <Route element={<AuthGuard allowedRoles={["escola"]} />}>
                   <Route path="/escola/alunos" element={<ListaAlunos />} />
+                  <Route path="/escola/assinatura" element={<Planos />} />
                 </Route>
               </Route>
             </Route>
           </Routes>
+          <AssinaturaBloqueadaDialog />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
