@@ -179,12 +179,24 @@ export class SimuladoService {
     simuladoId: string;
     alunoId: string;
     respostas: { questaoId: string; respostaSelecionada: string }[];
+    /** Admin pode responder no simulado de qualquer aluno (como no GET). */
+    isAdmin?: boolean;
   }) {
-    const { simuladoId, alunoId, respostas } = params;
+    const { simuladoId, alunoId, respostas, isAdmin = false } = params;
 
     const simulado = await Simulado.findById(simuladoId).populate("questoes");
     if (!simulado) {
       throw new Error("Simulado não encontrado");
+    }
+
+    // Mesma regra do GET /simulados/:id: responder/gravar tentativa no
+    // simulado de outro aluno é proibido. Sem isto qualquer usuário
+    // autenticado gravava tentativa na prova alheia.
+    const isOwner = String(simulado.usuario) === String(alunoId);
+    if (!isOwner && !isAdmin) {
+      const erro: any = new Error("Acesso negado");
+      erro.status = 403;
+      throw erro;
     }
 
     const questoes = simulado.questoes as any[];

@@ -97,11 +97,14 @@ export class SimuladoController {
         simuladoId: id,
         alunoId: req.userId,
         respostas,
+        isAdmin: req.userRole === "admin",
       });
 
       res.json(resultado);
     } catch (error: any) {
-      const status = error.message === "Simulado não encontrado" ? 404 : 400;
+      const status =
+        error.status ??
+        (error.message === "Simulado não encontrado" ? 404 : 400);
       res.status(status).json({ error: error.message });
     }
   }
