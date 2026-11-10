@@ -9,6 +9,7 @@
 import {
   MercadoPagoErro,
   MercadoPagoService,
+  descreverRejeicaoMP,
   statusInternoMP,
 } from "../../services/mercadopago/mercadopago-client.service";
 
@@ -143,5 +144,109 @@ describe("MercadoPagoService", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     delete process.env.MP_TENTATIVAS;
+  });
+
+  it("extrai high_risk do details em lista de strings (402 da Orders API)", async () => {
+    fetchMock.mockResolvedValue(
+      resposta(402, {
+        errors: [
+          {
+            code: "failed",
+            message: "The following transactions failed",
+            details: ["PAY01M718JCQBXD8V4JHS4PC7MYAB: high_risk"],
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      MercadoPagoService.criarCobrancaPix({
+        referencia: "GS-X",
+        valorCentavos: 1990,
+        descricao: "Individual",
+        cliente: { nome: "Aluno", email: "a@b.com" },
+      }),
+    ).rejects.toBeInstanceOf(MercadoPagoErro);
+  });
+
+  it("motivoErro não perde o detalhe quando details é lista de strings", () => {
+    const motivo = MercadoPagoService.motivoErro({
+      errors: [
+        {
+          code: "failed",
+          message: "The following transactions failed",
+          details: ["PAY01M718JCQBXD8V4JHS4PC7MYAB: high_risk"],
+        },
+      ],
+    });
+
+    expect(motivo).toContain("high_risk");
+    expect(motivo).toContain("PAY01M718JCQBXD8V4JHS4PC7MYAB");
+  });
+
+  it("motivoErro mantém o formato de objeto (property/message)", () => {
+    const motivo = MercadoPagoService.motivoErro({
+      errors: [{ code: "bad_request", details: { property: "total_amount", message: "invalid" } }],
+    });
+
+    expect(motivo).toContain("total_amount: invalid");
+  });
+});
+
+describe("descreverRejeicaoMP", () => {
+  const corpo = {
+    errors: [
+      {
+        code: "failed",
+        message: "The following transactions failed",
+        details: ["PAY01M718JCQBXD8V4JHS4PC7MYAB: high_risk"],
+      },
+    ],
+  };
+
+  function erro(http: number, body: any) {
+    return new MercadoPagoErro(`erro ${http}`, http, body);
+  }
+
+  it("traduz high_risk em motivo acionável em português", () => {
+    const r = descreverRejeicaoMP(erro(402, corpo));
+
+    expect(r.altoRisco).toBe(true);
+    expect(r.codigo).toBe("mp_high_risk");
+    expect(r.statusDetalhe).toBe("high_risk");
+    expect(r.pagamentoId).toBe("PAY01M718JCQBXD8V4JHS4PC7MYAB");
+    expect(r.http).toBe(402);
+    expect(r.motivo).toMatch(/análise de risco/);
+    expect(r.motivo).toMatch(/Nada foi cobrado/);
+    expect(r.motivo).not.toMatch(/failed|transactions failed/i);
+  });
+
+  it("reconhece rejected_high_risk da Payments API", () => {
+    const r = descreverRejeicaoMP(
+      erro(201, { status: "rejected", status_detail: "rejected_high_risk" }),
+    );
+
+    expect(r.altoRisco).toBe(true);
+    expect(r.statusDetalhe).toBe("rejected_high_risk");
+  });
+
+  it("credencial recusada tem mensagem própria", () => {
+    const r = descreverRejeicaoMP(
+      erro(401, { error: "invalid_credentials", message: "invalid" }),
+    );
+
+    expect(r.codigo).toBe("mp_credencial");
+    expect(r.altoRisco).toBe(false);
+    expect(r.motivo).toMatch(/credencial/i);
+  });
+
+  it("outras recusas não inventam causa", () => {
+    const r = descreverRejeicaoMP(erro(500, { message: "boom" }));
+
+    expect(r.codigo).toBe("mp_recusa");
+    expect(r.altoRisco).toBe(false);
+    expect(r.statusDetalhe).toBeUndefined();
+    expect(r.motivo).toMatch(/HTTP 500/);
+    expect(r.motivo).toMatch(/Nada foi cobrado/);
   });
 });
