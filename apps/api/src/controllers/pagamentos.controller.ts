@@ -115,7 +115,11 @@ export class PagamentosController {
           }
         : null,
       cobertaPorEscola: cobertura ? { escolaId: cobertura.escolaId } : null,
-      planos: PLANOS.filter((p) => p.publico === "individual"),
+      planos: PLANOS.filter((p) =>
+        req.userRole === "escola"
+          ? p.publico === "escola"
+          : p.publico === "individual",
+      ),
     });
   }
 
