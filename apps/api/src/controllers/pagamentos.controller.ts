@@ -5,7 +5,16 @@ import { User } from "../models/User";
 import { PLANOS, getPlano } from "../config/planos";
 import { AssinaturaService } from "../services/assinatura.service";
 import { PagBankService } from "../services/pagbank/pagbank-client.service";
-import { MercadoPagoService } from "../services/mercadopago/mercadopago-client.service";
+import { MercadoPagoService, descreverRejeicaoMP } from "../services/mercadopago/mercadopago-client.service";
+
+/** Falha do gateway automático que justifica cair no PIX manual. */
+interface FalhaGateway {
+  codigo: string;
+  motivo: string;
+  statusDetalhe?: string;
+  pedidoId?: string;
+  pagamentoId?: string;
+}
 
 /** Gera um código curto de referência (também é a referência no PagBank). */
 function gerarReferencia(): string {
@@ -111,6 +120,64 @@ export class PagamentosController {
   }
 
   /**
+   * Registra o pedido e responde 201 no PIX manual (chave + instruções).
+   *
+   * Usado no fluxo normal (gateways desligados) e como **fallback** quando o
+   * gateway automático recusa a cobrança: o aluno precisa de uma saída que
+   * venda, não de um 502. Devolve `false` quando o PIX manual não está ativo.
+   */
+  private static async responderPixManual(
+    res: Response,
+    dados: {
+      base: Record<string, unknown>;
+      valorFinal: number;
+      descontoPercentual: number;
+      falha?: FalhaGateway;
+    },
+  ): Promise<boolean> {
+    const config = await PixConfig.findOne();
+    if (!config || !config.ativo) return false;
+
+    const pagamento = await Pagamento.create({
+      ...dados.base,
+      metodo: "pix",
+      gateway: "manual",
+      ...(dados.falha
+        ? {
+            statusDetalhe: dados.falha.statusDetalhe,
+            mercadopagoPedidoId: dados.falha.pedidoId,
+            mercadopagoPaymentId: dados.falha.pagamentoId,
+            motivoFalha: dados.falha.motivo,
+          }
+        : {}),
+    });
+
+    res.status(201).json({
+      pagamento,
+      valorFinal: dados.valorFinal,
+      descontoPercentual: dados.descontoPercentual,
+      manual: true,
+      ...(dados.falha
+        ? {
+            fallback: {
+              de: "mercadopago",
+              codigo: dados.falha.codigo,
+              motivo: dados.falha.motivo,
+              statusDetalhe: dados.falha.statusDetalhe,
+            },
+          }
+        : {}),
+      pix: {
+        chave: config.chave,
+        nomeBeneficiario: config.nomeBeneficiario,
+        cidade: config.cidade,
+        instrucoes: config.instrucoes,
+      },
+    });
+    return true;
+  }
+
+  /**
    * (Aluno) Cria o pedido de assinatura.
    *
    * Com `PAGBANK_TOKEN` configurado, a cobrança real é criada no PagBank
@@ -174,23 +241,66 @@ export class PagamentosController {
 
       // Mercado Pago primeiro: é a conta que já tem credencial de produção e
       // PIX habilitado. PagBank segue como alternativa e o PIX manual fecha.
+      // Se o MP recusar a cobrança, o aluno NÃO pode ficar sem saída: cai no
+      // PIX manual quando ele está ativo, senão devolve 502 com motivo legível.
       if (metodo === "pix" && MercadoPagoService.configurado()) {
-        const cobranca = await MercadoPagoService.criarCobrancaPix({
-          referencia,
-          valorCentavos: Math.round(valorFinal * 100),
-          descricao,
-          cliente: {
-            nome: usuario.name,
-            email: usuario.email,
-            taxId: taxId || usuario.taxId,
-          },
-        });
+        let cobranca: Awaited<ReturnType<typeof MercadoPagoService.criarCobrancaPix>>;
+        try {
+          cobranca = await MercadoPagoService.criarCobrancaPix({
+            referencia,
+            valorCentavos: Math.round(valorFinal * 100),
+            descricao,
+            cliente: {
+              nome: usuario.name,
+              email: usuario.email,
+              taxId: taxId || usuario.taxId,
+            },
+          });
+        } catch (erroMP) {
+          const rejeicao = descreverRejeicaoMP(erroMP);
+
+          const caiuNoManual = await PagamentosController.responderPixManual(res, {
+            base,
+            valorFinal,
+            descontoPercentual,
+            falha: {
+              codigo: rejeicao.codigo,
+              motivo: rejeicao.motivo,
+              statusDetalhe: rejeicao.statusDetalhe,
+              pedidoId: rejeicao.pedidoId,
+              pagamentoId: rejeicao.pagamentoId,
+            },
+          });
+          if (caiuNoManual) return;
+
+          // Sem PIX manual: a recusa precisa ficar registrada para o admin ver
+          // (status_detail e id do pagamento) e o aluno recebe motivo legível.
+          await Pagamento.create({
+            ...base,
+            gateway: "mercadopago",
+            status: "recusado",
+            statusDetalhe: rejeicao.statusDetalhe,
+            mercadopagoPedidoId: rejeicao.pedidoId,
+            mercadopagoPaymentId: rejeicao.pagamentoId,
+            motivoFalha: rejeicao.motivo,
+          }).catch(() => null);
+
+          return res.status(502).json({
+            error: rejeicao.motivo,
+            motivo: rejeicao.motivo,
+            codigo: rejeicao.codigo,
+            statusDetalhe: rejeicao.statusDetalhe,
+            gateway: "mercadopago",
+            pixManualDisponivel: false,
+          });
+        }
 
         const pagamento = await Pagamento.create({
           ...base,
           gateway: "mercadopago",
           mercadopagoPedidoId: cobranca.pedidoId,
           mercadopagoPaymentId: cobranca.pagamentoId,
+          statusDetalhe: cobranca.statusDetalhe,
           qrCodeTexto: cobranca.qrCodeTexto,
           qrCodePngUrl: cobranca.qrCodeImagem,
           status: cobranca.status === "pago" ? "pago" : "pendente",
@@ -334,32 +444,17 @@ export class PagamentosController {
       }
 
       // Fallback: PIX manual conferido pelo admin.
-      const config = await PixConfig.findOne();
-      if (!config || !config.ativo) {
-        return res.status(503).json({
-          error:
-            "Cobrança via PagBank ainda não configurada. Fale com o suporte para assinar.",
-        });
-      }
-
-      const pagamento = await Pagamento.create({
-        ...base,
-        metodo: "pix",
-        gateway: "manual",
-      });
-
-      res.status(201).json({
-        pagamento,
+      const caiuNoManual = await PagamentosController.responderPixManual(res, {
+        base,
         valorFinal,
         descontoPercentual,
-        manual: true,
-        pix: {
-          chave: config.chave,
-          nomeBeneficiario: config.nomeBeneficiario,
-          cidade: config.cidade,
-          instrucoes: config.instrucoes,
-        },
       });
+      if (!caiuNoManual) {
+        return res.status(503).json({
+          error:
+            "Nenhum meio de pagamento está configurado no momento. Fale com o suporte para assinar.",
+        });
+      }
     } catch (error: any) {
       const status = error?.status === 400 ? 400 : 502;
       res.status(status).json({ error: error.message });

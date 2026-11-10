@@ -98,6 +98,9 @@ export class MercadoPagoWebhookService {
       if (cobranca.pagamentoId) {
         pagamento.mercadopagoPaymentId = cobranca.pagamentoId;
       }
+      if (cobranca.statusDetalhe) {
+        pagamento.statusDetalhe = cobranca.statusDetalhe;
+      }
       await pagamento.save();
 
       const assinatura = await AssinaturaService.renovar({
@@ -122,6 +125,9 @@ export class MercadoPagoWebhookService {
         pagamento.status = cobranca.status;
         if (cobranca.pedidoId) {
           pagamento.mercadopagoPedidoId = cobranca.pedidoId;
+        }
+        if (cobranca.statusDetalhe) {
+          pagamento.statusDetalhe = cobranca.statusDetalhe;
         }
         await pagamento.save();
       }

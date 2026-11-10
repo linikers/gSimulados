@@ -110,6 +110,107 @@ export class MercadoPagoErro extends Error {
   }
 }
 
+/**
+ * O `details` de erro do MP vem como objeto, string solta ou lista de strings
+ * (`["PAY01M7...: high_risk"]`). Achata tudo em textos prontos para a mensagem.
+ */
+export function achatarDetalhes(detalhe: unknown, profundidade = 0): string[] {
+  if (detalhe == null || profundidade > 4) return [];
+  if (typeof detalhe === "string") {
+    const texto = detalhe.trim();
+    return texto ? [texto] : [];
+  }
+  if (typeof detalhe === "number" || typeof detalhe === "boolean") {
+    return [String(detalhe)];
+  }
+  if (Array.isArray(detalhe)) {
+    return detalhe.flatMap((item) => achatarDetalhes(item, profundidade + 1));
+  }
+  if (typeof detalhe === "object") {
+    const obj = detalhe as Record<string, unknown>;
+    const campo = [obj.property, obj.field, obj.parameter].filter(Boolean).join(".");
+    const resto = achatarDetalhes(
+      obj.message ?? obj.description ?? obj.reason ?? obj.code,
+      profundidade + 1,
+    );
+    if (campo && resto.length) return [`${campo}: ${resto.join(", ")}`];
+    if (campo) return [campo];
+    return resto;
+  }
+  return [];
+}
+
+export interface RejeicaoMP {
+  /** `mp_high_risk` | `mp_credencial` | `mp_recusa` — chave estável para o front/log. */
+  codigo: string;
+  /** Rejeição por antifraude (Orders 402 `high_risk` / Payments `rejected_high_risk`). */
+  altoRisco: boolean;
+  /** Mensagem em português, acionável para o aluno (sem jargão de gateway). */
+  motivo: string;
+  /** `high_risk` / `rejected_high_risk` / `status_detail` devolvido pelo MP. */
+  statusDetalhe?: string;
+  /** Id da order (`ORD...`) quando o MP devolve. */
+  pedidoId?: string;
+  /** Id do pagamento (`PAY...`) quando o MP devolve. */
+  pagamentoId?: string;
+  /** HTTP devolvido pelo MP. */
+  http?: number;
+  /** Texto original do gateway, para log/suporte. */
+  detalheBruto: string;
+}
+
+const MOTIVO_ALTO_RISCO =
+  "O Mercado Pago bloqueou esta cobrança na análise de risco (high_risk) e não gerou o PIX. " +
+  "Nada foi cobrado. Tente novamente em alguns minutos; se continuar, fale com o suporte para pagar por PIX manual.";
+
+const MOTIVO_CREDENCIAL =
+  "A cobrança está temporariamente indisponível: o Mercado Pago recusou a credencial da conta. " +
+  "Nada foi cobrado. Fale com o suporte para pagar por PIX manual.";
+
+/**
+ * Traduz um erro do Mercado Pago em algo que o aluno e o admin entendam.
+ *
+ * Regra: a recusa por risco (`high_risk`) é a que mais aparece em produção e a
+ * única causa acionável — ela precisa chegar ao front com nome e sobrenome,
+ * nunca como "failed — The following transactions failed".
+ */
+export function descreverRejeicaoMP(erro: unknown): RejeicaoMP {
+  const e = erro as Partial<MercadoPagoErro> | undefined;
+  const http = typeof e?.http === "number" ? e.http : undefined;
+  const detalhes = achatarDetalhes((e as any)?.detalhes);
+  const bruto = [String(e?.message ?? ""), ...detalhes, JSON.stringify((e as any)?.detalhes ?? "")]
+    .filter(Boolean)
+    .join(" | ");
+
+  const altoRisco = /high_?\s?risk/i.test(bruto);
+  const credencial = !altoRisco && (http === 401 || http === 403);
+
+  const statusDetalhe = altoRisco
+    ? (/rejected_(high_risk|[a-z_]+)/i.exec(bruto)?.[0]?.toLowerCase() ?? "high_risk")
+    : undefined;
+
+  const pagamentoId = /\b(PAY[A-Z0-9]{6,})\b/i.exec(bruto)?.[1]?.toUpperCase();
+  const pedidoId = /\b(ORD[A-Z0-9]{6,})\b/i.exec(bruto)?.[1]?.toUpperCase();
+
+  const motivo = altoRisco
+    ? MOTIVO_ALTO_RISCO
+    : credencial
+      ? MOTIVO_CREDENCIAL
+      : `Não foi possível gerar o PIX no Mercado Pago${http ? ` (HTTP ${http})` : ""}. ` +
+        "Nada foi cobrado. Tente novamente em alguns minutos ou fale com o suporte para pagar por PIX manual.";
+
+  return {
+    codigo: altoRisco ? "mp_high_risk" : credencial ? "mp_credencial" : "mp_recusa",
+    altoRisco,
+    motivo,
+    statusDetalhe,
+    pedidoId,
+    pagamentoId,
+    http,
+    detalheBruto: bruto,
+  };
+}
+
 export const MercadoPagoService = {
   configurado(): boolean {
     return Boolean(process.env.MP_ACCESS_TOKEN?.trim());
@@ -321,23 +422,35 @@ export const MercadoPagoService = {
     );
   },
 
+  /**
+   * Motivo legível do erro do MP.
+   *
+   * O `details` do erro vem em dois formatos e os dois importam: objeto
+   * (`{ property, message }`) e **lista de strings** — é nela que o antifraude
+   * manda a causa real, ex. `["PAY01M7...: high_risk"]`. Ler só as chaves do
+   * objeto fazia o `high_risk` desaparecer e a mensagem final virar
+   * "failed — The following transactions failed".
+   */
   motivoErro(dados: any): string {
     if (!dados) return "";
     const causa = dados?.cause?.[0];
     const erro = dados?.errors?.[0];
-    const campo =
-      erro?.details?.property ??
-      erro?.details?.message ??
-      causa?.details?.property ??
-      causa?.details?.message ??
-      "";
+
+    const detalhes = [
+      ...achatarDetalhes(erro?.details),
+      ...achatarDetalhes(causa?.details),
+      ...achatarDetalhes(erro?.detail ?? erro?.details_detail),
+      ...achatarDetalhes(dados?.details),
+    ];
 
     const partes = [
       erro?.code ?? causa?.code,
-      campo ? `campo: ${campo}` : "",
+      ...detalhes,
       erro?.message ?? causa?.description,
       dados?.message ?? dados?.error,
-    ].filter(Boolean);
+    ]
+      .filter((parte) => typeof parte === "string" || typeof parte === "number")
+      .map(String);
 
     return Array.from(new Set(partes)).join(" — ");
   },

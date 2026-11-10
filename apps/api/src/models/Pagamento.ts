@@ -24,6 +24,10 @@ export interface IPagamento extends Document {
   pagbankChargeId?: string;
   mercadopagoPedidoId?: string;
   mercadopagoPaymentId?: string;
+  /** `status_detail` do gateway (ex.: `high_risk`, `rejected_high_risk`) — visível no admin. */
+  statusDetalhe?: string;
+  /** Por que a cobrança automática falhou, em português (o fallback manual grava aqui). */
+  motivoFalha?: string;
   /** PIX copia-e-cola devolvido pelo PagBank. */
   qrCodeTexto?: string;
   qrCodePngUrl?: string;
@@ -59,6 +63,8 @@ const PagamentoSchema: Schema = new Schema(
     pagbankChargeId: { type: String, index: true },
     mercadopagoPedidoId: { type: String, index: true },
     mercadopagoPaymentId: { type: String, index: true },
+    statusDetalhe: { type: String },
+    motivoFalha: { type: String },
     qrCodeTexto: { type: String },
     qrCodePngUrl: { type: String },
     boletoBarcode: { type: String },
