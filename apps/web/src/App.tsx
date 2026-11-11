@@ -18,6 +18,7 @@ import { ListaQuestoes } from "./pages/admin/BancoQuestoes/ListaQuestoes";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { GlobalSnackbar } from "./components/Feedback/GlobalSnackbar";
 import { AssinaturaBloqueadaDialog } from "./components/Feedback/AssinaturaBloqueadaDialog";
+import { NotFound } from "./pages/public/NotFound";
 import { AuthGuard } from "./routes/AuthGuard";
 import { useAuth } from "./hooks/useAuth";
 
@@ -145,6 +146,7 @@ function App() {
               <Route path="/aprovacoes" element={<Aprovacoes />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/planos" element={<Planos />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
 
             {/* Auth Routes (no layout) */}

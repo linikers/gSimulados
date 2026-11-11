@@ -8,6 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   TextField,
   MenuItem,
   Chip,
@@ -20,23 +21,31 @@ export function ListaQuestoes() {
   const [questoes, setQuestoes] = useState<IQuestion[]>([]);
   const [filterMateria, setFilterMateria] = useState("");
   const [materias, setMaterias] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    QuestionService.listMaterias()
+      .then(setMaterias)
+      .catch(() => setMaterias([]));
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     loadQuestoes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterMateria]);
+  }, [filterMateria, page, rowsPerPage]);
 
   const loadQuestoes = async () => {
     try {
-      const data = await QuestionService.list(filterMateria || undefined);
-      setQuestoes(data);
-
-      // Extrair matérias únicas
-      const uniqueMaterias = Array.from(
-        new Set(data.map((q) => q.materia))
-      ).sort();
-      setMaterias(uniqueMaterias);
+      const data = await QuestionService.listPaginado({
+        materia: filterMateria || undefined,
+        page: page + 1,
+        limit: rowsPerPage,
+      });
+      setQuestoes(data.items);
+      setTotal(data.total);
     } catch (error) {
       console.error("Erro ao carregar questões:", error);
     }
@@ -74,7 +83,7 @@ export function ListaQuestoes() {
         Questões Aprovadas
       </Typography>
 
-      <Typography sx={{ mb: 2 }}>Total: {questoes.length} questões</Typography>
+      <Typography sx={{ mb: 2 }}>Total: {total} questões</Typography>
 
       {/* Filtro */}
       <Paper sx={{ p: 2, mb: 3 }}>
@@ -82,7 +91,10 @@ export function ListaQuestoes() {
           select
           label="Filtrar por Matéria"
           value={filterMateria}
-          onChange={(e) => setFilterMateria(e.target.value)}
+          onChange={(e) => {
+            setFilterMateria(e.target.value);
+            setPage(0);
+          }}
           sx={{ minWidth: 250 }}
         >
           <MenuItem value="">Todas as Matérias</MenuItem>
@@ -156,6 +168,23 @@ export function ListaQuestoes() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={total}
+        page={page}
+        onPageChange={(_, novaPagina) => setPage(novaPagina)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(Number.parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        labelRowsPerPage="Linhas por página"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} de ${count}`
+        }
+      />
 
       {questoes.length === 0 && (
         <Box sx={{ textAlign: "center", py: 4 }}>

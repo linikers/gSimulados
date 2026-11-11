@@ -9,6 +9,7 @@ router.use(authMiddleware);
 
 router.post("/", QuestionsController.create);
 router.get("/", QuestionsController.list);
+router.get("/materias", QuestionsController.materias);
 router.get("/:id", QuestionsController.getById);
 router.delete("/:id", QuestionsController.delete);
 
