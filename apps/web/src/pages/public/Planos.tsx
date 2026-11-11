@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PagamentosService } from "../../services/pagamentos.service";
 import type { IPlano, ICheckoutResponse } from "../../types/pagamento";
@@ -33,6 +34,12 @@ export function Planos() {
   const [planos, setPlanos] = useState<IPlano[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkout, setCheckout] = useState<ICheckoutResponse | null>(null);
+
+  // A chave PIX de telefone também serve de WhatsApp para o comprovante.
+  const zapComprovante = (() => {
+    const digitos = checkout?.pix?.chave?.replace(/\D/g, "") ?? "";
+    return /^55\d{10,11}$/.test(digitos) ? digitos : "";
+  })();
   const [processando, setProcessando] = useState<string | null>(null);
   const { signed, user } = useAuth();
   const navigate = useNavigate();
@@ -138,7 +145,7 @@ export function Planos() {
                   />
                 </Box>
 
-                <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+                <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, whiteSpace: "nowrap" }}>
                   {gratuito ? "Grátis" : brl(plano.preco)}
                   {!gratuito && (
                     <Typography
@@ -306,6 +313,22 @@ export function Planos() {
                       </IconButton>
                     </Tooltip>
                   </Box>
+
+                  {zapComprovante && (
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<WhatsAppIcon />}
+                      href={`https://wa.me/${zapComprovante}?text=${encodeURIComponent(
+                        `Olá! Paguei o PIX da referência ${checkout.pagamento.referencia} no valor de ${brl(checkout.pagamento.valor)}. Segue o comprovante.`,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ alignSelf: "flex-start" }}
+                    >
+                      Enviar comprovante no WhatsApp
+                    </Button>
+                  )}
                 </>
               ) : (
                 <Alert severity="info">
