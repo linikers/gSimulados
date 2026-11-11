@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../store/useToast";
 import {
@@ -14,17 +14,27 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Navbar } from "src/components/public/Navbar";
 
 export function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, signed } = useAuth();
   const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as { aviso?: string; from?: string } | null;
+  const acabouDeEntrar = useRef(false);
+
+  // Já logado não precisa ver o formulário. O ref evita que o efeito dispare
+  // depois do signIn e ignore o "from" (ex.: voltar para o checkout).
+  useEffect(() => {
+    if (signed && !acabouDeEntrar.current) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [signed, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      acabouDeEntrar.current = true;
       await signIn({ email, password });
       const from = state?.from;
       const destino =
