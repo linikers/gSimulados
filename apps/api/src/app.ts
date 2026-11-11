@@ -12,6 +12,10 @@ import pagamentosRoutes from "./routes/pagamentos.routes";
 import gatewaysRoutes from "./routes/gateways.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
 import { dbReady } from "./config/database";
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./middlewares/error.middleware";
 
 const app = express();
 
@@ -52,5 +56,10 @@ app.get("/ready", (_req, res) => {
     mongo: ok ? "connected" : "disconnected",
   });
 });
+
+// Depois de TODAS as rotas (inclusive / e /health): 404 em JSON e um único
+// tradutor de erro (Express 5 encaminha rejeição de async para cá).
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export { app };
