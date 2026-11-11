@@ -37,8 +37,10 @@ jobs:
       - name: Build Web
         run: yarn workspace @gsimulados/web build
 
+      # --runInBand: o mongodb-memory-server baixa/desbloqueia o binário uma vez;
+      # workers paralelos disputam o lock e derrubam a suíte inteira (flake).
       - name: Testes da API (jest)
-        run: yarn workspace @gsimulados/api test
+        run: yarn workspace @gsimulados/api test --runInBand
 
       - name: Lint da Web
         run: yarn workspace @gsimulados/web lint
