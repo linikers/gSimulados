@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../store/useToast";
 import {
+  Alert,
   Box,
   Button,
   TextField,
@@ -9,7 +10,7 @@ import {
   Container,
   Paper,
 } from "@mui/material";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Navbar } from "src/components/public/Navbar";
 
 export function LoginPage() {
@@ -18,12 +19,19 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as { aviso?: string; from?: string } | null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await signIn({ email, password });
-      navigate("/dashboard");
+      const from = state?.from;
+      const destino =
+        from && from.startsWith("/") && !from.startsWith("//")
+          ? from
+          : "/dashboard";
+      navigate(destino, { replace: true });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const msg = error.response?.data?.error || "Erro ao fazer login";
@@ -35,10 +43,15 @@ export function LoginPage() {
     <>
       <Navbar />
       <Container component="main" maxWidth="xs">
+        {state?.aviso && (
+          <Alert severity="info" sx={{ mt: 12 }}>
+            {state.aviso}
+          </Alert>
+        )}
         <Paper
           elevation={3}
           sx={{
-            mt: 14,
+            mt: state?.aviso ? 2 : 14,
             p: 4,
             display: "flex",
             flexDirection: "column",

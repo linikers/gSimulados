@@ -56,7 +56,7 @@ export function Navbar() {
     { label: "Ferramentas", path: "/ferramentas" },
     { label: "Aprovações", path: "/aprovacoes" },
     { label: "Planos", path: "/planos" },
-    { label: "Simulados", path: "/aluno/simulados" },
+    { label: "Simulados", path: "/simulados" },
   ];
 
   // ... (rest of the file remains same, targeting the lines around 27 and title)
