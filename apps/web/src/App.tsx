@@ -43,6 +43,7 @@ import { SimuladosPublico } from "./pages/public/Simulados/SimuladosPublico";
 import { Planos } from "./pages/public/Planos";
 import { ListaPagamentos } from "./pages/admin/Pagamentos/ListaPagamentos";
 import { ConfigurarPix } from "./pages/admin/Pagamentos/ConfigurarPix";
+import { Gateways } from "./pages/admin/Gateways";
 
 const theme = createTheme({
   palette: {
@@ -235,6 +236,10 @@ function App() {
                   <Route
                     path="/admin/pagamentos/pix"
                     element={<ConfigurarPix />}
+                  />
+                  <Route
+                    path="/admin/configuracoes/pagamentos"
+                    element={<Gateways />}
                   />
                 </Route>
 

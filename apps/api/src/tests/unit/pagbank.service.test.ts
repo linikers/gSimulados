@@ -84,7 +84,7 @@ describe("PagBankService - configuração", () => {
       cliente,
       itens,
       metodo: "PIX",
-    })).rejects.toThrow(/PAGBANK_TOKEN não configurado/);
+    })).rejects.toThrow(/PagBank não configurado/);
     expect(postMock).not.toHaveBeenCalled();
   });
 

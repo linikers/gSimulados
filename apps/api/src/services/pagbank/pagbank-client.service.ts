@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
+import { GatewayConfigService } from "../gateway-config/gateway-config.service";
 
 /**
  * Cliente da API de Pedidos do PagBank (Orders).
@@ -158,10 +159,10 @@ function esperar(ms: number) {
 export class PagBankService {
   /** Token do ambiente atual (sandbox ou produção) — nunca logado. */
   private static token(): string {
-    const token = process.env.PAGBANK_TOKEN?.trim();
+    const token = GatewayConfigService.token("pagbank");
     if (!token) {
       throw new PagBankErro(
-        "PAGBANK_TOKEN não configurado: defina o token do Portal do Desenvolvedor (sandbox) ou de Vendas → Integrações (produção).",
+        "PagBank não configurado: informe o Token no painel (Admin → Gateways) ou em PAGBANK_TOKEN.",
       );
     }
     return token;
@@ -175,7 +176,7 @@ export class PagBankService {
 
   /** Há token configurado? Sem ele não dá para criar cobrança real. */
   static configurado(): boolean {
-    return Boolean(process.env.PAGBANK_TOKEN?.trim());
+    return Boolean(GatewayConfigService.token("pagbank"));
   }
 
   static producao(): boolean {

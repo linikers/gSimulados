@@ -64,6 +64,11 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/pagamentos/pix",
       icon: SettingsIcon,
     },
+    {
+      title: "Gateways",
+      path: "/admin/configuracoes/pagamentos",
+      icon: SettingsIcon,
+    },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],
