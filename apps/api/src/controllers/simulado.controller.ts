@@ -61,6 +61,15 @@ export class SimuladoController {
     }
   }
 
+  static async desempenho(req: Request, res: Response) {
+    try {
+      const dados = await SimuladoService.desempenho(req.userId);
+      res.json(dados);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getSimulado(req: Request, res: Response) {
     try {
       const { id } = req.params;

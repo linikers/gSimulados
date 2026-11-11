@@ -1,5 +1,9 @@
 import api from "./api";
-import type { ISimulado, IResultadoSimulado } from "../types/simulado";
+import type {
+  ISimulado,
+  IDesempenho,
+  IResultadoSimulado,
+} from "../types/simulado";
 
 export interface SimuladoParams {
   nome: string;
@@ -17,6 +21,11 @@ export const SimuladoService = {
 
   listMySimulados: async (): Promise<ISimulado[]> => {
     const response = await api.get("/simulados/my");
+    return response.data;
+  },
+
+  desempenho: async (): Promise<IDesempenho> => {
+    const response = await api.get("/simulados/desempenho");
     return response.data;
   },
 

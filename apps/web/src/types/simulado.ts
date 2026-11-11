@@ -26,6 +26,34 @@ export interface ISimulado {
   atualizadoEm: string;
 }
 
+export interface IDesempenhoResultado {
+  simuladoId: string;
+  nome: string;
+  data: string;
+  acertos: number;
+  total: number;
+  percentual: number;
+}
+
+export interface IDesempenhoMateria {
+  materia: string;
+  questoes: number;
+  acertos: number;
+  percentual: number;
+}
+
+export interface IDesempenho {
+  totais: {
+    simulados: number;
+    questoes: number;
+    acertos: number;
+    percentual: number;
+  };
+  porMateria: IDesempenhoMateria[];
+  evolucao: IDesempenhoResultado[];
+  resultados: IDesempenhoResultado[];
+}
+
 export interface IRespostaCorrigida {
   questaoId: string;
   respostaSelecionada: string;

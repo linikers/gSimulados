@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LoginPage } from "./pages/auth/Login";
 import { RegisterPage } from "./pages/auth/Register";
@@ -37,6 +37,7 @@ import { Aprovacoes } from "./pages/public/Aprovacoes";
 import { FAQ } from "./pages/public/FAQ";
 import GerarSimulado from "./pages/public/Simulados/GerarSimulado";
 import MeusSimulados from "./pages/public/Simulados/MeusSimulados";
+import Desempenho from "./pages/public/Simulados/Desempenho";
 import VisualizarSimulado from "./pages/public/Simulados/VisualizarSimulado";
 import { SimuladosPublico } from "./pages/public/Simulados/SimuladosPublico";
 import { Planos } from "./pages/public/Planos";
@@ -162,6 +163,11 @@ function App() {
 
                 {/* Patient/Student Routes */}
                 <Route path="/aluno/simulados" element={<MeusSimulados />} />
+                <Route path="/aluno/desempenho" element={<Desempenho />} />
+                <Route
+                  path="/aluno/resultados"
+                  element={<Navigate to="/aluno/desempenho" replace />}
+                />
                 <Route
                   path="/aluno/simulados/gerar"
                   element={<GerarSimulado />}

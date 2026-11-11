@@ -16,6 +16,8 @@ router.post(
   SimuladoController.generate,
 );
 router.get("/my", SimuladoController.listMySimulados);
+// Antes de "/:id": "desempenho" seria interpretado como um id.
+router.get("/desempenho", SimuladoController.desempenho);
 router.post("/:id/attempt", SimuladoController.submitAttempt);
 router.get("/:id", SimuladoController.getSimulado);
 

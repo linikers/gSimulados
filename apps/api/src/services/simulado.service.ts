@@ -160,6 +160,102 @@ export class SimuladoService {
   }
 
   /**
+   * Agregados do aluno para a página "Meu Desempenho".
+   * Só tentativas do próprio aluno; a matéria vem da questão do simulado.
+   */
+  static async desempenho(usuarioId: string) {
+    const simulados = await Simulado.find({ "tentativas.aluno": usuarioId })
+      .select("nome questoes tentativas")
+      .populate({ path: "questoes", select: "materia" })
+      .lean();
+
+    const porMateriaMap = new Map<
+      string,
+      { materia: string; questoes: number; acertos: number }
+    >();
+    const resultados: {
+      simuladoId: string;
+      nome: string;
+      data: Date;
+      acertos: number;
+      total: number;
+      percentual: number;
+    }[] = [];
+
+    let totalQuestoes = 0;
+    let totalAcertos = 0;
+
+    for (const simulado of simulados) {
+      const materiaDaQuestao = new Map<string, string>();
+      for (const questao of (simulado.questoes as any[]) ?? []) {
+        materiaDaQuestao.set(
+          String(questao._id),
+          questao.materia || "Outras",
+        );
+      }
+
+      for (const tentativa of simulado.tentativas ?? []) {
+        if (String(tentativa.aluno) !== String(usuarioId)) continue;
+        const respostas = tentativa.respostas ?? [];
+        if (respostas.length === 0) continue;
+
+        const acertos = respostas.filter((r) => r.correta).length;
+        totalQuestoes += respostas.length;
+        totalAcertos += acertos;
+
+        resultados.push({
+          simuladoId: String(simulado._id),
+          nome: simulado.nome,
+          data: tentativa.finalizadoEm,
+          acertos,
+          total: respostas.length,
+          percentual: Math.round((acertos / respostas.length) * 100),
+        });
+
+        for (const resposta of respostas) {
+          const materia =
+            materiaDaQuestao.get(String(resposta.questaoId)) || "Outras";
+          const atual = porMateriaMap.get(materia) ?? {
+            materia,
+            questoes: 0,
+            acertos: 0,
+          };
+          atual.questoes += 1;
+          if (resposta.correta) atual.acertos += 1;
+          porMateriaMap.set(materia, atual);
+        }
+      }
+    }
+
+    // Mais recente primeiro; a evolução usa os 10 últimos em ordem cronológica.
+    resultados.sort(
+      (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
+    );
+
+    const porMateria = [...porMateriaMap.values()]
+      .map((m) => ({
+        ...m,
+        percentual: Math.round((m.acertos / m.questoes) * 100),
+      }))
+      .sort((a, b) => a.percentual - b.percentual);
+
+    return {
+      totais: {
+        simulados: resultados.length,
+        questoes: totalQuestoes,
+        acertos: totalAcertos,
+        percentual:
+          totalQuestoes > 0
+            ? Math.round((totalAcertos / totalQuestoes) * 100)
+            : 0,
+      },
+      porMateria,
+      evolucao: resultados.slice(0, 10).reverse(),
+      resultados: resultados.slice(0, 20),
+    };
+  }
+
+  /**
    * Remove o gabarito do simulado antes de devolvê-lo a quem não é admin.
    * Usado tanto na listagem quanto na leitura de um simulado específico.
    */
