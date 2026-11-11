@@ -14,9 +14,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useToast } from "../../store/useToast";
+import { useAuth } from "../../hooks/useAuth";
 
 export function RegisterPage() {
   const { showToast } = useToast();
+  const { signed } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,6 +40,11 @@ export function RegisterPage() {
   }, [formData.role]);
 
   const navigate = useNavigate();
+
+  // Já logado não precisa ver o cadastro.
+  useEffect(() => {
+    if (signed) navigate("/dashboard", { replace: true });
+  }, [signed, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

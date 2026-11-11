@@ -21,9 +21,11 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 export function Navbar() {
   const navigate = useNavigate();
+  const { signed, user, signOut } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -160,14 +162,38 @@ export function Navbar() {
             )}
           </div>
         ))}
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => handleNavigate("/login")}
-            sx={{ minHeight: 48 }}
-          >
-            <ListItemText primary="Login" />
-          </ListItemButton>
-        </ListItem>
+        {signed ? (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigate("/dashboard")}
+                sx={{ minHeight: 48 }}
+              >
+                <ListItemText primary={user?.name?.split(" ")[0] || "Minha conta"} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  signOut();
+                  handleNavigate("/");
+                }}
+                sx={{ minHeight: 48 }}
+              >
+                <ListItemText primary="Sair" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        ) : (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigate("/login")}
+              sx={{ minHeight: 48 }}
+            >
+              <ListItemText primary="Login" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -239,14 +265,37 @@ export function Navbar() {
                   )}
                 </div>
               ))}
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={() => handleNavigate("/login")}
-                sx={{ ml: 1 }}
-              >
-                Login
-              </Button>
+              {signed ? (
+                <>
+                  <Button
+                    color="inherit"
+                    onClick={() => handleNavigate("/dashboard")}
+                    sx={{ ml: 1 }}
+                  >
+                    {user?.name?.split(" ")[0] || "Minha conta"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={() => {
+                      signOut();
+                      handleNavigate("/");
+                    }}
+                    sx={{ ml: 1 }}
+                  >
+                    Sair
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => handleNavigate("/login")}
+                  sx={{ ml: 1 }}
+                >
+                  Login
+                </Button>
+              )}
             </Box>
           )}
         </Toolbar>
