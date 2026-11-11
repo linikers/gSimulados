@@ -15,6 +15,11 @@ import { dbReady } from "./config/database";
 
 const app = express();
 
+// No Fly, a conexão chega pelo proxy da plataforma. Sem isto o `req.ip` é o IP
+// interno do proxy e TODO mundo cai no mesmo balde do rate limit — 10 erros de
+// senha de um aluno bloqueariam o login de todos.
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.use(express.json());
 
