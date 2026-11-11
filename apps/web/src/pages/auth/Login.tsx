@@ -90,6 +90,9 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Link to="/esqueci-senha">Esqueci minha senha</Link>
+            </Box>
             <Button
               type="submit"
               fullWidth

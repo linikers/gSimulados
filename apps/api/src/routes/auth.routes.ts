@@ -11,6 +11,14 @@ import {
   refreshSchema,
   registerSchema,
 } from "../schemas/auth.schema";
+import {
+  esqueciSenhaSchema,
+  redefinirSenhaSchema,
+} from "../schemas/password-reset.schema";
+import {
+  esqueciSenhaLimiter,
+  redefinirSenhaLimiter,
+} from "../middlewares/rate-limit.middleware";
 
 const router = Router();
 
@@ -31,6 +39,18 @@ router.post(
   refreshLimiter,
   validate(refreshSchema),
   AuthController.refresh,
+);
+router.post(
+  "/esqueci-senha",
+  esqueciSenhaLimiter,
+  validate(esqueciSenhaSchema),
+  AuthController.esqueciSenha,
+);
+router.post(
+  "/redefinir-senha",
+  redefinirSenhaLimiter,
+  validate(redefinirSenhaSchema),
+  AuthController.redefinirSenha,
 );
 router.post("/logout", AuthController.logout);
 

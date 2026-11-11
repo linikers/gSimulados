@@ -37,3 +37,21 @@ export const refreshLimiter = rateLimit({
   legacyHeaders: false,
   message: mensagem,
 });
+
+/** Pedido de reset: 5 por IP/hora (e o service ainda limita por e-mail). */
+export const esqueciSenhaLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: mensagem,
+});
+
+/** Tentativas de troca: 10 por IP/hora. */
+export const redefinirSenhaLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: mensagem,
+});
