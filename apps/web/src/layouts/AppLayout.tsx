@@ -132,6 +132,7 @@ export function AppLayout() {
         component="main"
         sx={{
           flexGrow: 1,
+          minWidth: 0, // sem isso, tabela/gráfico esticam o main além da viewport no mobile
           p: { xs: 2, md: 3 },
           width: { md: `calc(100% - ${drawerWidth}px)` },
         }}

@@ -75,11 +75,6 @@ export const navigationConfig: NavigationConfig = {
   aluno: [
     { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
     { title: "Meus Simulados", path: "/aluno/simulados", icon: QuizIcon },
-    {
-      title: "Meus Resultados",
-      path: "/aluno/resultados",
-      icon: AssignmentIcon,
-    },
     { title: "Meu Desempenho", path: "/aluno/desempenho", icon: BarChartIcon },
     { title: "Assinatura", path: "/aluno/assinatura", icon: AssignmentIcon },
   ],
