@@ -496,6 +496,29 @@ export class PagamentosController {
         return res.json(pagamento);
       }
 
+      // Só o PIX manual (chave estática conferida no extrato) pode ser
+      // confirmado à mão. Cobrança automática (MP/PagBank) que ficou pendente
+      // ou foi recusada NÃO vira acesso liberado por clique do admin — sem
+      // dinheiro no extrato, sem assinatura.
+      const gateway = pagamento.gateway ?? "manual";
+      if (gateway !== "manual") {
+        return res.status(409).json({
+          error:
+            "Cobrança automática: confirme o pagamento no gateway. Este registro não pode ser confirmado manualmente.",
+          gateway,
+          status: pagamento.status,
+          statusDetalhe: pagamento.statusDetalhe ?? null,
+        });
+      }
+
+      if (pagamento.status !== "pendente") {
+        return res.status(409).json({
+          error: `Pagamento com status "${pagamento.status}" não pode ser confirmado.`,
+          gateway,
+          status: pagamento.status,
+        });
+      }
+
       pagamento.status = "pago";
       pagamento.pagoEm = new Date();
       pagamento.confirmadoPor = req.userId as unknown as typeof pagamento.confirmadoPor;

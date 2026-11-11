@@ -24,6 +24,10 @@ export interface IPagamento {
   metodo: "pix";
   status: PagamentoStatus;
   referencia: string;
+  gateway?: "pagbank" | "mercadopago" | "manual";
+  /** `status_detail` do gateway (ex.: high_risk) — mostrado no admin. */
+  statusDetalhe?: string;
+  motivoFalha?: string;
   criadoEm: string;
   confirmadoEm?: string;
   usuario?: { _id: string; name: string; email: string; role: string };
