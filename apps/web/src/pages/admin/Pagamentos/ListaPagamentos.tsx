@@ -13,6 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
 } from "@mui/material";
 import type { ChipProps } from "@mui/material";
 import { PagamentosService } from "../../../services/pagamentos.service";
@@ -29,6 +30,27 @@ const statusColor = (status: PagamentoStatus): ChipProps["color"] => {
   if (status === "expirado") return "default";
   return "error";
 };
+
+const gatewayLabel = (gateway?: IPagamento["gateway"]) => {
+  if (gateway === "mercadopago") return "Mercado Pago";
+  if (gateway === "pagbank") return "PagBank";
+  return "PIX manual";
+};
+
+/** Só PIX manual (ou registro antigo sem gateway) pode ser confirmado à mão. */
+const podeConfirmar = (p: IPagamento) =>
+  p.status === "pendente" && (!p.gateway || p.gateway === "manual");
+
+/**
+ * Pendência criada pelo gateway (não é PIX manual): o dinheiro não entrou e o
+ * admin não deve confirmar. O fallback manual grava `motivoFalha`, mas o
+ * pagamento em si é PIX manual e continua confirmável.
+ */
+const recusadoPeloGateway = (p: IPagamento) =>
+  p.status === "pendente" &&
+  !!p.gateway &&
+  p.gateway !== "manual" &&
+  !!(p.statusDetalhe || p.motivoFalha);
 
 export function ListaPagamentos() {
   const [pagamentos, setPagamentos] = useState<IPagamento[]>([]);
@@ -78,8 +100,9 @@ export function ListaPagamentos() {
         Pagamentos
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Confirme manualmente os pagamentos recebidos via PIX para liberar o plano
-        do aluno.
+        Confirme à mão apenas o PIX recebido na chave manual. Cobranças do
+        Mercado Pago/PagBank são liberadas pelo webhook — se aparecer recusa, o
+        motivo fica na coluna Status.
       </Typography>
 
       <TableContainer component={Paper} elevation={0} className="glass-container">
@@ -116,12 +139,47 @@ export function ListaPagamentos() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={p.status}
-                      color={statusColor(p.status)}
+                      label={recusadoPeloGateway(p) ? "recusado" : p.status}
+                      color={
+                        recusadoPeloGateway(p)
+                          ? "error"
+                          : statusColor(p.status)
+                      }
                     />
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      color="text.secondary"
+                    >
+                      {gatewayLabel(p.gateway)}
+                    </Typography>
+                    {(p.statusDetalhe || p.motivoFalha) && (
+                      <Tooltip
+                        title={p.motivoFalha || p.statusDetalhe || ""}
+                        placement="top"
+                      >
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          color={
+                            p.gateway === "manual" ? "text.secondary" : "error"
+                          }
+                          sx={{
+                            maxWidth: 220,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {p.gateway === "manual"
+                            ? `MP recusou: ${p.statusDetalhe || "falha"}`
+                            : p.statusDetalhe || "falha"}
+                        </Typography>
+                      </Tooltip>
+                    )}
                   </TableCell>
                   <TableCell align="right">
-                    {p.status === "pendente" ? (
+                    {podeConfirmar(p) ? (
                       <Button
                         size="small"
                         variant="contained"
@@ -131,7 +189,15 @@ export function ListaPagamentos() {
                         {confirmando === p._id ? "Confirmando..." : "Confirmar"}
                       </Button>
                     ) : (
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        title={
+                          p.status === "pendente"
+                            ? "Cobrança automática — confirme no gateway"
+                            : undefined
+                        }
+                      >
                         —
                       </Typography>
                     )}
