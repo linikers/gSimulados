@@ -1,6 +1,7 @@
 import { app } from "./app";
 import { env } from "./config/env";
 import { connectDB } from "./config/database";
+import { GatewayConfigService } from "./services/gateway-config/gateway-config.service";
 
 const port = env.PORT || 3001;
 
@@ -12,7 +13,8 @@ app.listen(port, () => {
 });
 
 // Conecta em background, com retentativas (não encerra o processo).
-connectDB();
+// Depois de conectar, carrega as credenciais de gateway salvas no painel.
+connectDB().then(() => GatewayConfigService.hydrate());
 
 // Evita morte silenciosa do processo por rejeições não tratadas.
 process.on("unhandledRejection", (reason) => {

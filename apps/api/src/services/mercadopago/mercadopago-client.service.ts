@@ -16,6 +16,8 @@
  * Regra que vale para os dois provedores: status desconhecido NUNCA libera.
  */
 
+import { GatewayConfigService } from "../gateway-config/gateway-config.service";
+
 export const MP_BASE = "https://api.mercadopago.com";
 
 export type StatusInterno =
@@ -213,7 +215,7 @@ export function descreverRejeicaoMP(erro: unknown): RejeicaoMP {
 
 export const MercadoPagoService = {
   configurado(): boolean {
-    return Boolean(process.env.MP_ACCESS_TOKEN?.trim());
+    return Boolean(GatewayConfigService.token("mercadopago"));
   },
 
   baseUrl(): string {
@@ -353,10 +355,10 @@ export const MercadoPagoService = {
     corpo?: unknown,
     idempotencia?: string,
   ): Promise<T> {
-    const token = process.env.MP_ACCESS_TOKEN?.trim();
+    const token = GatewayConfigService.token("mercadopago");
     if (!token) {
       throw new MercadoPagoErro(
-        "MP_ACCESS_TOKEN não configurado (Mercado Pago → Suas integrações → Credenciais).",
+        "Mercado Pago não configurado: informe o Access Token no painel (Admin → Gateways) ou em MP_ACCESS_TOKEN.",
       );
     }
 
