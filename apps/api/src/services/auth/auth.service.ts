@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User, IUserDocument, Escola, Aluno, Admin } from "../../models/User";
 import { env } from "../../config/env";
+import { RefreshTokenService } from "./refresh-token.service";
 
 export class AuthService {
   static async generateToken(user: IUserDocument) {
@@ -12,7 +13,7 @@ export class AuthService {
     );
   }
 
-  static async register(data: any) {
+  static async register(data: any, userAgent?: string) {
     const { email, password, role, ...rest } = data;
 
     const existingUser = await User.findOne({ email });
@@ -36,14 +37,18 @@ export class AuthService {
 
     await user.save();
     const token = await this.generateToken(user as IUserDocument);
+    const refreshToken = await RefreshTokenService.criar(
+      String(user._id),
+      userAgent,
+    );
 
     const userResponse = user.toObject();
     delete userResponse.password;
 
-    return { user: userResponse, token };
+    return { user: userResponse, token, refreshToken };
   }
 
-  static async login(data: any) {
+  static async login(data: any, userAgent?: string) {
     const { email, password } = data;
     const user = await User.findOne({ email });
 
@@ -52,10 +57,37 @@ export class AuthService {
     }
 
     const token = await this.generateToken(user);
+    const refreshToken = await RefreshTokenService.criar(
+      String(user._id),
+      userAgent,
+    );
 
     const userResponse = user.toObject();
     delete userResponse.password;
 
-    return { user: userResponse, token };
+    return { user: userResponse, token, refreshToken };
+  }
+
+  /**
+   * Renova o access token a partir do refresh. Rotaciona o refresh (o antigo
+   * morre) e confere se o usuário ainda existe antes de emitir outro.
+   */
+  static async refresh(token: string, userAgent?: string) {
+    const { usuarioId, refreshToken } =
+      await RefreshTokenService.rotacionar(token, userAgent);
+
+    const user = await User.findById(usuarioId);
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    const novoAccess = await this.generateToken(user as IUserDocument);
+    return { token: novoAccess, refreshToken, userId: usuarioId };
+  }
+
+  static async logout(refreshToken?: string) {
+    if (refreshToken) {
+      await RefreshTokenService.revogar(refreshToken);
+    }
   }
 }
