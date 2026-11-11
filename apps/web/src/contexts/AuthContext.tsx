@@ -21,17 +21,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   async function signIn(data: ILoginCredentials) {
     const response = await api.post("/auth/login", data);
-    const { token, user } = response.data;
+    const { token, refreshToken, user } = response.data;
 
     localStorage.setItem("@gSimulados:token", token);
     localStorage.setItem("@gSimulados:user", JSON.stringify(user));
+    if (refreshToken) {
+      localStorage.setItem("@gSimulados:refreshToken", refreshToken);
+    }
 
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(user);
   }
 
   function signOut() {
+    const refreshToken = localStorage.getItem("@gSimulados:refreshToken");
+    if (refreshToken) {
+      // revoga no servidor sem prender a saída do usuário
+      api.post("/auth/logout", { refreshToken }).catch(() => undefined);
+    }
     localStorage.removeItem("@gSimulados:token");
+    localStorage.removeItem("@gSimulados:refreshToken");
     localStorage.removeItem("@gSimulados:user");
     setUser(null);
   }
