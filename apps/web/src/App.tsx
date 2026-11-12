@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LoginPage } from "./pages/auth/Login";
 import { RegisterPage } from "./pages/auth/Register";
+import { EsqueciSenha } from "./pages/auth/EsqueciSenha";
+import { RedefinirSenha } from "./pages/auth/RedefinirSenha";
 import { AppLayout } from "./layouts/AppLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { CadastroEscola } from "./pages/admin/Escolas/CadastroEscola";
@@ -156,6 +158,8 @@ function App() {
             {/* Auth Routes (no layout) */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
             {/* Protected Routes with AppLayout */}
             <Route element={<AuthGuard />}>

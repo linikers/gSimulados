@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth/auth.service";
+import { PasswordResetService } from "../services/auth/password-reset.service";
 
 export class AuthController {
   // Perfis que podem ser escolhidos no cadastro publico.
@@ -45,6 +46,33 @@ export class AuthController {
       res.json(dados);
     } catch (error: any) {
       res.status(401).json({ error: error.message });
+    }
+  }
+
+  /** Sempre 202: não revela se o e-mail existe. */
+  static async esqueciSenha(req: Request, res: Response) {
+    try {
+      await PasswordResetService.solicitar(String(req.body.email));
+      res.status(202).json({
+        ok: true,
+        mensagem:
+          "Se este e-mail estiver cadastrado, enviaremos um link para redefinir a senha.",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Não foi possível processar o pedido agora." });
+    }
+  }
+
+  static async redefinirSenha(req: Request, res: Response) {
+    try {
+      await PasswordResetService.redefinir(
+        String(req.body.token),
+        String(req.body.password),
+      );
+      res.json({ ok: true });
+    } catch (error: any) {
+      const status = error?.statusCode ?? 400;
+      res.status(status).json({ error: error.message });
     }
   }
 
