@@ -47,6 +47,7 @@ import { ListaPagamentos } from "./pages/admin/Pagamentos/ListaPagamentos";
 import { ConfigurarPix } from "./pages/admin/Pagamentos/ConfigurarPix";
 import { Gateways } from "./pages/admin/Gateways";
 import { AdminFAQ } from "./pages/admin/AdminFAQ";
+import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 
 const theme = createTheme({
   palette: {
@@ -247,6 +248,7 @@ function App() {
                     element={<Gateways />}
                   />
                   <Route path="/admin/faq" element={<AdminFAQ />} />
+                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 </Route>
 
                 {/* Rotas de Escola */}

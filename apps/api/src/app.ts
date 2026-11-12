@@ -11,6 +11,7 @@ import simuladoRoutes from "./routes/simulados.routes";
 import pagamentosRoutes from "./routes/pagamentos.routes";
 import gatewaysRoutes from "./routes/gateways.routes";
 import faqRoutes from "./routes/faq.routes";
+import analyticsRoutes from "./routes/analytics.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
 import { dbReady } from "./config/database";
 import {
@@ -29,6 +30,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoutes);
+app.use("/admin/analytics", analyticsRoutes);
 app.use("/schools", schoolRoutes);
 app.use("/alunos", alunosRoutes);
 app.use("/questions", questionsRoutes);
