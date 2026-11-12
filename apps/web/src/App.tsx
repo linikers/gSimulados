@@ -44,6 +44,7 @@ import { Planos } from "./pages/public/Planos";
 import { ListaPagamentos } from "./pages/admin/Pagamentos/ListaPagamentos";
 import { ConfigurarPix } from "./pages/admin/Pagamentos/ConfigurarPix";
 import { Gateways } from "./pages/admin/Gateways";
+import { AdminFAQ } from "./pages/admin/AdminFAQ";
 
 const theme = createTheme({
   palette: {
@@ -241,6 +242,7 @@ function App() {
                     path="/admin/configuracoes/pagamentos"
                     element={<Gateways />}
                   />
+                  <Route path="/admin/faq" element={<AdminFAQ />} />
                 </Route>
 
                 {/* Rotas de Escola */}

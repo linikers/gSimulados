@@ -10,6 +10,7 @@ import pdfExtractionRoutes from "./routes/pdf-extraction.routes";
 import simuladoRoutes from "./routes/simulados.routes";
 import pagamentosRoutes from "./routes/pagamentos.routes";
 import gatewaysRoutes from "./routes/gateways.routes";
+import faqRoutes from "./routes/faq.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
 import { dbReady } from "./config/database";
 import {
@@ -37,6 +38,7 @@ app.use("/extraction", pdfExtractionRoutes);
 app.use("/simulados", simuladoRoutes);
 app.use("/pagamentos", pagamentosRoutes);
 app.use("/admin/gateways", gatewaysRoutes);
+app.use("/faq", faqRoutes);
 app.use("/webhooks", webhooksRoutes);
 
 app.get("/", (_, res) => {
