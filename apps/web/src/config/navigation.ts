@@ -6,6 +6,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import QuizIcon from "@mui/icons-material/Quiz";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 export interface NavItem {
   title: string;
@@ -69,6 +70,7 @@ export const navigationConfig: NavigationConfig = {
       path: "/admin/configuracoes/pagamentos",
       icon: SettingsIcon,
     },
+    { title: "FAQ", path: "/admin/faq", icon: HelpOutlineIcon },
     { title: "Configurações", path: "/admin/config", icon: SettingsIcon },
     { title: "Analytics", path: "/admin/analytics", icon: BarChartIcon },
   ],
