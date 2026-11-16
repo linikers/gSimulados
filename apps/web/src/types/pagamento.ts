@@ -29,6 +29,9 @@ export interface IPagamento {
   statusDetalhe?: string;
   motivoFalha?: string;
   criadoEm: string;
+  /** Gravado quando o gateway confirmou o pagamento. */
+  pagoEm?: string;
+  /** Gravado quando o admin confirmou o PIX manual. */
   confirmadoEm?: string;
   usuario?: { _id: string; name: string; email: string; role: string };
 }

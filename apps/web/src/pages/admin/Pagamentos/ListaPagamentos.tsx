@@ -24,6 +24,27 @@ import { useErrorHandler } from "../../../hooks/useErrorHandler";
 const brl = (valor: number) =>
   valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+/**
+ * Data/hora em America/Sao_Paulo. O admin casa o comprovante que chega no
+ * WhatsApp com a linha da tabela pelo horário, então sempre com hora — nunca
+ * só a data.
+ */
+const dataHora = (iso?: string) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d
+    .toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(", ", " ");
+};
+
 const statusColor = (status: PagamentoStatus): ChipProps["color"] => {
   if (status === "pago") return "success";
   if (status === "pendente") return "warning";
@@ -61,7 +82,14 @@ export function ListaPagamentos() {
 
   const carregar = useCallback(async () => {
     try {
-      setPagamentos(await PagamentosService.listarTodos());
+      const lista = await PagamentosService.listarTodos();
+      // Mais recente primeiro: a API já ordena, mas o horário é o critério de
+      // conferência do comprovante — não deixar depender da ordem de chegada.
+      setPagamentos(
+        [...lista].sort(
+          (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
+        )
+      );
     } catch (error) {
       handleError(error, "Erro ao carregar os pagamentos.");
     } finally {
@@ -95,7 +123,7 @@ export function ListaPagamentos() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="xl" sx={{ py: 6 }}>
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
         Pagamentos
       </Typography>
@@ -106,37 +134,50 @@ export function ListaPagamentos() {
       </Typography>
 
       <TableContainer component={Paper} elevation={0} className="glass-container">
-        <Table>
+        <Table size="small" sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow>
               <TableCell>Aluno</TableCell>
               <TableCell>Plano</TableCell>
               <TableCell>Valor</TableCell>
               <TableCell>Referência</TableCell>
+              <TableCell sx={{ px: 1 }}>Criado em</TableCell>
+              <TableCell sx={{ px: 1 }}>Confirmado em</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell align="right">Ação</TableCell>
+              <TableCell align="right" sx={{ px: 1 }}>Ação</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {pagamentos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                   Nenhum pagamento registrado ainda.
                 </TableCell>
               </TableRow>
             ) : (
               pagamentos.map((p) => (
                 <TableRow key={p._id}>
-                  <TableCell>
+                  <TableCell sx={{ maxWidth: 190 }}>
                     {p.usuario?.name ?? "—"}
-                    <Typography variant="caption" display="block" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      color="text.secondary"
+                      noWrap
+                    >
                       {p.usuario?.email}
                     </Typography>
                   </TableCell>
                   <TableCell>{p.plano}</TableCell>
                   <TableCell>{brl(p.valor)}</TableCell>
                   <TableCell>{p.referencia}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ px: 1, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                    {dataHora(p.criadoEm)}
+                  </TableCell>
+                  <TableCell sx={{ px: 1, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                    {dataHora(p.confirmadoEm || p.pagoEm)}
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 170 }}>
                     <Chip
                       size="small"
                       label={recusadoPeloGateway(p) ? "recusado" : p.status}
@@ -165,7 +206,7 @@ export function ListaPagamentos() {
                             p.gateway === "manual" ? "text.secondary" : "error"
                           }
                           sx={{
-                            maxWidth: 220,
+                            maxWidth: 135,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
