@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import { PixConfig } from "../models/PixConfig";
 import { Pagamento } from "../models/Pagamento";
 import { User } from "../models/User";
@@ -37,6 +38,9 @@ function urlWebhook(): string {
     "https://gsimulados-api.fly.dev";
   return `${base}/webhooks/pagbank`;
 }
+
+/** Validade da cobrança de PIX manual (dias). */
+const VALIDADE_PIX_MANUAL_DIAS = 3;
 
 export class PagamentosController {
   /** Catálogo de planos (público). */
@@ -124,11 +128,61 @@ export class PagamentosController {
   }
 
   /**
-   * Registra o pedido e responde 201 no PIX manual (chave + instruções).
+   * Marca como `expirado` toda cobrança pendente cujo `expiraEm` já passou.
+   *
+   * Não existe webhook para o PIX manual, então sem isso a linha fica
+   * `pendente` para sempre (produção chegou a 67 pendentes do mesmo aluno).
+   * É chamado no checkout e nas listagens — limpeza best-effort, nunca pode
+   * derrubar a venda por causa de um updateMany.
+   */
+  private static async expirarVencidos(): Promise<number> {
+    try {
+      const resultado = await Pagamento.updateMany(
+        { status: "pendente", expiraEm: { $lt: new Date() } },
+        { $set: { status: "expirado" } },
+      );
+      return resultado?.modifiedCount ?? 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
+   * Cobrança de PIX manual pendente e ainda vigente do mesmo aluno+plano+valor.
+   *
+   * Cada clique em "Assinar com PIX" criava uma cobrança nova (67 pendentes
+   * acumuladas em produção, um por clique de QA). A referência é a mesma que o
+   * aluno já recebeu no WhatsApp — reemitir outra só confunde a conferência.
+   */
+  private static async pixManualVigente(dados: {
+    usuario: Types.ObjectId;
+    plano: string;
+    valor: number;
+  }) {
+    try {
+      return await Pagamento.findOne({
+        usuario: dados.usuario,
+        plano: dados.plano,
+        metodo: "pix",
+        gateway: "manual",
+        status: "pendente",
+        valor: dados.valor,
+        expiraEm: { $gt: new Date() },
+      }).sort({ criadoEm: -1 });
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Registra o pedido e responde no PIX manual (chave + instruções).
    *
    * Usado no fluxo normal (gateways desligados) e como **fallback** quando o
    * gateway automático recusa a cobrança: o aluno precisa de uma saída que
    * venda, não de um 502. Devolve `false` quando o PIX manual não está ativo.
+   *
+   * Se já existe cobrança manual pendente e vigente para o mesmo aluno+plano,
+   * devolve **ela** com 200 em vez de criar outra (201 continua sendo criação).
    */
   private static async responderPixManual(
     res: Response,
@@ -142,25 +196,31 @@ export class PagamentosController {
     const config = await PixConfig.findOne();
     if (!config || !config.ativo) return false;
 
-    const pagamento = await Pagamento.create({
-      ...dados.base,
-      metodo: "pix",
-      gateway: "manual",
-      ...(dados.falha
-        ? {
-            statusDetalhe: dados.falha.statusDetalhe,
-            mercadopagoPedidoId: dados.falha.pedidoId,
-            mercadopagoPaymentId: dados.falha.pagamentoId,
-            motivoFalha: dados.falha.motivo,
-          }
-        : {}),
+    const existente = await PagamentosController.pixManualVigente({
+      usuario: dados.base.usuario as Types.ObjectId,
+      plano: String(dados.base.plano),
+      valor: dados.valorFinal,
     });
 
-    res.status(201).json({
+    const pagamento =
+      existente ??
+      (await Pagamento.create({
+        ...dados.base,
+        metodo: "pix",
+        gateway: "manual",
+        // `statusDetalhe`/ids do MP NÃO são copiados para a cobrança manual:
+        // herdavam `high_risk` e o admin via "MP recusou: high_risk" numa
+        // cobrança legítima aguardando comprovante. O motivo em português
+        // basta para o suporte, e o detalhe técnico segue na resposta.
+        ...(dados.falha ? { motivoFalha: dados.falha.motivo } : {}),
+      }));
+
+    res.status(existente ? 200 : 201).json({
       pagamento,
       valorFinal: dados.valorFinal,
       descontoPercentual: dados.descontoPercentual,
       manual: true,
+      reutilizado: Boolean(existente),
       ...(dados.falha
         ? {
             fallback: {
@@ -192,6 +252,9 @@ export class PagamentosController {
     try {
       const { plano, metodo = "pix", taxId } = req.body ?? {};
       const planoEscolhido = getPlano(plano);
+
+      // Antes de olhar a fila: o que venceu não é mais "aguardando pagamento".
+      await PagamentosController.expirarVencidos();
 
       if (!planoEscolhido) {
         return res.status(400).json({ error: "Plano inválido" });
@@ -240,7 +303,9 @@ export class PagamentosController {
         metodo: metodo as "pix" | "boleto",
         status: "pendente" as const,
         referencia,
-        expiraEm: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        expiraEm: new Date(
+          Date.now() + VALIDADE_PIX_MANUAL_DIAS * 24 * 60 * 60 * 1000,
+        ),
       };
 
       // Mercado Pago primeiro: é a conta que já tem credencial de produção e
@@ -467,15 +532,29 @@ export class PagamentosController {
 
   /** (Aluno) Lista os próprios pedidos. */
   static async meusPagamentos(req: Request, res: Response) {
+    await PagamentosController.expirarVencidos();
     const pagamentos = await Pagamento.find({ usuario: req.userId }).sort({
       criadoEm: -1,
     });
     res.json(pagamentos);
   }
 
-  /** (Admin) Lista todos os pedidos. */
-  static async listarTodos(_req: Request, res: Response) {
-    const pagamentos = await Pagamento.find()
+  /**
+   * (Admin) Lista todos os pedidos.
+   *
+   * Aceita `?status=` e `?gateway=` para a tela filtrar (ex.: só `pendente`,
+   * que é a fila que o admin confere no extrato).
+   */
+  static async listarTodos(req: Request, res: Response) {
+    await PagamentosController.expirarVencidos();
+
+    const filtro: Record<string, unknown> = {};
+    const status = typeof req.query?.status === "string" ? req.query.status.trim() : "";
+    const gateway = typeof req.query?.gateway === "string" ? req.query.gateway.trim() : "";
+    if (status) filtro.status = status;
+    if (gateway) filtro.gateway = gateway;
+
+    const pagamentos = await Pagamento.find(filtro)
       .populate("usuario", "name email role")
       .sort({ criadoEm: -1 });
     res.json(pagamentos);

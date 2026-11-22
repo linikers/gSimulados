@@ -53,6 +53,9 @@ jest.mock("../../models/Pagamento", () => ({
     create: (...a: unknown[]) => pagamentoCreateMock(...a),
     find: jest.fn(),
     findById: jest.fn(),
+    // Sem cobrança manual pendente: o caminho é sempre criação.
+    findOne: jest.fn(() => ({ sort: async () => null })),
+    updateMany: jest.fn(async () => ({ modifiedCount: 0 })),
   },
 }));
 
@@ -147,8 +150,10 @@ describe("checkout - MP recusa high_risk", () => {
     const criado = pagamentoCreateMock.mock.calls[0][0];
     expect(criado.gateway).toBe("manual");
     expect(criado.status).toBe("pendente");
-    expect(criado.statusDetalhe).toBe("high_risk");
-    expect(criado.mercadopagoPaymentId).toBe("PAY01M718JCQBXD8V4JHS4PC7MYAB");
+    // A cobrança manual não carrega o lixo do gateway: `statusDetalhe` fazia o
+    // admin ver "MP recusou: high_risk" numa cobrança aguardando comprovante.
+    expect(criado.statusDetalhe).toBeUndefined();
+    expect(criado.mercadopagoPaymentId).toBeUndefined();
     expect(criado.motivoFalha).toMatch(/high_risk/);
   });
 

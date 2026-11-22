@@ -37,6 +37,8 @@ jest.mock("../../models/Pagamento", () => ({
     create: (...a: unknown[]) => pagamentoCreateMock(...a),
     find: jest.fn(),
     findById: jest.fn(),
+    findOne: jest.fn(() => ({ sort: async () => null })),
+    updateMany: jest.fn(async () => ({ modifiedCount: 0 })),
   },
 }));
 

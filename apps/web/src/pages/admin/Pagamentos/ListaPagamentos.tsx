@@ -7,6 +7,8 @@ import {
   Chip,
   Button,
   CircularProgress,
+  ToggleButton,
+  ToggleButtonGroup,
   Table,
   TableBody,
   TableCell,
@@ -77,6 +79,14 @@ export function ListaPagamentos() {
   const [pagamentos, setPagamentos] = useState<IPagamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmando, setConfirmando] = useState<string | null>(null);
+  /**
+   * "pendentes" é a fila real de conferência do PIX manual: com o histórico
+   * inteiro a tela virava 70+ linhas para achar quem está aguardando
+   * comprovante agora.
+   */
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "pendente">(
+    "todos",
+  );
   const { showToast } = useToast();
   const { handleError } = useErrorHandler();
 
@@ -114,6 +124,11 @@ export function ListaPagamentos() {
     }
   };
 
+  const visiveis =
+    filtroStatus === "pendente"
+      ? pagamentos.filter((p) => p.status === "pendente")
+      : pagamentos;
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 12 }}>
@@ -127,11 +142,28 @@ export function ListaPagamentos() {
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
         Pagamentos
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
         Confirme à mão apenas o PIX recebido na chave manual. Cobranças do
         Mercado Pago/PagBank são liberadas pelo webhook — se aparecer recusa, o
         motivo fica na coluna Status.
       </Typography>
+
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        value={filtroStatus}
+        onChange={(_e, valor) => valor && setFiltroStatus(valor)}
+        sx={{ mb: 2 }}
+        aria-label="Filtrar pagamentos por status"
+      >
+        <ToggleButton value="todos">
+          Todos ({pagamentos.length})
+        </ToggleButton>
+        <ToggleButton value="pendente">
+          Somente pendentes (
+          {pagamentos.filter((p) => p.status === "pendente").length})
+        </ToggleButton>
+      </ToggleButtonGroup>
 
       <TableContainer component={Paper} elevation={0} className="glass-container">
         <Table size="small" sx={{ minWidth: 900 }}>
@@ -148,14 +180,16 @@ export function ListaPagamentos() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {pagamentos.length === 0 ? (
+            {visiveis.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                  Nenhum pagamento registrado ainda.
+                  {filtroStatus === "pendente"
+                    ? "Nenhum pagamento aguardando comprovante."
+                    : "Nenhum pagamento registrado ainda."}
                 </TableCell>
               </TableRow>
             ) : (
-              pagamentos.map((p) => (
+              visiveis.map((p) => (
                 <TableRow key={p._id}>
                   <TableCell sx={{ maxWidth: 190 }}>
                     {p.usuario?.name ?? "—"}
@@ -213,7 +247,7 @@ export function ListaPagamentos() {
                           }}
                         >
                           {p.gateway === "manual"
-                            ? `MP recusou: ${p.statusDetalhe || "falha"}`
+                            ? "Aguardando comprovante"
                             : p.statusDetalhe || "falha"}
                         </Typography>
                       </Tooltip>
